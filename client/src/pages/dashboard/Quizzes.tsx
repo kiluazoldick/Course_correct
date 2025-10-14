@@ -83,6 +83,8 @@ export default function Quizzes() {
       setIsQuizOpen(false);
       setIsResultOpen(true);
       queryClient.invalidateQueries({ queryKey: ['/api/quiz-results'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/quizzes'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
     },
     onError: (error: any) => {
       toast({

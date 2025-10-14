@@ -1,30 +1,20 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { insertCourseSchema, insertQuizSchema, insertQuizResultSchema, insertSummarySchema } from "@shared/schema";
 import { generateCourseSummary, generateQuiz, evaluateOpenAnswer } from "./ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
-  await setupAuth(app);
+  setupAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Note: Auth routes are now handled in auth.ts
 
   // Courses routes
   app.get('/api/courses', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as any).id;
       const courses = await storage.getCoursesByUserId(userId);
       res.json(courses);
     } catch (error) {
@@ -39,7 +29,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
       }
-      if (course.userId !== req.user.claims.sub) {
+      if (course.userId !== (req.user as any).id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       res.json(course);
@@ -51,7 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/courses', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as any).id;
       const validated = insertCourseSchema.parse(req.body);
       const course = await storage.createCourse({
         ...validated,
@@ -73,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
       }
-      if (course.userId !== req.user.claims.sub) {
+      if (course.userId !== (req.user as any).id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       const validated = insertCourseSchema.partial().parse(req.body);
@@ -94,7 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
       }
-      if (course.userId !== req.user.claims.sub) {
+      if (course.userId !== (req.user as any).id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       await storage.deleteCourse(req.params.id);
@@ -108,7 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Quiz routes
   app.get('/api/quizzes', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as any).id;
       const quizzes = await storage.getQuizzesByUserId(userId);
       res.json(quizzes);
     } catch (error) {
@@ -123,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!quiz) {
         return res.status(404).json({ message: "Quiz not found" });
       }
-      if (quiz.userId !== req.user.claims.sub) {
+      if (quiz.userId !== (req.user as any).id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       res.json(quiz);
@@ -135,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/quizzes', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as any).id;
       const validated = insertQuizSchema.parse(req.body);
       const quiz = await storage.createQuiz({
         ...validated,
@@ -154,7 +144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Quiz results routes
   app.get('/api/quiz-results', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as any).id;
       const results = await storage.getQuizResultsByUserId(userId);
       res.json(results);
     } catch (error) {
@@ -165,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/quiz-results', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as any).id;
       const validated = insertQuizResultSchema.parse(req.body);
       const result = await storage.createQuizResult({
         ...validated,
@@ -184,7 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Summaries routes
   app.get('/api/summaries', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as any).id;
       const summaries = await storage.getSummariesByUserId(userId);
       res.json(summaries);
     } catch (error) {
@@ -195,7 +185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/summaries', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as any).id;
       const validated = insertSummarySchema.parse(req.body);
       const summary = await storage.createSummary({
         ...validated,
@@ -214,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI-powered summary generation
   app.post('/api/courses/:id/generate-summary', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as any).id;
       const course = await storage.getCourse(req.params.id);
       
       if (!course) {
@@ -243,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI-powered quiz generation
   app.post('/api/courses/:id/generate-quiz', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as any).id;
       const { type = 'mixed' } = req.body;
       const course = await storage.getCourse(req.params.id);
       
@@ -274,7 +264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Evaluate quiz answers
   app.post('/api/quizzes/:id/evaluate', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as any).id;
       const { answers } = req.body;
       const quiz = await storage.getQuiz(req.params.id);
       

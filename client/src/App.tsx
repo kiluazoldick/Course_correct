@@ -4,6 +4,9 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/useAuth";
 import LandingPage from "@/pages/Home";
+import Features from "@/pages/Features";
+import Pricing from "@/pages/Pricing";
+import About from "@/pages/About";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Dashboard from "@/pages/Dashboard";
@@ -25,6 +28,9 @@ function Router() {
       {!isAuthenticated ? (
         <>
           <Route path="/" component={LandingPage} />
+          <Route path="/features" component={Features} />
+          <Route path="/pricing" component={Pricing} />
+          <Route path="/about" component={About} />
           <Route path="/login" component={Login} />
           <Route path="/signup" component={Signup} />
         </>

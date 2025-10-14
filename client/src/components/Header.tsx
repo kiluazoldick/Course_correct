@@ -6,14 +6,6 @@ import { Link } from 'wouter';
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setMobileMenuOpen(false);
-    }
-  };
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,27 +16,27 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
-            <button
-              onClick={() => scrollToSection('fonctionnalites')}
+            <Link 
+              href="/features"
               data-testid="button-nav-features"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Fonctionnalités
-            </button>
-            <button
-              onClick={() => scrollToSection('avantages')}
-              data-testid="button-nav-benefits"
+            </Link>
+            <Link
+              href="/pricing"
+              data-testid="button-nav-pricing"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Tarifs
-            </button>
-            <button
-              onClick={() => scrollToSection('footer')}
+            </Link>
+            <Link
+              href="/about"
               data-testid="button-nav-about"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               À propos
-            </button>
+            </Link>
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
@@ -80,27 +72,30 @@ export default function Header() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <nav className="flex flex-col gap-4">
-              <button
-                onClick={() => scrollToSection('fonctionnalites')}
+              <Link
+                href="/features"
                 data-testid="button-mobile-features"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors text-left"
+                onClick={() => setMobileMenuOpen(false)}
               >
                 Fonctionnalités
-              </button>
-              <button
-                onClick={() => scrollToSection('avantages')}
-                data-testid="button-mobile-benefits"
+              </Link>
+              <Link
+                href="/pricing"
+                data-testid="button-mobile-pricing"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors text-left"
+                onClick={() => setMobileMenuOpen(false)}
               >
                 Tarifs
-              </button>
-              <button
-                onClick={() => scrollToSection('footer')}
+              </Link>
+              <Link
+                href="/about"
                 data-testid="button-mobile-about"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors text-left"
+                onClick={() => setMobileMenuOpen(false)}
               >
                 À propos
-              </button>
+              </Link>
               <div className="flex flex-col gap-2 pt-2">
                 <Button
                   variant="ghost"

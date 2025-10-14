@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertCourseSchema, insertQuizSchema, insertQuizResultSchema, insertSummarySchema } from "@shared/schema";
+import { generateCourseSummary, generateQuiz, evaluateOpenAnswer } from "./ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -207,6 +208,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid summary data", errors: error });
       }
       res.status(500).json({ message: "Failed to create summary" });
+    }
+  });
+
+  // AI-powered summary generation
+  app.post('/api/courses/:id/generate-summary', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const course = await storage.getCourse(req.params.id);
+      
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      
+      if (course.userId !== userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const summaryContent = await generateCourseSummary(course.content, course.title);
+      
+      const summary = await storage.createSummary({
+        courseId: course.id,
+        userId,
+        content: summaryContent,
+      });
+
+      res.json(summary);
+    } catch (error) {
+      console.error("Error generating summary:", error);
+      res.status(500).json({ message: "Failed to generate summary", error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  // AI-powered quiz generation
+  app.post('/api/courses/:id/generate-quiz', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { type = 'mixed' } = req.body;
+      const course = await storage.getCourse(req.params.id);
+      
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      
+      if (course.userId !== userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const quizData = await generateQuiz(course.content, course.title, type);
+      
+      const quiz = await storage.createQuiz({
+        courseId: course.id,
+        userId,
+        title: `Quiz : ${course.title}`,
+        questions: quizData.questions,
+      });
+
+      res.json(quiz);
+    } catch (error) {
+      console.error("Error generating quiz:", error);
+      res.status(500).json({ message: "Failed to generate quiz", error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  // Evaluate quiz answers
+  app.post('/api/quizzes/:id/evaluate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { answers } = req.body;
+      const quiz = await storage.getQuiz(req.params.id);
+      
+      if (!quiz) {
+        return res.status(404).json({ message: "Quiz not found" });
+      }
+
+      if (quiz.userId !== userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const questions = quiz.questions as any[];
+      let score = 0;
+      const evaluations: any[] = [];
+
+      for (let i = 0; i < questions.length; i++) {
+        const question = questions[i];
+        const userAnswer = answers[i];
+
+        if (question.type === 'mcq') {
+          const isCorrect = userAnswer === question.correctAnswer;
+          if (isCorrect) score++;
+          evaluations.push({
+            questionIndex: i,
+            isCorrect,
+            userAnswer,
+            correctAnswer: question.correctAnswer,
+            explanation: question.explanation,
+          });
+        } else if (question.type === 'open') {
+          const evaluation = await evaluateOpenAnswer(
+            question.question,
+            userAnswer,
+            question.explanation
+          );
+          score += evaluation.score / 100;
+          evaluations.push({
+            questionIndex: i,
+            score: evaluation.score,
+            userAnswer,
+            feedback: evaluation.feedback,
+          });
+        }
+      }
+
+      const finalScore = Math.round((score / questions.length) * 100);
+
+      const result = await storage.createQuizResult({
+        quizId: quiz.id,
+        userId,
+        courseId: quiz.courseId,
+        answers,
+        score: finalScore,
+        totalQuestions: questions.length,
+      });
+
+      res.json({
+        result,
+        evaluations,
+        finalScore,
+      });
+    } catch (error) {
+      console.error("Error evaluating quiz:", error);
+      res.status(500).json({ message: "Failed to evaluate quiz", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 

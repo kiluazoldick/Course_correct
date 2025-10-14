@@ -10,8 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { insertCourseSchema, type Course, type InsertCourse } from '@shared/schema';
-import { Plus, BookOpen, Trash2, Edit, Calendar } from 'lucide-react';
+import { Plus, BookOpen, Trash2, Edit, Calendar, Sparkles, FileText } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import ReactMarkdown from 'react-markdown';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,8 @@ export default function Courses() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+  const [currentSummary, setCurrentSummary] = useState<string | null>(null);
 
   const { data: courses = [], isLoading } = useQuery<Course[]>({
     queryKey: ['/api/courses'],
@@ -127,6 +130,29 @@ export default function Courses() {
     },
   });
 
+  const generateSummaryMutation = useMutation({
+    mutationFn: async (courseId: string) => {
+      const response = await apiRequest('POST', `/api/courses/${courseId}/generate-summary`);
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      setCurrentSummary(data.content);
+      setIsSummaryOpen(true);
+      queryClient.invalidateQueries({ queryKey: ['/api/summaries'] });
+      toast({
+        title: 'Résumé généré',
+        description: 'Votre résumé intelligent est prêt !',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erreur',
+        description: error?.message || 'Impossible de générer le résumé.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const handleCreate = (data: InsertCourse) => {
     createMutation.mutate(data);
   };
@@ -157,6 +183,11 @@ export default function Courses() {
     if (selectedCourse) {
       deleteMutation.mutate(selectedCourse.id);
     }
+  };
+
+  const handleGenerateSummary = (course: Course) => {
+    setSelectedCourse(course);
+    generateSummaryMutation.mutate(course.id);
   };
 
   if (isLoading) {
@@ -226,25 +257,40 @@ export default function Courses() {
                   </span>
                 </div>
               </CardContent>
-              <CardFooter className="flex gap-2">
+              <CardFooter className="flex flex-col gap-2">
                 <Button
-                  variant="outline"
+                  variant="default"
                   size="sm"
-                  onClick={() => handleEdit(course)}
-                  data-testid={`button-edit-course-${course.id}`}
-                  className="flex-1"
+                  onClick={() => handleGenerateSummary(course)}
+                  disabled={generateSummaryMutation.isPending}
+                  data-testid={`button-generate-summary-${course.id}`}
+                  className="w-full"
                 >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Modifier
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  {generateSummaryMutation.isPending && selectedCourse?.id === course.id
+                    ? 'Génération...'
+                    : 'Générer un résumé IA'}
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDelete(course)}
-                  data-testid={`button-delete-course-${course.id}`}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <div className="flex gap-2 w-full">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(course)}
+                    data-testid={`button-edit-course-${course.id}`}
+                    className="flex-1"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Modifier
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(course)}
+                    data-testid={`button-delete-course-${course.id}`}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </CardFooter>
             </Card>
           ))}
@@ -447,6 +493,48 @@ export default function Courses() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Summary Display Dialog */}
+      <Dialog open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              Résumé : {selectedCourse?.title}
+            </DialogTitle>
+            <DialogDescription>
+              Résumé intelligent généré par DeepSeek v4
+            </DialogDescription>
+          </DialogHeader>
+          <div className="prose prose-sm max-w-none dark:prose-invert" data-testid="text-summary-content">
+            {currentSummary && (
+              <ReactMarkdown>{currentSummary}</ReactMarkdown>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsSummaryOpen(false)}
+              data-testid="button-close-summary"
+            >
+              Fermer
+            </Button>
+            <Button
+              onClick={() => {
+                // TODO: Implement PDF download
+                toast({
+                  title: 'Bientôt disponible',
+                  description: 'Le téléchargement PDF sera disponible prochainement.',
+                });
+              }}
+              data-testid="button-download-summary"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Télécharger PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

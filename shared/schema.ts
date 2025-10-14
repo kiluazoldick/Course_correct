@@ -22,11 +22,13 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table (adapted for Replit Auth)
+// User storage table (supports local auth + Google OAuth)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
+  email: varchar("email").notNull().unique(),
   username: varchar("username").unique(),
+  password: varchar("password"), // Nullable for Google OAuth users
+  googleId: varchar("google_id").unique(), // Nullable for local auth users
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -34,6 +36,32 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Schema for local registration (email + password)
+export const insertLocalUserSchema = createInsertSchema(users, {
+  email: z.string().email("Email invalide"),
+  username: z.string().min(3, "Le nom d'utilisateur doit contenir au moins 3 caractères"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  googleId: true,
+  firstName: true,
+  lastName: true,
+  profileImageUrl: true,
+});
+
+// Schema for Google OAuth registration
+export const insertGoogleUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  password: true,
+  username: true,
+});
+
+export type InsertLocalUser = z.infer<typeof insertLocalUserSchema>;
+export type InsertGoogleUser = z.infer<typeof insertGoogleUserSchema>;
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 

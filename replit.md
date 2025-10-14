@@ -2,7 +2,20 @@
 
 ## Overview
 
-Corrige Tes Cours is an AI-powered educational platform designed for French-speaking university students. The platform helps students study more effectively by providing automated course summaries, personalized quizzes, and performance tracking. The application features a modern landing page to attract users and a comprehensive dashboard for authenticated users to manage their coursework and track their progress.
+Corrige Tes Cours is an AI-powered educational platform designed for French-speaking university students. The platform helps students study more effectively by providing automated course summaries using **DeepSeek R1** (the latest reasoning model from DeepSeek), personalized quizzes, and performance tracking. The application features a modern landing page to attract users and a comprehensive dashboard for authenticated users to manage their coursework and track their progress.
+
+## AI Integration
+
+**OpenRouter API with DeepSeek R1:**
+- Model: `deepseek/deepseek-r1` (state-of-the-art reasoning model, 671B parameters, MIT licensed)
+- Features:
+  - Intelligent course summary generation with structured markdown output
+  - Quiz generation (MCQ, open questions, mixed types)
+  - Automatic evaluation of open-ended answers with detailed feedback
+- API Configuration:
+  - Base URL: `https://openrouter.ai/api/v1`
+  - Authentication: Bearer token via `OPENROUTER_API_KEY` environment variable
+  - HTTP headers include site referrer and title for usage tracking
 
 ## User Preferences
 

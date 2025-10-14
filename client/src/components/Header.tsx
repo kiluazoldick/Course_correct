@@ -52,7 +52,7 @@ export default function Header() {
               variant="ghost"
               size="default"
               data-testid="button-login"
-              onClick={() => window.location.href = '/api/login'}
+              onClick={() => window.location.href = '/login'}
             >
               Connexion
             </Button>
@@ -60,7 +60,7 @@ export default function Header() {
               variant="default"
               size="default"
               data-testid="button-signup-header"
-              onClick={() => window.location.href = '/api/login'}
+              onClick={() => window.location.href = '/signup'}
             >
               Créer un compte
             </Button>
@@ -107,7 +107,7 @@ export default function Header() {
                   size="default"
                   data-testid="button-mobile-login"
                   onClick={() => {
-                    window.location.href = '/api/login';
+                    window.location.href = '/login';
                   }}
                   className="w-full"
                 >
@@ -118,7 +118,7 @@ export default function Header() {
                   size="default"
                   data-testid="button-mobile-signup"
                   onClick={() => {
-                    window.location.href = '/api/login';
+                    window.location.href = '/signup';
                   }}
                   className="w-full"
                 >

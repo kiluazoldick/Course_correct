@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 
 export default function CTASection() {
   const handleCTA = () => {
-    window.location.href = '/api/login';
+    window.location.href = '/signup';
   };
 
   return (

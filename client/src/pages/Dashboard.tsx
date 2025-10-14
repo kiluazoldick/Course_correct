@@ -1,0 +1,40 @@
+import { Switch, Route } from 'wouter';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
+import DashboardHome from './dashboard/DashboardHome';
+import Courses from './dashboard/Courses';
+import Quizzes from './dashboard/Quizzes';
+import Performance from './dashboard/Performance';
+import Account from './dashboard/Account';
+
+export default function Dashboard() {
+  const style = {
+    '--sidebar-width': '16rem',
+    '--sidebar-width-icon': '3rem',
+  };
+
+  return (
+    <SidebarProvider style={style as React.CSSProperties}>
+      <div className="flex h-screen w-full">
+        <AppSidebar />
+        <div className="flex flex-col flex-1">
+          <header className="flex items-center justify-between p-4 border-b">
+            <SidebarTrigger data-testid="button-sidebar-toggle" />
+            <h1 className="text-lg font-semibold" data-testid="text-app-title">
+              Corrige Tes Cours
+            </h1>
+          </header>
+          <main className="flex-1 overflow-auto p-6">
+            <Switch>
+              <Route path="/" component={DashboardHome} />
+              <Route path="/courses" component={Courses} />
+              <Route path="/quizzes" component={Quizzes} />
+              <Route path="/performance" component={Performance} />
+              <Route path="/account" component={Account} />
+            </Switch>
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}

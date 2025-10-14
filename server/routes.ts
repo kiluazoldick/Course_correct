@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { insertCourseSchema, insertQuizSchema, insertQuizResultSchema, insertSummarySchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -50,13 +51,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/courses', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const validated = insertCourseSchema.parse(req.body);
       const course = await storage.createCourse({
-        ...req.body,
+        ...validated,
         userId,
       });
       res.json(course);
     } catch (error) {
       console.error("Error creating course:", error);
+      if (error instanceof Error && error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid course data", errors: error });
+      }
       res.status(500).json({ message: "Failed to create course" });
     }
   });
@@ -70,10 +75,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (course.userId !== req.user.claims.sub) {
         return res.status(403).json({ message: "Forbidden" });
       }
-      const updated = await storage.updateCourse(req.params.id, req.body);
+      const validated = insertCourseSchema.partial().parse(req.body);
+      const updated = await storage.updateCourse(req.params.id, validated);
       res.json(updated);
     } catch (error) {
       console.error("Error updating course:", error);
+      if (error instanceof Error && error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid course data", errors: error });
+      }
       res.status(500).json({ message: "Failed to update course" });
     }
   });
@@ -126,13 +135,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/quizzes', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const validated = insertQuizSchema.parse(req.body);
       const quiz = await storage.createQuiz({
-        ...req.body,
+        ...validated,
         userId,
       });
       res.json(quiz);
     } catch (error) {
       console.error("Error creating quiz:", error);
+      if (error instanceof Error && error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid quiz data", errors: error });
+      }
       res.status(500).json({ message: "Failed to create quiz" });
     }
   });
@@ -152,13 +165,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/quiz-results', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const validated = insertQuizResultSchema.parse(req.body);
       const result = await storage.createQuizResult({
-        ...req.body,
+        ...validated,
         userId,
       });
       res.json(result);
     } catch (error) {
       console.error("Error creating quiz result:", error);
+      if (error instanceof Error && error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid quiz result data", errors: error });
+      }
       res.status(500).json({ message: "Failed to create quiz result" });
     }
   });
@@ -178,13 +195,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/summaries', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const validated = insertSummarySchema.parse(req.body);
       const summary = await storage.createSummary({
-        ...req.body,
+        ...validated,
         userId,
       });
       res.json(summary);
     } catch (error) {
       console.error("Error creating summary:", error);
+      if (error instanceof Error && error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid summary data", errors: error });
+      }
       res.status(500).json({ message: "Failed to create summary" });
     }
   });

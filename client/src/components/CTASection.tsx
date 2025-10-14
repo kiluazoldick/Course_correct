@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 
 export default function CTASection() {
   const handleCTA = () => {
-    console.log('Je crée mon compte gratuit maintenant clicked');
+    window.location.href = '/api/login';
   };
 
   return (

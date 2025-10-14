@@ -3,7 +3,7 @@ import heroImage from '@assets/stock_images/student_studying_on__af7a3399.jpg';
 
 export default function HeroSection() {
   const handleCTA = () => {
-    console.log('Créer un compte gratuit clicked');
+    window.location.href = '/api/login';
   };
 
   return (

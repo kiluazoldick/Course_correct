@@ -5,6 +5,8 @@ import ws from "ws";
 import {
   type User,
   type UpsertUser,
+  type InsertLocalUser,
+  type InsertGoogleUser,
   type Course,
   type InsertCourse,
   type Summary,
@@ -26,11 +28,16 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
 
 export interface IStorage {
-  // Users (required for Replit Auth)
+  // Users
   getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
+  getUserById(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByGoogleId(googleId: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  createLocalUser(user: InsertLocalUser): Promise<User>;
+  createGoogleUser(user: InsertGoogleUser): Promise<User>;
+  linkGoogleAccount(userId: string, googleId: string): Promise<User>;
 
   // Courses
   getCourse(id: string): Promise<Course | undefined>;
@@ -67,6 +74,11 @@ export class DbStorage implements IStorage {
     return result[0];
   }
 
+  async getUserById(id: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
+  }
+
   async getUserByUsername(username: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
     return result[0];
@@ -74,6 +86,11 @@ export class DbStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0];
+  }
+
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.googleId, googleId)).limit(1);
     return result[0];
   }
 
@@ -88,6 +105,25 @@ export class DbStorage implements IStorage {
           updatedAt: new Date(),
         },
       })
+      .returning();
+    return user;
+  }
+
+  async createLocalUser(userData: InsertLocalUser): Promise<User> {
+    const [user] = await db.insert(users).values(userData).returning();
+    return user;
+  }
+
+  async createGoogleUser(userData: InsertGoogleUser): Promise<User> {
+    const [user] = await db.insert(users).values(userData).returning();
+    return user;
+  }
+
+  async linkGoogleAccount(userId: string, googleId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ googleId, updatedAt: new Date() })
+      .where(eq(users.id, userId))
       .returning();
     return user;
   }

@@ -45,9 +45,10 @@ Preferred communication style: Simple, everyday language.
 - Custom elevation system with hover/active states (`hover-elevate`, `active-elevate-2`)
 
 **State Management:**
-- React Query for async server state with aggressive caching (staleTime: Infinity)
+- React Query for async server state with optimized caching (staleTime: 30s, refetchOnWindowFocus enabled)
 - React hooks (useState, useContext) for local component state
 - Custom hooks pattern (useAuth, useIsMobile) for reusable logic
+- Comprehensive cache invalidation strategy for data synchronization across components
 
 ### Backend Architecture
 

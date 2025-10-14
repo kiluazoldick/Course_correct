@@ -30,19 +30,16 @@ export default function Login() {
               onClick={handleLogin}
               className="w-full bg-gradient-to-r from-[#007BFF] to-[#0056b3] hover:from-[#0056b3] hover:to-[#003d82] text-white"
               size="lg"
-              data-testid="button-login-replit"
+              data-testid="button-login"
             >
               <LogIn className="w-5 h-5 mr-2" />
-              Se connecter avec Replit
+              Se connecter
             </Button>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-muted-foreground">Ou continuer avec</span>
-              </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-border"></div>
+              <span className="text-xs text-muted-foreground">OU</span>
+              <div className="flex-1 h-px bg-border"></div>
             </div>
 
             <Button
@@ -53,10 +50,14 @@ export default function Login() {
               data-testid="button-login-google"
             >
               <SiGoogle className="w-5 h-5 mr-2" />
-              Google
+              Continuer avec Google
             </Button>
 
-            <div className="text-center text-sm">
+            <p className="text-xs text-center text-muted-foreground pt-2">
+              L'authentification est sécurisée via Replit Auth (compatible Google)
+            </p>
+
+            <div className="text-center text-sm pt-4 border-t">
               <span className="text-muted-foreground">Pas encore de compte ? </span>
               <a
                 href="/signup"

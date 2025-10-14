@@ -30,19 +30,16 @@ export default function Signup() {
               onClick={handleSignup}
               className="w-full bg-gradient-to-r from-[#007BFF] to-[#0056b3] hover:from-[#0056b3] hover:to-[#003d82] text-white"
               size="lg"
-              data-testid="button-signup-replit"
+              data-testid="button-signup"
             >
               <UserPlus className="w-5 h-5 mr-2" />
-              S'inscrire avec Replit
+              Créer un compte
             </Button>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-muted-foreground">Ou continuer avec</span>
-              </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-border"></div>
+              <span className="text-xs text-muted-foreground">OU</span>
+              <div className="flex-1 h-px bg-border"></div>
             </div>
 
             <Button
@@ -53,10 +50,15 @@ export default function Signup() {
               data-testid="button-signup-google"
             >
               <SiGoogle className="w-5 h-5 mr-2" />
-              Google
+              Continuer avec Google
             </Button>
 
-            <div className="space-y-2 pt-2">
+            <p className="text-xs text-center text-muted-foreground pt-2">
+              L'authentification est sécurisée via Replit Auth (compatible Google)
+            </p>
+
+            <div className="space-y-2 pt-4 border-t">
+              <p className="text-sm font-medium text-center">Ce que vous obtenez :</p>
               <div className="flex items-start gap-2 text-xs text-muted-foreground">
                 <div className="w-1 h-1 rounded-full bg-primary mt-1.5" />
                 <span>Résumés de cours générés par IA</span>
@@ -71,7 +73,7 @@ export default function Signup() {
               </div>
             </div>
 
-            <div className="text-center text-sm pt-2">
+            <div className="text-center text-sm pt-4 border-t">
               <span className="text-muted-foreground">Vous avez déjà un compte ? </span>
               <a
                 href="/login"

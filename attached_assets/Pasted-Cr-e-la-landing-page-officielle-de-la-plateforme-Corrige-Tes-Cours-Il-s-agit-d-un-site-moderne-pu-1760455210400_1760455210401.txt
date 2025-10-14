@@ -1,0 +1,92 @@
+Crée la landing page officielle de la plateforme Corrige Tes Cours.
+Il s’agit d’un site moderne, épuré et professionnel destiné aux étudiants du supérieur.
+Le but est de présenter la promesse du produit, inspirer confiance et inciter à créer un compte gratuitement.
+
+🎯 Objectif :
+
+Mettre en avant la promesse :
+
+“Révise plus intelligemment, réussis plus facilement.”
+Corrige Tes Cours t’aide à mieux comprendre tes cours grâce à des résumés, quiz et analyses personnalisées.
+
+🧱 Structure de la page :
+
+Header :
+
+Logo “Corrige Tes Cours” (texte + icône livre/casquette étudiante)
+
+Menu : “Fonctionnalités”, “Tarifs”, “À propos”, “Connexion”, “Créer un compte”
+
+CTA principal : “Commencer gratuitement”
+
+Hero Section :
+
+Grand titre accrocheur :
+“Ta révision devient intelligente.”
+
+Sous-texte :
+“Des résumés clairs, des quiz personnalisés et un suivi intelligent pour booster ta réussite.”
+
+Visuel illustrant un étudiant travaillant sur son ordi (illustration ou mockup).
+
+CTA principal : “Créer un compte gratuit”
+
+Section Fonctionnalités principales :
+
+📝 Prise de notes interactive
+“Note tes cours directement depuis l’appli, sans stress.”
+
+📄 Résumés automatiques par IA
+“Simplifie tes cours en un clic grâce à l’intelligence artificielle.”
+
+❓ Quiz intelligents
+“Teste-toi avec des questions adaptées à ton niveau.”
+
+📈 Suivi de performance
+“Visualise tes progrès et reste motivé.”
+
+Section Avantages / Promesse :
+
+Présente pourquoi Corrige Tes Cours est unique.
+“Parce que bien réviser, c’est bien réussir.”
+
+Inclure 3 arguments-clés sous forme de cartes visuelles :
+
+Gain de temps ⏰
+
+Mémorisation efficace 🧠
+
+Interface intuitive 💻
+
+Section Témoignages (optionnel pour MVP)
+
+“Ils ont amélioré leurs résultats avec Corrige Tes Cours.”
+
+Section CTA finale :
+
+Titre : “Prêt(e) à booster ta réussite ?”
+
+Bouton : “Je crée mon compte gratuit maintenant”
+
+Footer :
+
+Liens : Mentions légales | Confidentialité | Contact
+
+Copyright :
+© 2025 Corrige Tes Cours. Tous droits réservés.
+
+Réseaux sociaux (icônes simples)
+
+🎨 Direction artistique :
+
+Palette principale : dégradé bleu (#007BFF) → bleu nuit (#001F3F)
+
+Style : minimaliste, luxueux, propre, avec espaces blancs bien dosés.
+
+Typographie : Inter ou Poppins.
+
+Boutons CTA : bleu vif avec effet hover lumineux.
+
+Animation légère sur les transitions (FadeIn, SlideUp).
+
+Utiliser TailwindCSS pour la mise en forme et Remix Icon pour les icônes.

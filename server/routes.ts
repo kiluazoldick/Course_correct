@@ -295,7 +295,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const userAnswer = answers[i];
 
         if (question.type === 'mcq') {
-          const isCorrect = userAnswer === question.correctAnswer;
+          // Normalize answers for comparison (trim spaces, lowercase)
+          const normalizedUserAnswer = (userAnswer || '').trim().toLowerCase();
+          const normalizedCorrectAnswer = (question.correctAnswer || '').trim().toLowerCase();
+          const isCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
           if (isCorrect) score++;
           evaluations.push({
             questionIndex: i,

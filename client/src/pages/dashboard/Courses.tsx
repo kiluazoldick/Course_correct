@@ -13,6 +13,7 @@ import { insertCourseSchema, type Course, type InsertCourse } from '@shared/sche
 import { Plus, BookOpen, Trash2, Edit, Calendar, Sparkles, FileText } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import ReactMarkdown from 'react-markdown';
+import jsPDF from 'jspdf';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -188,6 +189,108 @@ export default function Courses() {
   const handleGenerateSummary = (course: Course) => {
     setSelectedCourse(course);
     generateSummaryMutation.mutate(course.id);
+  };
+
+  const downloadSummaryAsPdf = () => {
+    if (!currentSummary || !selectedCourse) return;
+
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      const maxWidth = pageWidth - 2 * margin;
+      let yPosition = margin;
+
+      // Add title
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      const title = `Résumé : ${selectedCourse.title}`;
+      doc.text(title, margin, yPosition);
+      yPosition += 15;
+
+      // Add subtitle
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100);
+      doc.text('Généré par DeepSeek R1', margin, yPosition);
+      yPosition += 10;
+
+      // Add separator
+      doc.setDrawColor(200);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 10;
+
+      // Process markdown content (simple conversion)
+      doc.setFontSize(11);
+      doc.setTextColor(0);
+      const lines = currentSummary.split('\n');
+      
+      lines.forEach(line => {
+        // Handle different markdown elements
+        let text = line;
+        let isBold = false;
+        let isTitle = false;
+
+        if (line.startsWith('# ')) {
+          text = line.substring(2);
+          isTitle = true;
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+        } else if (line.startsWith('## ')) {
+          text = line.substring(3);
+          isTitle = true;
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+        } else if (line.startsWith('### ')) {
+          text = line.substring(4);
+          isTitle = true;
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+        } else if (line.startsWith('- ') || line.startsWith('* ')) {
+          text = '• ' + line.substring(2);
+          doc.setFont('helvetica', 'normal');
+        } else if (line.match(/^\d+\./)) {
+          doc.setFont('helvetica', 'normal');
+        } else {
+          doc.setFont('helvetica', 'normal');
+        }
+
+        // Split text to fit page width
+        const splitText = doc.splitTextToSize(text, maxWidth);
+        
+        splitText.forEach((textLine: string) => {
+          if (yPosition > pageHeight - margin) {
+            doc.addPage();
+            yPosition = margin;
+          }
+          doc.text(textLine, margin, yPosition);
+          yPosition += isTitle ? 8 : 6;
+        });
+
+        // Add spacing after titles
+        if (isTitle) yPosition += 3;
+        
+        // Reset font for next line
+        doc.setFontSize(11);
+      });
+
+      // Save PDF
+      const fileName = `resume-${selectedCourse.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.pdf`;
+      doc.save(fileName);
+
+      toast({
+        title: 'PDF téléchargé',
+        description: 'Le résumé a été téléchargé avec succès.',
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de générer le PDF.',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (isLoading) {
@@ -520,13 +623,7 @@ export default function Courses() {
               Fermer
             </Button>
             <Button
-              onClick={() => {
-                // TODO: Implement PDF download
-                toast({
-                  title: 'Bientôt disponible',
-                  description: 'Le téléchargement PDF sera disponible prochainement.',
-                });
-              }}
+              onClick={downloadSummaryAsPdf}
               data-testid="button-download-summary"
             >
               <FileText className="w-4 h-4 mr-2" />

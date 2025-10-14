@@ -1,9 +1,35 @@
 import { useAuth } from '@/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { BookOpen, Brain, TrendingUp } from 'lucide-react';
+import { type Course, type Quiz, type QuizResult } from '@shared/schema';
 
 export default function DashboardHome() {
   const { user } = useAuth();
+
+  const { data: courses = [] } = useQuery<Course[]>({
+    queryKey: ['/api/courses'],
+  });
+
+  const { data: quizzes = [] } = useQuery<Quiz[]>({
+    queryKey: ['/api/quizzes'],
+  });
+
+  const { data: quizResults = [] } = useQuery<QuizResult[]>({
+    queryKey: ['/api/quiz-results'],
+  });
+
+  const totalCourses = courses.length;
+  const totalQuizzes = quizResults.length;
+  const averageScore = totalQuizzes > 0
+    ? Math.round(quizResults.reduce((sum, result) => sum + result.score, 0) / totalQuizzes)
+    : 0;
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600 dark:text-green-400';
+    if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-red-600 dark:text-red-400';
+  };
 
   return (
     <div className="space-y-6">
@@ -23,7 +49,7 @@ export default function DashboardHome() {
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-courses-count">0</div>
+            <div className="text-2xl font-bold" data-testid="text-courses-count">{totalCourses}</div>
             <p className="text-xs text-muted-foreground">cours enregistrés</p>
           </CardContent>
         </Card>
@@ -34,7 +60,7 @@ export default function DashboardHome() {
             <Brain className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-quizzes-count">0</div>
+            <div className="text-2xl font-bold" data-testid="text-quizzes-count">{totalQuizzes}</div>
             <p className="text-xs text-muted-foreground">quiz complétés</p>
           </CardContent>
         </Card>
@@ -45,7 +71,9 @@ export default function DashboardHome() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-avg-score">-</div>
+            <div className={`text-2xl font-bold ${totalQuizzes > 0 ? getScoreColor(averageScore) : ''}`} data-testid="text-avg-score">
+              {totalQuizzes > 0 ? `${averageScore}%` : '-'}
+            </div>
             <p className="text-xs text-muted-foreground">score moyen</p>
           </CardContent>
         </Card>

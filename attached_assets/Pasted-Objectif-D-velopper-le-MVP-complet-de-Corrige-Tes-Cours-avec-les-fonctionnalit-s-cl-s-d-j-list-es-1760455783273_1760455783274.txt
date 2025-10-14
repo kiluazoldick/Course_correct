@@ -1,0 +1,95 @@
+Objectif : Développer le MVP complet de Corrige Tes Cours avec les fonctionnalités clés déjà listées.
+
+🧩 Fonctionnalités principales à implémenter
+
+Système d’authentification
+
+Création de compte par email + username + mot de passe robuste
+
+Connexion à un compte existant
+
+Gestion sécurisée des sessions utilisateur
+
+Connexion via Google Auth (OAuth2)
+
+Possibilité de se déconnecter facilement
+
+Dashboard utilisateur
+
+Page principale après connexion
+
+Sidebar minimaliste avec onglets :
+
+Tableau de bord
+
+Mes cours
+
+Mes quiz
+
+Performances
+
+Mon compte
+
+Section principale avec un aperçu global des performances et un message de bienvenue.
+
+Gestion de cours
+
+Possibilité de créer un cours (titre, contenu)
+
+Sauvegarde automatique (base de données interne Replit)
+
+Options : éditer / supprimer / visualiser
+
+Interface simple, zone de texte éditable
+
+Résumé de cours via IA
+
+Intégration d’une API (ex. OpenRouter → modèle DeepSeek v4)
+
+L’utilisateur sélectionne un cours et clique sur “Résumer le cours”
+
+Résumé généré automatiquement et affiché dans une nouvelle section
+
+Possibilité de télécharger le résumé en PDF
+
+Le PDF contient une signature “Corrige Tes Cours” discrète en bas.
+
+Quiz intelligents
+
+Génération automatique de quiz à partir d’un cours via IA (QCM / Réponse ouverte / Mixte)
+
+L’utilisateur répond au quiz et soumet
+
+L’application évalue les réponses et affiche les résultats + corrections
+
+Stockage des scores et performances par matière
+
+Suivi de performance
+
+Graphiques simples (barres, lignes) pour visualiser :
+
+Moyenne des scores par matière
+
+Progression sur le temps
+
+Dashboard clair et motivant
+
+Page de compte utilisateur
+
+Informations de profil : username, email, date d’inscription
+
+Option de déconnexion
+
+Design ultra minimaliste et intuitif
+
+⚙️ Détails techniques
+
+Langage : TypeScript
+
+Base de données : gérée par Replit (PostgreSQL intégré ou autre)
+
+Replit gère le backend et les API routes
+
+Utilisation de l’API OpenRouter pour les fonctionnalités IA (DeepSeek v4)
+
+Architecture propre et modulable (préparer le terrain pour la future version Premium)

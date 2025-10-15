@@ -26,7 +26,18 @@ Corrige Tes Cours is an AI-powered educational platform designed for French-spea
 
 ## Recent Changes
 
-### October 15, 2025
+### October 15, 2025 (Latest)
+- **AI Chatbot "Aide IA"**: Implemented educational chatbot using DeepSeek R1 via OpenRouter API
+  - Free tier: 5 messages per session with 3-hour cooldown
+  - Premium tier: Unlimited chatbot access
+  - Chat history with markdown rendering
+  - Session management and message tracking
+- **File Upload Feature**: Added PDF/Word document upload (max 10MB)
+  - Automatic text extraction from PDF and Word (.docx) files
+  - Auto-creates course from extracted content
+  - Uses mammoth for Word processing, pdf-parse for PDF extraction
+  - Includes subject field for course categorization
+- **Premium System**: Extended database schema with subscriptions, chat_sessions, and payments tables
 - **Dashboard Dark/Light Mode**: Added ThemeProvider to dashboard with theme toggle in header, persists theme in localStorage
 - **Course Read-Only View**: Added "Voir" button on course cards to display full course content in read-only dialog
 - **PDF Branding Update**: Changed PDF signature from "DeepSeek R1" to "Corrige Tes Cours" in summary PDFs

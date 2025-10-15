@@ -15,11 +15,20 @@ import {
   type InsertQuiz,
   type QuizResult,
   type InsertQuizResult,
+  type Subscription,
+  type InsertSubscription,
+  type ChatSession,
+  type InsertChatSession,
+  type Payment,
+  type InsertPayment,
   users,
   courses,
   summaries,
   quizzes,
   quizResults,
+  subscriptions,
+  chatSessions,
+  payments,
 } from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
@@ -64,6 +73,25 @@ export interface IStorage {
   getQuizResultsByUserId(userId: string): Promise<QuizResult[]>;
   getQuizResultsByCourseId(courseId: string): Promise<QuizResult[]>;
   createQuizResult(result: InsertQuizResult): Promise<QuizResult>;
+
+  // Subscriptions
+  getSubscription(id: string): Promise<Subscription | undefined>;
+  getSubscriptionByUserId(userId: string): Promise<Subscription | undefined>;
+  createSubscription(subscription: InsertSubscription): Promise<Subscription>;
+  updateSubscription(id: string, subscription: Partial<InsertSubscription>): Promise<Subscription | undefined>;
+
+  // Chat Sessions
+  getChatSession(id: string): Promise<ChatSession | undefined>;
+  getChatSessionByUserId(userId: string): Promise<ChatSession | undefined>;
+  createChatSession(session: InsertChatSession): Promise<ChatSession>;
+  updateChatSession(id: string, session: Partial<InsertChatSession>): Promise<ChatSession | undefined>;
+  deleteChatSession(id: string): Promise<void>;
+
+  // Payments
+  getPayment(id: string): Promise<Payment | undefined>;
+  getPaymentsByUserId(userId: string): Promise<Payment[]>;
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  updatePayment(id: string, payment: Partial<InsertPayment>): Promise<Payment | undefined>;
 }
 
 export class DbStorage implements IStorage {
@@ -210,6 +238,75 @@ export class DbStorage implements IStorage {
   async createQuizResult(result: InsertQuizResult): Promise<QuizResult> {
     const inserted = await db.insert(quizResults).values(result).returning();
     return inserted[0];
+  }
+
+  // Subscriptions
+  async getSubscription(id: string): Promise<Subscription | undefined> {
+    const result = await db.select().from(subscriptions).where(eq(subscriptions.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getSubscriptionByUserId(userId: string): Promise<Subscription | undefined> {
+    const result = await db.select().from(subscriptions).where(eq(subscriptions.userId, userId)).limit(1);
+    return result[0];
+  }
+
+  async createSubscription(subscription: InsertSubscription): Promise<Subscription> {
+    const result = await db.insert(subscriptions).values(subscription).returning();
+    return result[0];
+  }
+
+  async updateSubscription(id: string, subscription: Partial<InsertSubscription>): Promise<Subscription | undefined> {
+    const updated = { ...subscription, updatedAt: new Date() };
+    const result = await db.update(subscriptions).set(updated).where(eq(subscriptions.id, id)).returning();
+    return result[0];
+  }
+
+  // Chat Sessions
+  async getChatSession(id: string): Promise<ChatSession | undefined> {
+    const result = await db.select().from(chatSessions).where(eq(chatSessions.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getChatSessionByUserId(userId: string): Promise<ChatSession | undefined> {
+    const result = await db.select().from(chatSessions).where(eq(chatSessions.userId, userId)).limit(1);
+    return result[0];
+  }
+
+  async createChatSession(session: InsertChatSession): Promise<ChatSession> {
+    const result = await db.insert(chatSessions).values(session).returning();
+    return result[0];
+  }
+
+  async updateChatSession(id: string, session: Partial<InsertChatSession>): Promise<ChatSession | undefined> {
+    const updated = { ...session, updatedAt: new Date() };
+    const result = await db.update(chatSessions).set(updated).where(eq(chatSessions.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteChatSession(id: string): Promise<void> {
+    await db.delete(chatSessions).where(eq(chatSessions.id, id));
+  }
+
+  // Payments
+  async getPayment(id: string): Promise<Payment | undefined> {
+    const result = await db.select().from(payments).where(eq(payments.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getPaymentsByUserId(userId: string): Promise<Payment[]> {
+    return await db.select().from(payments).where(eq(payments.userId, userId)).orderBy(desc(payments.createdAt));
+  }
+
+  async createPayment(payment: InsertPayment): Promise<Payment> {
+    const result = await db.insert(payments).values(payment).returning();
+    return result[0];
+  }
+
+  async updatePayment(id: string, payment: Partial<InsertPayment>): Promise<Payment | undefined> {
+    const updated = { ...payment, updatedAt: new Date() };
+    const result = await db.update(payments).set(updated).where(eq(payments.id, id)).returning();
+    return result[0];
   }
 }
 

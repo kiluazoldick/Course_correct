@@ -195,3 +195,64 @@ Réponse de l'étudiant : ${userAnswer}
   const evaluation = JSON.parse(evaluationContent);
   return evaluation;
 }
+
+export async function chatWithAI(
+  userMessage: string,
+  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>
+): Promise<string> {
+  const messages = [
+    {
+      role: 'system',
+      content: `Tu es un assistant éducatif bienveillant pour les étudiants universitaires camerounais. 
+
+Ton rôle :
+- Aider les étudiants à comprendre leurs cours
+- Expliquer les concepts difficiles de manière simple et claire
+- Donner des exemples pratiques et des analogies
+- Encourager l'apprentissage autonome
+- Répondre en français avec un ton amical et pédagogique
+
+Directives :
+- Adapte tes explications au niveau universitaire
+- Utilise des exemples concrets et pertinents
+- Si la question n'est pas claire, demande des précisions
+- Encourage toujours l'étudiant dans son apprentissage
+- Reste concis mais complet dans tes réponses`
+    },
+    ...conversationHistory,
+    {
+      role: 'user',
+      content: userMessage
+    }
+  ];
+
+  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://corrigetescours.com',
+      'X-Title': 'Corrige Tes Cours',
+    },
+    body: JSON.stringify({
+      model: 'deepseek/deepseek-r1',
+      messages,
+      temperature: 0.7,
+      max_tokens: 1500,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`OpenRouter API error: ${response.status} - ${error}`);
+  }
+
+  const data = await response.json();
+  const aiResponse = data.choices?.[0]?.message?.content;
+
+  if (!aiResponse) {
+    throw new Error('No response generated from OpenRouter API');
+  }
+
+  return aiResponse;
+}

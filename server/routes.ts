@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
 import { insertCourseSchema, insertQuizSchema, insertQuizResultSchema, insertSummarySchema } from "@shared/schema";
-import { generateCourseSummary, generateQuiz, evaluateOpenAnswer } from "./ai";
+import { generateCourseSummary, generateQuiz, evaluateOpenAnswer, chatWithAI } from "./ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -332,6 +332,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error evaluating quiz:", error);
       res.status(500).json({ message: "Failed to evaluate quiz", error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  // Chat routes
+  app.post('/api/chat/message', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { message } = req.body;
+
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      // Get or create chat session
+      let session = await storage.getChatSessionByUserId(userId);
+      if (!session) {
+        session = await storage.createChatSession({
+          userId,
+          messages: [],
+          messageCount: 0,
+        });
+      }
+
+      // Check subscription status
+      const subscription = await storage.getSubscriptionByUserId(userId);
+      const isPremium = subscription?.status === 'premium' && 
+                        subscription?.endDate && 
+                        new Date(subscription.endDate) > new Date();
+
+      // Check message limits for free users
+      if (!isPremium) {
+        const now = new Date();
+        const resetAt = session.resetAt ? new Date(session.resetAt) : null;
+
+        // If reset time has passed, reset the counter
+        if (resetAt && resetAt <= now) {
+          session = await storage.updateChatSession(session.id, {
+            messageCount: 0,
+            resetAt: null,
+          }) || session;
+        }
+
+        // Check if limit exceeded
+        if (session.messageCount >= 5) {
+          const remainingTime = resetAt ? Math.ceil((resetAt.getTime() - now.getTime()) / 1000 / 60) : 0;
+          return res.status(429).json({
+            message: "Limite atteinte",
+            limitExceeded: true,
+            remainingMinutes: remainingTime > 0 ? remainingTime : 0,
+          });
+        }
+      }
+
+      // Get conversation history (last 10 messages to keep context manageable)
+      const messages = (session.messages as any[]) || [];
+      const conversationHistory = messages.slice(-10);
+
+      // Get AI response
+      const aiResponse = await chatWithAI(message, conversationHistory);
+
+      // Update session with new messages
+      const updatedMessages = [
+        ...messages,
+        { role: 'user', content: message, timestamp: new Date().toISOString() },
+        { role: 'assistant', content: aiResponse, timestamp: new Date().toISOString() },
+      ];
+
+      const newMessageCount = session.messageCount + 1;
+      const updates: any = {
+        messages: updatedMessages,
+        messageCount: newMessageCount,
+        lastMessageAt: new Date(),
+      };
+
+      // Set reset time for free users when they hit the limit
+      if (!isPremium && newMessageCount >= 5) {
+        const resetTime = new Date();
+        resetTime.setHours(resetTime.getHours() + 3);
+        updates.resetAt = resetTime;
+      }
+
+      await storage.updateChatSession(session.id, updates);
+
+      res.json({
+        response: aiResponse,
+        messagesRemaining: isPremium ? null : Math.max(0, 5 - newMessageCount),
+        isPremium,
+      });
+    } catch (error) {
+      console.error("Error in chat:", error);
+      res.status(500).json({ message: "Failed to process chat message", error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  app.get('/api/chat/session', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const session = await storage.getChatSessionByUserId(userId);
+
+      if (!session) {
+        return res.json({
+          messages: [],
+          messageCount: 0,
+          isPremium: false,
+          messagesRemaining: 5,
+        });
+      }
+
+      // Check subscription status
+      const subscription = await storage.getSubscriptionByUserId(userId);
+      const isPremium = subscription?.status === 'premium' && 
+                        subscription?.endDate && 
+                        new Date(subscription.endDate) > new Date();
+
+      // Check if reset time has passed
+      const now = new Date();
+      const resetAt = session.resetAt ? new Date(session.resetAt) : null;
+      let messageCount = session.messageCount;
+
+      if (!isPremium && resetAt && resetAt <= now) {
+        messageCount = 0;
+        await storage.updateChatSession(session.id, {
+          messageCount: 0,
+          resetAt: null,
+        });
+      }
+
+      res.json({
+        messages: session.messages || [],
+        messageCount,
+        isPremium,
+        messagesRemaining: isPremium ? null : Math.max(0, 5 - messageCount),
+        resetAt: !isPremium && resetAt && resetAt > now ? resetAt : null,
+      });
+    } catch (error) {
+      console.error("Error fetching chat session:", error);
+      res.status(500).json({ message: "Failed to fetch chat session" });
+    }
+  });
+
+  app.delete('/api/chat/session', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const session = await storage.getChatSessionByUserId(userId);
+
+      if (session) {
+        await storage.deleteChatSession(session.id);
+      }
+
+      res.json({ message: "Chat session cleared" });
+    } catch (error) {
+      console.error("Error clearing chat session:", error);
+      res.status(500).json({ message: "Failed to clear chat session" });
+    }
+  });
+
+  // Subscription routes
+  app.get('/api/subscription', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const subscription = await storage.getSubscriptionByUserId(userId);
+
+      if (!subscription) {
+        return res.json({
+          status: 'free',
+          isPremium: false,
+        });
+      }
+
+      const isPremium = subscription.status === 'premium' && 
+                        subscription.endDate && 
+                        new Date(subscription.endDate) > new Date();
+
+      res.json({
+        ...subscription,
+        isPremium,
+      });
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
+      res.status(500).json({ message: "Failed to fetch subscription" });
     }
   });
 

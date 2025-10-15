@@ -1,3 +1,5 @@
+import Navbar from '@/components/Navbar';
+import AppFooter from '@/components/AppFooter';
 import { FileText, Brain, CheckCircle, TrendingUp, Sparkles, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
@@ -74,57 +76,40 @@ export default function Features() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" data-testid="link-home" className="flex items-center gap-2 hover-elevate active-elevate-2 rounded-md px-2 py-1 -ml-2">
-              <span className="text-lg font-semibold">Corrige Tes Cours</span>
-            </Link>
-            <div className="flex items-center gap-3">
-              <Link href="/pricing">
-                <Button variant="ghost" data-testid="button-pricing">Tarifs</Button>
-              </Link>
-              <Link href="/about">
-                <Button variant="ghost" data-testid="button-about">À propos</Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="default" data-testid="button-login">Connexion</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
 
-      <main>
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary via-primary/90 to-primary/70">
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-b from-primary/5 via-background to-background py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6" data-testid="text-features-hero-title">
               Fonctionnalités complètes pour réussir vos études
             </h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Découvrez comment Corrige Tes Cours utilise l'intelligence artificielle DeepSeek R1 
               pour transformer votre façon d'apprendre et de réviser.
             </p>
           </div>
         </section>
 
+        {/* Features Grid */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {features.map((feature, index) => (
                 <Card key={index} className="hover-elevate" data-testid={`card-feature-${index}`}>
-                  <CardContent className="p-8">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
-                      <feature.icon className="w-6 h-6 text-primary" />
+                  <CardContent className="p-6">
+                    <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <feature.icon className="h-6 w-6 text-primary" />
                     </div>
                     <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                    <p className="text-muted-foreground mb-6">{feature.description}</p>
+                    <p className="text-muted-foreground mb-4">{feature.description}</p>
                     <ul className="space-y-2">
                       {feature.details.map((detail, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-sm">
-                          <CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                          <span>{detail}</span>
+                          <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                          <span className="text-muted-foreground">{detail}</span>
                         </li>
                       ))}
                     </ul>
@@ -135,6 +120,7 @@ export default function Features() {
           </div>
         </section>
 
+        {/* CTA Section */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
@@ -152,13 +138,7 @@ export default function Features() {
         </section>
       </main>
 
-      <footer className="bg-secondary py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-sm text-muted-foreground">
-            © 2025 Corrige Tes Cours. Tous droits réservés.
-          </p>
-        </div>
-      </footer>
+      <AppFooter />
     </div>
   );
 }

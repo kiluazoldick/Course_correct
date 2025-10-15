@@ -1,3 +1,5 @@
+import Navbar from '@/components/Navbar';
+import AppFooter from '@/components/AppFooter';
 import { Check, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
@@ -60,59 +62,42 @@ export default function Pricing() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" data-testid="link-home" className="flex items-center gap-2 hover-elevate active-elevate-2 rounded-md px-2 py-1 -ml-2">
-              <span className="text-lg font-semibold">Corrige Tes Cours</span>
-            </Link>
-            <div className="flex items-center gap-3">
-              <Link href="/features">
-                <Button variant="ghost" data-testid="button-features">Fonctionnalités</Button>
-              </Link>
-              <Link href="/about">
-                <Button variant="ghost" data-testid="button-about">À propos</Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="default" data-testid="button-login">Connexion</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
 
-      <main>
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary via-primary/90 to-primary/70">
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-b from-primary/5 via-background to-background py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6" data-testid="text-pricing-title">
               Choisissez le plan qui vous correspond
             </h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Commencez gratuitement, évoluez quand vous êtes prêt. 
               Tous les plans incluent une garantie satisfait ou remboursé.
             </p>
           </div>
         </section>
 
+        {/* Pricing Cards */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {plans.map((plan, index) => (
                 <Card 
                   key={index} 
-                  className={`relative hover-elevate ${plan.popular ? 'border-primary shadow-lg' : ''}`}
+                  className={`relative hover-elevate ${plan.popular ? 'border-primary' : ''}`}
                   data-testid={`card-plan-${index}`}
                 >
                   {plan.popular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-primary text-white" data-testid="badge-popular">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <Badge className="bg-primary" data-testid="badge-popular">
                         <Sparkles className="w-3 h-3 mr-1" />
                         Le plus populaire
                       </Badge>
                     </div>
                   )}
-                  <CardHeader className="pb-8">
+                  <CardHeader className="pb-6">
                     <CardTitle className="text-2xl">{plan.name}</CardTitle>
                     <CardDescription>{plan.description}</CardDescription>
                     <div className="mt-4">
@@ -123,9 +108,9 @@ export default function Pricing() {
                   <CardContent className="space-y-6">
                     <ul className="space-y-3">
                       {plan.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-3">
-                          <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                          <span className="text-sm">{feature}</span>
+                        <li key={idx} className="flex items-start gap-2">
+                          <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-muted-foreground">{feature}</span>
                         </li>
                       ))}
                     </ul>
@@ -144,43 +129,44 @@ export default function Pricing() {
               ))}
             </div>
 
-            <div className="mt-16 text-center">
-              <h3 className="text-2xl font-semibold mb-4">Questions fréquentes</h3>
-              <div className="max-w-3xl mx-auto space-y-6 text-left">
-                <div>
-                  <h4 className="font-semibold mb-2">Puis-je changer de plan à tout moment ?</h4>
-                  <p className="text-muted-foreground">
-                    Oui, vous pouvez passer d'un plan à l'autre à tout moment. 
-                    Le changement est immédiat et vous ne payez que la différence au prorata.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Comment fonctionne la période d'essai ?</h4>
-                  <p className="text-muted-foreground">
-                    Vous pouvez tester les plans payants sans engagement. 
-                    Annulez avant la fin de la période d'essai et vous ne serez pas facturé.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Quels modes de paiement acceptez-vous ?</h4>
-                  <p className="text-muted-foreground">
-                    Nous acceptons les cartes bancaires (Visa, Mastercard, American Express) 
-                    et les paiements via PayPal.
-                  </p>
-                </div>
+            {/* FAQ */}
+            <div className="mt-20 text-center">
+              <h2 className="text-3xl font-bold mb-12">Questions fréquentes</h2>
+              <div className="max-w-3xl mx-auto grid gap-8 text-left">
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="font-semibold mb-2">Puis-je changer de plan à tout moment ?</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Oui, vous pouvez passer d'un plan à l'autre à tout moment. 
+                      Le changement est immédiat et vous ne payez que la différence au prorata.
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="font-semibold mb-2">Comment fonctionne la période d'essai ?</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Vous pouvez tester les plans payants sans engagement. 
+                      Annulez avant la fin de la période d'essai et vous ne serez pas facturé.
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="font-semibold mb-2">Quels modes de paiement acceptez-vous ?</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Nous acceptons les cartes bancaires (Visa, Mastercard, American Express) 
+                      et les paiements via PayPal.
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="bg-secondary py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-sm text-muted-foreground">
-            © 2025 Corrige Tes Cours. Tous droits réservés.
-          </p>
-        </div>
-      </footer>
+      <AppFooter />
     </div>
   );
 }

@@ -5,7 +5,10 @@
 Corrige Tes Cours is an AI-powered educational platform designed for French-speaking university students in Cameroon. The platform helps students study more effectively by providing automated course summaries, personalized quizzes, and performance tracking. The application features a modern, sales-focused landing page to attract users and a comprehensive dashboard for authenticated users to manage their coursework and track their progress.
 
 **Location**: Douala, Cameroun
-**Pricing**: All plans are priced in XAF (Francs CFA)
+**Pricing**: Two plans available:
+- **Gratuit**: 0 XAF/forever - Unlimited courses, summaries, quizzes, basic stats
+- **Étudiant**: 1,500 XAF/month - All Free features + AI assistant, PDF downloads, advanced stats, priority support
+**Payment**: Mobile Money (MTN, Orange) and credit cards accepted
 **Contact**: contact@corrigetescours.cm
 
 ## AI Integration
@@ -44,10 +47,15 @@ Preferred communication style: Simple, everyday language.
 **Styling Strategy:**
 - Minimalist, modern design with clean aesthetics to attract students
 - **Sales-focused content**: Simple, non-technical messaging focused on student results and benefits
-- Unified components: **Navbar** (logo, navigation links, auth buttons) and **AppFooter** (company info, links, contact) used across all landing pages
+- Unified components: **Navbar** (logo, navigation links, theme toggle, auth buttons) and **AppFooter** (company info, links, contact) used across all landing pages
 - Brand color palette: Primary blue (#007BFF) with subtle gradients
+- **Favicon**: Blue graduation cap SVG icon for browser tab identification
 - Inter and Poppins fonts from Google Fonts
 - Responsive design with mobile-first approach using Tailwind breakpoints
+- **Dark/Light Mode**: Full theme support with ThemeProvider, localStorage persistence, and smooth transitions
+  - Theme toggle in Navbar for landing pages (desktop & mobile)
+  - Theme toggle in top-right corner for auth pages (Login, Signup)
+  - Theme persists across navigation and browser sessions
 - Custom elevation system with hover/active states (`hover-elevate`, `active-elevate-2`)
 - Consistent styling across Home, Features, Pricing, About, Login, Signup, Legal, Privacy, and Terms pages
 

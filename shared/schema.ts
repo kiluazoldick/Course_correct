@@ -132,3 +132,72 @@ export const insertQuizResultSchema = createInsertSchema(quizResults).omit({
 
 export type InsertQuizResult = z.infer<typeof insertQuizResultSchema>;
 export type QuizResult = typeof quizResults.$inferSelect;
+
+// Subscriptions table for premium features
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }).unique(),
+  status: varchar("status").notNull().default("free"), // 'free' | 'premium' | 'cancelled'
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  paymentMethod: varchar("payment_method"), // 'mtn' | 'orange' | 'card'
+  amount: integer("amount"), // Amount in XAF
+  transactionId: varchar("transaction_id"), // Lygos transaction ID
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+
+// Chatbot sessions table for conversation history
+export const chatSessions = pgTable("chat_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  messages: jsonb("messages").notNull().default([]), // Array of {role: 'user'|'assistant', content: string, timestamp: string}
+  messageCount: integer("message_count").notNull().default(0),
+  lastMessageAt: timestamp("last_message_at"),
+  resetAt: timestamp("reset_at"), // When the 3h cooldown ends
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertChatSessionSchema = createInsertSchema(chatSessions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertChatSession = z.infer<typeof insertChatSessionSchema>;
+export type ChatSession = typeof chatSessions.$inferSelect;
+
+// Payment transactions table for Lygos payments
+export const payments = pgTable("payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  subscriptionId: varchar("subscription_id").references(() => subscriptions.id, { onDelete: 'set null' }),
+  amount: integer("amount").notNull(), // Amount in XAF
+  currency: varchar("currency").notNull().default("XAF"),
+  status: varchar("status").notNull().default("pending"), // 'pending' | 'completed' | 'failed'
+  paymentMethod: varchar("payment_method").notNull(), // 'mtn' | 'orange' | 'card'
+  lygosTransactionId: varchar("lygos_transaction_id"), // Lygos transaction ID
+  lygosProductId: varchar("lygos_product_id"), // Lygos product ID
+  metadata: jsonb("metadata"), // Additional payment data
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = typeof payments.$inferSelect;

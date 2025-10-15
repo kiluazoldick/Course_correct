@@ -9,6 +9,9 @@ import Pricing from "@/pages/Pricing";
 import About from "@/pages/About";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
+import LegalNotice from "@/pages/LegalNotice";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/not-found";
 
@@ -23,6 +26,9 @@ function Router() {
       <Route path="/features" component={Features} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/about" component={About} />
+      <Route path="/legal" component={LegalNotice} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
       
       {/* Conditional routes based on auth */}
       {isLoading ? (

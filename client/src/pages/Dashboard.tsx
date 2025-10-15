@@ -1,6 +1,7 @@
 import { Switch, Route } from 'wouter';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import DashboardHome from './dashboard/DashboardHome';
 import Courses from './dashboard/Courses';
 import Quizzes from './dashboard/Quizzes';
@@ -23,6 +24,7 @@ export default function Dashboard() {
             <h1 className="text-lg font-semibold" data-testid="text-app-title">
               Corrige Tes Cours
             </h1>
+            <ThemeToggle />
           </header>
           <main className="flex-1 overflow-auto p-6">
             <Switch>

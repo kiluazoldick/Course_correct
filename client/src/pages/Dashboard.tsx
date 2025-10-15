@@ -5,6 +5,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import DashboardHome from './dashboard/DashboardHome';
 import Courses from './dashboard/Courses';
 import Quizzes from './dashboard/Quizzes';
+import Chat from './dashboard/Chat';
 import Performance from './dashboard/Performance';
 import Account from './dashboard/Account';
 
@@ -31,6 +32,7 @@ export default function Dashboard() {
               <Route path="/" component={DashboardHome} />
               <Route path="/courses" component={Courses} />
               <Route path="/quizzes" component={Quizzes} />
+              <Route path="/chat" component={Chat} />
               <Route path="/performance" component={Performance} />
               <Route path="/account" component={Account} />
             </Switch>

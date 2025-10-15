@@ -1,4 +1,4 @@
-import { LayoutDashboard, BookOpen, Brain, TrendingUp, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Brain, MessageCircle, TrendingUp, User, LogOut } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -28,6 +28,11 @@ const menuItems = [
     title: 'Mes quiz',
     url: '/quizzes',
     icon: Brain,
+  },
+  {
+    title: 'Aide IA',
+    url: '/chat',
+    icon: MessageCircle,
   },
   {
     title: 'Performances',

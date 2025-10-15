@@ -2,7 +2,11 @@
 
 ## Overview
 
-Corrige Tes Cours is an AI-powered educational platform designed for French-speaking university students. The platform helps students study more effectively by providing automated course summaries using **DeepSeek R1** (the latest reasoning model from DeepSeek), personalized quizzes, and performance tracking. The application features a modern landing page to attract users and a comprehensive dashboard for authenticated users to manage their coursework and track their progress.
+Corrige Tes Cours is an AI-powered educational platform designed for French-speaking university students in Cameroon. The platform helps students study more effectively by providing automated course summaries, personalized quizzes, and performance tracking. The application features a modern, sales-focused landing page to attract users and a comprehensive dashboard for authenticated users to manage their coursework and track their progress.
+
+**Location**: Douala, Cameroun
+**Pricing**: All plans are priced in XAF (Francs CFA)
+**Contact**: contact@corrigetescours.cm
 
 ## AI Integration
 
@@ -39,12 +43,13 @@ Preferred communication style: Simple, everyday language.
 
 **Styling Strategy:**
 - Minimalist, modern design with clean aesthetics to attract students
+- **Sales-focused content**: Simple, non-technical messaging focused on student results and benefits
 - Unified components: **Navbar** (logo, navigation links, auth buttons) and **AppFooter** (company info, links, contact) used across all landing pages
 - Brand color palette: Primary blue (#007BFF) with subtle gradients
 - Inter and Poppins fonts from Google Fonts
 - Responsive design with mobile-first approach using Tailwind breakpoints
 - Custom elevation system with hover/active states (`hover-elevate`, `active-elevate-2`)
-- Consistent styling across Home, Features, Pricing, About, Login, and Signup pages
+- Consistent styling across Home, Features, Pricing, About, Login, Signup, Legal, Privacy, and Terms pages
 
 **State Management:**
 - React Query for async server state with optimized caching (staleTime: 30s, refetchOnWindowFocus enabled)

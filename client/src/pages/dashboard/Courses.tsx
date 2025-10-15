@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { insertCourseSchema, type Course, type InsertCourse } from '@shared/schema';
-import { Plus, BookOpen, Trash2, Edit, Calendar, Sparkles, FileText, Eye } from 'lucide-react';
+import { Plus, BookOpen, Trash2, Edit, Calendar, Sparkles, FileText, Eye, Upload } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import ReactMarkdown from 'react-markdown';
 import jsPDF from 'jspdf';
@@ -31,9 +31,12 @@ export default function Courses() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const [currentSummary, setCurrentSummary] = useState<string | null>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadSubject, setUploadSubject] = useState('');
 
   const { data: courses = [], isLoading } = useQuery<Course[]>({
     queryKey: ['/api/courses'],
@@ -150,6 +153,44 @@ export default function Courses() {
       toast({
         title: 'Erreur',
         description: error?.message || 'Impossible de générer le résumé.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const uploadFileMutation = useMutation({
+    mutationFn: async ({ file, subject }: { file: File; subject: string }) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('subject', subject);
+      
+      const response = await fetch('/api/courses/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Upload failed');
+      }
+
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
+      setIsUploadOpen(false);
+      setUploadFile(null);
+      setUploadSubject('');
+      toast({
+        title: 'Fichier importé',
+        description: 'Ton cours a été créé à partir du fichier.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erreur',
+        description: error?.message || 'Impossible d\'importer le fichier.',
         variant: 'destructive',
       });
     },
@@ -322,10 +363,16 @@ export default function Courses() {
           <h2 className="text-3xl font-bold" data-testid="text-courses-title">Mes Cours</h2>
           <p className="text-muted-foreground mt-2">Gérez vos cours et générez des résumés intelligents</p>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)} data-testid="button-create-course">
-          <Plus className="w-4 h-4 mr-2" />
-          Nouveau cours
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setIsUploadOpen(true)} data-testid="button-upload-course">
+            <Upload className="w-4 h-4 mr-2" />
+            Importer
+          </Button>
+          <Button onClick={() => setIsCreateOpen(true)} data-testid="button-create-course">
+            <Plus className="w-4 h-4 mr-2" />
+            Nouveau cours
+          </Button>
+        </div>
       </div>
 
       {courses.length === 0 ? (
@@ -658,6 +705,76 @@ export default function Courses() {
                 Modifier
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload File Dialog */}
+      <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-primary" />
+              Importer un fichier
+            </DialogTitle>
+            <DialogDescription>
+              Importe un fichier PDF ou Word pour créer automatiquement un cours (max 10 MB)
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="file-upload">
+                Fichier (PDF ou Word .docx)
+              </label>
+              <Input
+                id="file-upload"
+                type="file"
+                accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
+                onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                data-testid="input-file-upload"
+              />
+              {uploadFile && (
+                <p className="text-sm text-muted-foreground">
+                  Fichier : {uploadFile.name} ({(uploadFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="subject-upload">
+                Matière (optionnel)
+              </label>
+              <Input
+                id="subject-upload"
+                value={uploadSubject}
+                onChange={(e) => setUploadSubject(e.target.value)}
+                placeholder="Ex: Mathématiques, Physique..."
+                data-testid="input-subject-upload"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsUploadOpen(false);
+                setUploadFile(null);
+                setUploadSubject('');
+              }}
+              data-testid="button-cancel-upload"
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={() => {
+                if (uploadFile) {
+                  uploadFileMutation.mutate({ file: uploadFile, subject: uploadSubject });
+                }
+              }}
+              disabled={!uploadFile || uploadFileMutation.isPending}
+              data-testid="button-confirm-upload"
+            >
+              {uploadFileMutation.isPending ? 'Import en cours...' : 'Importer'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

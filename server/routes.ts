@@ -4,10 +4,32 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
 import { insertCourseSchema, insertQuizSchema, insertQuizResultSchema, insertSummarySchema } from "@shared/schema";
 import { generateCourseSummary, generateQuiz, evaluateOpenAnswer, chatWithAI } from "./ai";
+import multer from "multer";
+import { processUploadedFile } from "./fileProcessor";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   setupAuth(app);
+
+  // Configure multer for file uploads (10MB limit)
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10 MB
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/msword'
+      ];
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Type de fichier non supporté. Utilise PDF ou Word (.docx)'));
+      }
+    },
+  });
 
   // Note: Auth routes are now handled in auth.ts
 
@@ -92,6 +114,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting course:", error);
       res.status(500).json({ message: "Failed to delete course" });
+    }
+  });
+
+  // File upload route
+  app.post('/api/courses/upload', isAuthenticated, upload.single('file'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Aucun fichier n'a été uploadé" });
+      }
+
+      const userId = (req.user as any).id;
+      const { text, title } = await processUploadedFile(req.file.buffer, req.file.mimetype);
+
+      if (!text || text.length < 50) {
+        return res.status(400).json({ 
+          message: "Le fichier ne contient pas assez de texte exploitable" 
+        });
+      }
+
+      // Create course from extracted text
+      const course = await storage.createCourse({
+        userId,
+        title: title,
+        content: text,
+        subject: req.body.subject || '',
+      });
+
+      res.json(course);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      if (error instanceof Error) {
+        if (error.message.includes('File too large')) {
+          return res.status(413).json({ message: "Le fichier est trop volumineux (max 10 MB)" });
+        }
+        return res.status(400).json({ message: error.message });
+      }
+      res.status(500).json({ message: "Erreur lors de l'upload du fichier" });
     }
   });
 

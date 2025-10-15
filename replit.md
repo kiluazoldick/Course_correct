@@ -27,6 +27,12 @@ Corrige Tes Cours is an AI-powered educational platform designed for French-spea
 ## Recent Changes
 
 ### October 15, 2025
+- **Full-Screen Course Editor**: Redesigned course creation/editing interface with spacious full-screen editor (max-w-7xl, 90vh height)
+  - Textarea expands to use all available vertical space for comfortable long-form note-taking
+  - Real-time word and character counter to track progress
+  - Compact 2-column layout for title and subject fields to maximize content area
+  - Monospace font for better readability when typing technical content
+  - Optimized for students taking 25+ page course notes during lectures
 - **Dashboard Dark/Light Mode**: Added ThemeProvider to dashboard with theme toggle in header, persists theme in localStorage
 - **Course Read-Only View**: Added "Voir" button on course cards to display full course content in read-only dialog
 - **PDF Branding Update**: Changed PDF signature from "DeepSeek R1" to "Corrige Tes Cours" in summary PDFs
@@ -123,7 +129,11 @@ users (Dual Auth: Email/Password + Google OAuth)
   - **No username field** - uses firstName/lastName for display
 - **Courses**: Title, content, subject, timestamps, user relationship
   - **View Mode**: Read-only dialog displays full course content with "Voir" button
-  - **Edit Mode**: Edit dialog for modifying course content
+  - **Edit Mode**: Full-screen editor dialog (max-w-7xl, 90vh) optimized for long-form content
+    - Real-time word/character counter
+    - Monospace font for technical content
+    - Flexible textarea that expands to fill available space
+    - Designed for students taking extensive lecture notes (25+ pages)
 - **Summaries**: AI-generated course summaries linked to courses
   - **PDF Export**: Downloads with "Corrige Tes Cours" branding, clean markdown rendering
 - **Quizzes**: Questions with multiple choice answers and open-ended questions

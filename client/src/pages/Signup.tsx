@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { SiGoogle } from 'react-icons/si';
 import { UserPlus, Mail, Lock, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Link } from 'wouter';
+import { useLocation } from 'wouter';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -15,6 +15,7 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,11 +74,13 @@ export default function Signup() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/">
-            <h1 className="text-4xl font-bold text-white mb-2 cursor-pointer hover:opacity-90 transition-opacity" data-testid="text-signup-title">
-              Corrige Tes Cours
-            </h1>
-          </Link>
+          <h1 
+            className="text-4xl font-bold text-white mb-2 cursor-pointer hover:opacity-90 transition-opacity" 
+            data-testid="text-signup-title"
+            onClick={() => setLocation('/')}
+          >
+            Corrige Tes Cours
+          </h1>
           <p className="text-white/90">Rejoignez des milliers d'étudiants qui réussissent</p>
         </div>
 
@@ -214,11 +217,13 @@ export default function Signup() {
 
             <div className="text-center text-sm pt-4 border-t">
               <span className="text-muted-foreground">Vous avez déjà un compte ? </span>
-              <Link href="/login">
-                <a className="text-primary font-semibold hover:underline" data-testid="link-login">
-                  Se connecter
-                </a>
-              </Link>
+              <button
+                onClick={() => setLocation('/login')}
+                className="text-primary font-semibold hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                data-testid="link-login"
+              >
+                Se connecter
+              </button>
             </div>
           </CardContent>
         </Card>

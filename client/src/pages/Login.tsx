@@ -6,13 +6,14 @@ import { Label } from '@/components/ui/label';
 import { SiGoogle } from 'react-icons/si';
 import { LogIn, Mail, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Link } from 'wouter';
+import { useLocation } from 'wouter';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,11 +53,13 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/">
-            <h1 className="text-4xl font-bold text-white mb-2 cursor-pointer hover:opacity-90 transition-opacity" data-testid="text-login-title">
-              Corrige Tes Cours
-            </h1>
-          </Link>
+          <h1 
+            className="text-4xl font-bold text-white mb-2 cursor-pointer hover:opacity-90 transition-opacity" 
+            data-testid="text-login-title"
+            onClick={() => setLocation('/')}
+          >
+            Corrige Tes Cours
+          </h1>
           <p className="text-white/90">Boostez votre réussite avec l'IA</p>
         </div>
 
@@ -140,11 +143,13 @@ export default function Login() {
 
             <div className="text-center text-sm pt-4 border-t">
               <span className="text-muted-foreground">Pas encore de compte ? </span>
-              <Link href="/signup">
-                <a className="text-primary font-semibold hover:underline" data-testid="link-signup">
-                  Créer un compte
-                </a>
-              </Link>
+              <button
+                onClick={() => setLocation('/signup')}
+                className="text-primary font-semibold hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                data-testid="link-signup"
+              >
+                Créer un compte
+              </button>
             </div>
           </CardContent>
         </Card>

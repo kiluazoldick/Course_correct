@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SiGoogle } from 'react-icons/si';
-import { LogIn, Mail, Lock } from 'lucide-react';
+import { LogIn, Mail, Lock, GraduationCap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
@@ -40,7 +40,6 @@ export default function Login() {
         throw new Error(data.error || 'Erreur de connexion');
       }
 
-      // Redirect to dashboard
       window.location.href = '/';
     } catch (error: any) {
       toast({
@@ -58,24 +57,26 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 
-            className="text-4xl font-bold text-white mb-2 cursor-pointer hover:opacity-90 transition-opacity" 
-            data-testid="text-login-title"
+          <div 
+            className="inline-flex items-center gap-2 mb-4 cursor-pointer hover-elevate rounded-md px-3 py-2" 
             onClick={() => setLocation('/')}
           >
-            Corrige Tes Cours
-          </h1>
-          <p className="text-white/90">Boostez votre réussite avec l'IA</p>
+            <GraduationCap className="h-8 w-8 text-primary" />
+            <h1 className="text-2xl font-bold" data-testid="text-login-title">
+              Corrige Tes Cours
+            </h1>
+          </div>
+          <p className="text-muted-foreground">Bienvenue ! Connectez-vous pour continuer</p>
         </div>
 
-        <Card className="backdrop-blur-sm bg-white/95">
+        <Card>
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Connexion</CardTitle>
             <CardDescription className="text-center">
-              Connectez-vous pour accéder à votre espace
+              Accédez à votre espace d'apprentissage
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -83,7 +84,7 @@ export default function Login() {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
@@ -100,7 +101,7 @@ export default function Login() {
               <div className="space-y-2">
                 <Label htmlFor="password">Mot de passe</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
@@ -125,17 +126,20 @@ export default function Login() {
                   'Connexion...'
                 ) : (
                   <>
-                    <LogIn className="w-5 h-5 mr-2" />
+                    <LogIn className="h-5 w-5 mr-2" />
                     Se connecter
                   </>
                 )}
               </Button>
             </form>
 
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-border"></div>
-              <span className="text-xs text-muted-foreground">OU</span>
-              <div className="flex-1 h-px bg-border"></div>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Ou continuer avec</span>
+              </div>
             </div>
 
             <Button
@@ -145,8 +149,8 @@ export default function Login() {
               size="lg"
               data-testid="button-login-google"
             >
-              <SiGoogle className="w-5 h-5 mr-2" />
-              Continuer avec Google
+              <SiGoogle className="h-5 w-5 mr-2" />
+              Google
             </Button>
 
             <div className="text-center text-sm pt-4 border-t">
@@ -162,7 +166,7 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-white/80 mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-6">
           En vous connectant, vous acceptez nos conditions d'utilisation
         </p>
       </div>

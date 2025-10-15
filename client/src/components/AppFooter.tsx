@@ -24,24 +24,18 @@ export default function AppFooter() {
             <h3 className="font-semibold mb-4" data-testid="text-footer-nav-title">Navigation</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/features">
-                  <a className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-features">
-                    Fonctionnalités
-                  </a>
+                <Link href="/features" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-features">
+                  Fonctionnalités
                 </Link>
               </li>
               <li>
-                <Link href="/pricing">
-                  <a className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-pricing">
-                    Tarifs
-                  </a>
+                <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-pricing">
+                  Tarifs
                 </Link>
               </li>
               <li>
-                <Link href="/about">
-                  <a className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-about">
-                    À propos
-                  </a>
+                <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-about">
+                  À propos
                 </Link>
               </li>
             </ul>

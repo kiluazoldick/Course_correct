@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SiGoogle } from 'react-icons/si';
-import { UserPlus, Mail, Lock, User } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, GraduationCap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,10 +38,10 @@ export default function Signup() {
       return;
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       toast({
         title: 'Erreur',
-        description: 'Le mot de passe doit contenir au moins 6 caractères',
+        description: 'Le mot de passe doit contenir au moins 8 caractères',
         variant: 'destructive',
       });
       return;
@@ -62,7 +62,6 @@ export default function Signup() {
         throw new Error(data.error || 'Erreur lors de l\'inscription');
       }
 
-      // Redirect to dashboard
       window.location.href = '/';
     } catch (error: any) {
       toast({
@@ -80,32 +79,90 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 
-            className="text-4xl font-bold text-white mb-2 cursor-pointer hover:opacity-90 transition-opacity" 
-            data-testid="text-signup-title"
+          <div 
+            className="inline-flex items-center gap-2 mb-4 cursor-pointer hover-elevate rounded-md px-3 py-2" 
             onClick={() => setLocation('/')}
           >
-            Corrige Tes Cours
-          </h1>
-          <p className="text-white/90">Rejoignez des milliers d'étudiants qui réussissent</p>
+            <GraduationCap className="h-8 w-8 text-primary" />
+            <h1 className="text-2xl font-bold" data-testid="text-signup-title">
+              Corrige Tes Cours
+            </h1>
+          </div>
+          <p className="text-muted-foreground">Créez votre compte et commencez à réussir</p>
         </div>
 
-        <Card className="backdrop-blur-sm bg-white/95">
+        <Card>
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Créer un compte</CardTitle>
             <CardDescription className="text-center">
-              Commencez votre parcours vers la réussite
+              Rejoignez des milliers d'étudiants qui réussissent
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <Button
+              onClick={handleGoogleSignup}
+              variant="outline"
+              className="w-full"
+              size="lg"
+              data-testid="button-signup-google"
+            >
+              <SiGoogle className="h-5 w-5 mr-2" />
+              Continuer avec Google
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Ou avec email</span>
+              </div>
+            </div>
+
             <form onSubmit={handleEmailSignup} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">Prénom</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="Jean"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="pl-10"
+                      required
+                      data-testid="input-firstname"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Nom</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Dupont"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="pl-10"
+                      required
+                      data-testid="input-lastname"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
@@ -120,45 +177,9 @@ export default function Signup() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="firstName">Prénom</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="firstName"
-                    type="text"
-                    placeholder="Jean"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="pl-10"
-                    required
-                    minLength={2}
-                    data-testid="input-firstname"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Nom</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="lastName"
-                    type="text"
-                    placeholder="Dupont"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="pl-10"
-                    required
-                    minLength={2}
-                    data-testid="input-lastname"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="password">Mot de passe</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
@@ -167,7 +188,6 @@ export default function Signup() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10"
                     required
-                    minLength={6}
                     data-testid="input-password"
                   />
                 </div>
@@ -176,7 +196,7 @@ export default function Signup() {
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="confirmPassword"
                     type="password"
@@ -185,7 +205,6 @@ export default function Signup() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="pl-10"
                     required
-                    minLength={6}
                     data-testid="input-confirm-password"
                   />
                 </div>
@@ -202,48 +221,15 @@ export default function Signup() {
                   'Création du compte...'
                 ) : (
                   <>
-                    <UserPlus className="w-5 h-5 mr-2" />
+                    <UserPlus className="h-5 w-5 mr-2" />
                     Créer mon compte
                   </>
                 )}
               </Button>
             </form>
 
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-border"></div>
-              <span className="text-xs text-muted-foreground">OU</span>
-              <div className="flex-1 h-px bg-border"></div>
-            </div>
-
-            <Button
-              onClick={handleGoogleSignup}
-              variant="outline"
-              className="w-full"
-              size="lg"
-              data-testid="button-signup-google"
-            >
-              <SiGoogle className="w-5 h-5 mr-2" />
-              Continuer avec Google
-            </Button>
-
-            <div className="space-y-2 pt-4 border-t">
-              <p className="text-sm font-medium text-center">Ce que vous obtenez :</p>
-              <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                <div className="w-1 h-1 rounded-full bg-primary mt-1.5" />
-                <span>Résumés de cours générés par IA</span>
-              </div>
-              <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                <div className="w-1 h-1 rounded-full bg-primary mt-1.5" />
-                <span>Quiz personnalisés et intelligents</span>
-              </div>
-              <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                <div className="w-1 h-1 rounded-full bg-primary mt-1.5" />
-                <span>Suivi détaillé de vos performances</span>
-              </div>
-            </div>
-
             <div className="text-center text-sm pt-4 border-t">
-              <span className="text-muted-foreground">Vous avez déjà un compte ? </span>
+              <span className="text-muted-foreground">Déjà un compte ? </span>
               <button
                 onClick={() => setLocation('/login')}
                 className="text-primary font-semibold hover:underline bg-transparent border-0 p-0 cursor-pointer"
@@ -255,7 +241,7 @@ export default function Signup() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-white/80 mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-6">
           En créant un compte, vous acceptez nos conditions d'utilisation
         </p>
       </div>

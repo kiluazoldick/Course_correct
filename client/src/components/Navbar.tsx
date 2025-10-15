@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { GraduationCap, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Link, useLocation } from 'wouter';
 
 export default function Navbar() {
@@ -37,6 +38,7 @@ export default function Navbar() {
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
+            <ThemeToggle />
             <Link href="/login">
               <Button variant="ghost" size="sm" data-testid="button-login">
                 Connexion
@@ -76,6 +78,10 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="flex flex-col gap-2 pt-2 border-t mt-2">
+                <div className="flex items-center justify-between px-3 py-2">
+                  <span className="text-sm font-medium">Thème</span>
+                  <ThemeToggle />
+                </div>
                 <Link href="/login">
                   <Button
                     variant="ghost"

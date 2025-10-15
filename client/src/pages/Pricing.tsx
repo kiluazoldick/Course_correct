@@ -10,7 +10,7 @@ export default function Pricing() {
   const plans = [
     {
       name: "Gratuit",
-      price: "0€",
+      price: "0",
       period: "toujours",
       description: "Parfait pour découvrir la plateforme",
       features: [
@@ -25,7 +25,7 @@ export default function Pricing() {
     },
     {
       name: "Étudiant",
-      price: "9.90€",
+      price: "1 500",
       period: "par mois",
       description: "L'essentiel pour réussir vos études",
       features: [
@@ -35,28 +35,26 @@ export default function Pricing() {
         "Téléchargement PDF",
         "Statistiques avancées",
         "Graphiques de progression",
-        "Support prioritaire",
-        "Accès anticipé aux nouvelles fonctionnalités"
+        "Support prioritaire"
       ],
-      cta: "Essayer 7 jours gratuits",
+      cta: "Commencer maintenant",
       popular: true
     },
     {
-      name: "Universitaire",
-      price: "15.90€",
+      name: "Premium",
+      price: "2 500",
       period: "par mois",
       description: "Pour les étudiants les plus exigeants",
       features: [
         "Tout du plan Étudiant",
-        "IA plus puissante (DeepSeek R1 Premium)",
+        "IA avancée",
         "Analyses approfondies",
-        "Export multi-formats (PDF, Markdown, DOCX)",
-        "Partage de notes avec collaborateurs",
-        "Révisions personnalisées IA",
-        "Support téléphonique",
-        "Garantie de satisfaction 30 jours"
+        "Export multi-formats",
+        "Partage de notes",
+        "Révisions personnalisées",
+        "Support prioritaire 24/7"
       ],
-      cta: "Essayer 14 jours gratuits",
+      cta: "Commencer maintenant",
       popular: false
     }
   ];
@@ -73,8 +71,7 @@ export default function Pricing() {
               Choisissez le plan qui vous correspond
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Commencez gratuitement, évoluez quand vous êtes prêt. 
-              Tous les plans incluent une garantie satisfait ou remboursé.
+              Commencez gratuitement et évoluez selon vos besoins
             </p>
           </div>
         </section>
@@ -102,7 +99,7 @@ export default function Pricing() {
                     <CardDescription>{plan.description}</CardDescription>
                     <div className="mt-4">
                       <span className="text-4xl font-bold">{plan.price}</span>
-                      <span className="text-muted-foreground ml-2">/{plan.period}</span>
+                      <span className="text-muted-foreground ml-2">XAF /{plan.period}</span>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -137,26 +134,23 @@ export default function Pricing() {
                   <CardContent className="p-6">
                     <h3 className="font-semibold mb-2">Puis-je changer de plan à tout moment ?</h3>
                     <p className="text-sm text-muted-foreground">
-                      Oui, vous pouvez passer d'un plan à l'autre à tout moment. 
-                      Le changement est immédiat et vous ne payez que la différence au prorata.
+                      Oui, vous pouvez passer d'un plan à l'autre à tout moment selon vos besoins.
                     </p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-6">
-                    <h3 className="font-semibold mb-2">Comment fonctionne la période d'essai ?</h3>
+                    <h3 className="font-semibold mb-2">Comment puis-je payer ?</h3>
                     <p className="text-sm text-muted-foreground">
-                      Vous pouvez tester les plans payants sans engagement. 
-                      Annulez avant la fin de la période d'essai et vous ne serez pas facturé.
+                      Nous acceptons les paiements par Mobile Money (MTN, Orange) et carte bancaire.
                     </p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-6">
-                    <h3 className="font-semibold mb-2">Quels modes de paiement acceptez-vous ?</h3>
+                    <h3 className="font-semibold mb-2">Y a-t-il une garantie ?</h3>
                     <p className="text-sm text-muted-foreground">
-                      Nous acceptons les cartes bancaires (Visa, Mastercard, American Express) 
-                      et les paiements via PayPal.
+                      Oui, tous nos plans payants incluent une garantie satisfait ou remboursé de 14 jours.
                     </p>
                   </CardContent>
                 </Card>

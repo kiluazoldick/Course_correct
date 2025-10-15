@@ -10,67 +10,67 @@ export default function Features() {
     {
       icon: FileText,
       title: "Prise de notes intelligente",
-      description: "Créez et organisez vos cours en un seul endroit. Système de catégorisation par matière pour retrouver vos notes facilement.",
+      description: "Créez et organisez vos cours en un seul endroit avec un système de catégorisation simple et efficace.",
       details: [
-        "Éditeur de texte riche et intuitif",
-        "Organisation par matières et thèmes",
-        "Recherche instantanée dans vos notes",
-        "Stockage sécurisé de tous vos cours"
+        "Éditeur de texte intuitif",
+        "Organisation par matières",
+        "Recherche instantanée",
+        "Stockage sécurisé"
       ]
     },
     {
       icon: Brain,
-      title: "Résumés IA avec DeepSeek R1",
-      description: "Notre IA analyse vos cours et génère des résumés structurés avec les points clés, utilisant le modèle de raisonnement DeepSeek R1.",
+      title: "Résumés IA",
+      description: "Générez automatiquement des résumés structurés avec les points clés de vos cours.",
       details: [
-        "Génération automatique de résumés clairs",
-        "Identification des concepts importants",
-        "Format markdown structuré et lisible",
-        "Téléchargement PDF pour révisions offline"
+        "Résumés clairs et précis",
+        "Points essentiels identifiés",
+        "Format structuré",
+        "Téléchargement PDF"
       ]
     },
     {
       icon: CheckCircle,
       title: "Quiz personnalisés",
-      description: "L'IA crée des quiz adaptés à vos cours : QCM, questions ouvertes ou format mixte selon vos besoins.",
+      description: "Des quiz adaptés à vos cours : QCM, questions ouvertes ou format mixte selon vos besoins.",
       details: [
-        "QCM avec plusieurs choix de réponses",
-        "Questions ouvertes pour approfondir",
-        "Format mixte pour varier l'apprentissage",
-        "Correction automatique instantanée"
+        "QCM interactifs",
+        "Questions ouvertes",
+        "Format mixte",
+        "Correction automatique"
       ]
     },
     {
       icon: Sparkles,
       title: "Évaluation automatique",
-      description: "L'IA évalue vos réponses aux questions ouvertes et vous fournit un feedback détaillé pour progresser.",
+      description: "Recevez un feedback détaillé sur vos réponses pour progresser rapidement.",
       details: [
-        "Correction intelligente des réponses ouvertes",
-        "Feedback constructif et personnalisé",
+        "Correction intelligente",
+        "Feedback personnalisé",
         "Suggestions d'amélioration",
-        "Score de compréhension détaillé"
+        "Score détaillé"
       ]
     },
     {
       icon: TrendingUp,
       title: "Suivi de performance",
-      description: "Visualisez votre progression avec des statistiques détaillées et des graphiques intuitifs.",
+      description: "Visualisez votre progression avec des statistiques et graphiques intuitifs.",
       details: [
-        "Dashboard avec métriques clés",
-        "Graphiques de progression dans le temps",
+        "Dashboard complet",
+        "Graphiques de progression",
         "Analyse par matière",
-        "Identification des points à améliorer"
+        "Points à améliorer"
       ]
     },
     {
       icon: Target,
       title: "Révisions optimisées",
-      description: "Concentrez vos révisions sur ce qui compte vraiment grâce aux insights de l'IA.",
+      description: "Concentrez vos révisions sur ce qui compte vraiment grâce à des suggestions personnalisées.",
       details: [
-        "Suggestions de révision personnalisées",
-        "Priorisation des sujets à revoir",
-        "Planning de révision intelligent",
-        "Rappels et notifications"
+        "Révisions ciblées",
+        "Priorisation intelligente",
+        "Planning adapté",
+        "Rappels utiles"
       ]
     }
   ];
@@ -84,11 +84,10 @@ export default function Features() {
         <section className="bg-gradient-to-b from-primary/5 via-background to-background py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6" data-testid="text-features-hero-title">
-              Fonctionnalités complètes pour réussir vos études
+              Des fonctionnalités complètes pour réussir
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Découvrez comment Corrige Tes Cours utilise l'intelligence artificielle DeepSeek R1 
-              pour transformer votre façon d'apprendre et de réviser.
+              Découvrez comment Corrige Tes Cours transforme votre façon d'apprendre et de réviser
             </p>
           </div>
         </section>
@@ -127,7 +126,7 @@ export default function Features() {
               Prêt à transformer votre façon d'étudier ?
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Rejoignez des milliers d'étudiants qui utilisent déjà Corrige Tes Cours pour améliorer leurs résultats.
+              Rejoignez des milliers d'étudiants qui améliorent leurs résultats avec Corrige Tes Cours
             </p>
             <Link href="/signup">
               <Button size="lg" data-testid="button-signup-cta">

@@ -10,22 +10,22 @@ export default function About() {
     {
       icon: Target,
       title: "Notre mission",
-      description: "Rendre l'apprentissage plus efficace et accessible à tous les étudiants francophones grâce à l'intelligence artificielle."
+      description: "Rendre l'apprentissage plus efficace et accessible à tous les étudiants grâce à la technologie."
     },
     {
       icon: Heart,
       title: "Notre passion",
-      description: "Aider les étudiants à réussir en leur fournissant des outils innovants qui facilitent la compréhension et la mémorisation."
+      description: "Aider les étudiants à réussir en leur fournissant des outils simples qui facilitent la compréhension."
     },
     {
       icon: Zap,
-      title: "Notre technologie",
-      description: "Nous utilisons DeepSeek R1, le modèle d'IA de raisonnement le plus avancé, pour analyser et synthétiser vos cours."
+      title: "Notre approche",
+      description: "Des outils intelligents qui s'adaptent à votre rythme pour des révisions plus efficaces."
     },
     {
       icon: Users,
       title: "Notre communauté",
-      description: "Des milliers d'étudiants nous font confiance pour améliorer leurs résultats académiques et gagner du temps."
+      description: "Des milliers d'étudiants nous font confiance pour améliorer leurs résultats académiques."
     }
   ];
 
@@ -41,8 +41,7 @@ export default function About() {
               À propos de Corrige Tes Cours
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Nous croyons que chaque étudiant mérite les meilleurs outils pour réussir ses études. 
-              C'est pourquoi nous avons créé Corrige Tes Cours.
+              Nous croyons que chaque étudiant mérite les meilleurs outils pour réussir ses études
             </p>
           </div>
         </section>
@@ -54,11 +53,11 @@ export default function About() {
               <h2 className="text-3xl md:text-4xl font-bold mb-6">Notre histoire</h2>
               <p className="text-lg text-muted-foreground mb-4">
                 Corrige Tes Cours est né d'un constat simple : les étudiants passent trop de temps 
-                à réviser de manière inefficace. Nous avons voulu changer cela.
+                à réviser sans vraiment progresser.
               </p>
               <p className="text-lg text-muted-foreground">
-                En combinant les dernières avancées en intelligence artificielle avec une interface 
-                intuitive, nous avons créé un outil qui transforme vraiment la façon d'apprendre.
+                Nous avons créé une plateforme qui permet d'apprendre plus efficacement 
+                et d'obtenir de meilleurs résultats en moins de temps.
               </p>
             </div>
 
@@ -83,8 +82,8 @@ export default function About() {
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
           <div className="max-w-7xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Notre engagement</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              Notre équipe travaille chaque jour pour améliorer la plateforme et vous offrir 
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Nous travaillons chaque jour pour améliorer notre plateforme et vous offrir 
               la meilleure expérience d'apprentissage possible. Votre réussite est notre priorité.
             </p>
           </div>
@@ -94,11 +93,10 @@ export default function About() {
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Rejoignez la révolution de l'apprentissage
+              Rejoignez des milliers d'étudiants qui réussissent
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Des milliers d'étudiants utilisent déjà Corrige Tes Cours pour améliorer leurs résultats. 
-              Pourquoi pas vous ?
+              Commencez dès aujourd'hui et transformez votre façon d'apprendre
             </p>
             <Link href="/signup">
               <Button size="lg" data-testid="button-signup-cta">

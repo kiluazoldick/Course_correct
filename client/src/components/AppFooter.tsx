@@ -15,7 +15,7 @@ export default function AppFooter() {
               <span className="text-lg font-bold">Corrige Tes Cours</span>
             </div>
             <p className="text-sm text-muted-foreground max-w-md">
-              Plateforme d'apprentissage intelligente utilisant l'IA pour aider les étudiants à réussir leurs études.
+              Votre plateforme d'apprentissage intelligente pour réussir vos études
             </p>
           </div>
 
@@ -47,11 +47,11 @@ export default function AppFooter() {
             <ul className="space-y-2">
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span data-testid="text-footer-email">contact@corrigetescours.fr</span>
+                <span data-testid="text-footer-email">contact@corrigetescours.cm</span>
               </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span data-testid="text-footer-location">Paris, France</span>
+                <span data-testid="text-footer-location">Douala, Cameroun</span>
               </li>
             </ul>
           </div>
@@ -63,15 +63,15 @@ export default function AppFooter() {
               © {currentYear} Corrige Tes Cours. Tous droits réservés.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-legal">
+              <Link href="/legal" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-legal">
                 Mentions légales
-              </a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-privacy">
+              </Link>
+              <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-privacy">
                 Confidentialité
-              </a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-terms">
+              </Link>
+              <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-terms">
                 CGU
-              </a>
+              </Link>
             </div>
           </div>
         </div>

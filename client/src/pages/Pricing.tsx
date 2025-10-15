@@ -12,11 +12,11 @@ export default function Pricing() {
       name: "Gratuit",
       price: "0",
       period: "toujours",
-      description: "Parfait pour découvrir la plateforme",
+      description: "Pour commencer et découvrir la plateforme",
       features: [
-        "5 cours maximum",
-        "10 résumés IA par mois",
-        "15 quiz par mois",
+        "Cours illimités",
+        "Génération de résumés illimités",
+        "Quiz illimités",
         "Statistiques de base",
         "Support par email"
       ],
@@ -27,35 +27,19 @@ export default function Pricing() {
       name: "Étudiant",
       price: "1 500",
       period: "par mois",
-      description: "L'essentiel pour réussir vos études",
+      description: "Tout ce qu'il faut pour exceller dans vos études",
       features: [
-        "Cours illimités",
-        "Résumés IA illimités",
-        "Quiz illimités",
-        "Téléchargement PDF",
+        "Tout du plan Gratuit",
+        "Assistant IA personnel",
+        "Performance améliorée",
+        "Téléchargement de résumés PDF",
         "Statistiques avancées",
-        "Graphiques de progression",
-        "Support prioritaire"
-      ],
-      cta: "Commencer maintenant",
-      popular: true
-    },
-    {
-      name: "Premium",
-      price: "2 500",
-      period: "par mois",
-      description: "Pour les étudiants les plus exigeants",
-      features: [
-        "Tout du plan Étudiant",
-        "IA avancée",
-        "Analyses approfondies",
-        "Export multi-formats",
-        "Partage de notes",
-        "Révisions personnalisées",
+        "Graphiques de progression détaillés",
+        "Analyses par matière",
         "Support prioritaire 24/7"
       ],
       cta: "Commencer maintenant",
-      popular: false
+      popular: true
     }
   ];
 
@@ -71,15 +55,15 @@ export default function Pricing() {
               Choisissez le plan qui vous correspond
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Commencez gratuitement et évoluez selon vos besoins
+              Commencez gratuitement et passez au plan Étudiant pour débloquer toutes les fonctionnalités
             </p>
           </div>
         </section>
 
         {/* Pricing Cards */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {plans.map((plan, index) => (
                 <Card 
                   key={index} 
@@ -134,7 +118,7 @@ export default function Pricing() {
                   <CardContent className="p-6">
                     <h3 className="font-semibold mb-2">Puis-je changer de plan à tout moment ?</h3>
                     <p className="text-sm text-muted-foreground">
-                      Oui, vous pouvez passer d'un plan à l'autre à tout moment selon vos besoins.
+                      Oui, vous pouvez passer du plan Gratuit au plan Étudiant à tout moment selon vos besoins.
                     </p>
                   </CardContent>
                 </Card>
@@ -150,7 +134,7 @@ export default function Pricing() {
                   <CardContent className="p-6">
                     <h3 className="font-semibold mb-2">Y a-t-il une garantie ?</h3>
                     <p className="text-sm text-muted-foreground">
-                      Oui, tous nos plans payants incluent une garantie satisfait ou remboursé de 14 jours.
+                      Oui, le plan Étudiant inclut une garantie satisfait ou remboursé de 14 jours.
                     </p>
                   </CardContent>
                 </Card>

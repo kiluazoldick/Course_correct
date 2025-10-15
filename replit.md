@@ -58,11 +58,12 @@ Preferred communication style: Simple, everyday language.
 - TypeScript for type safety across the entire stack
 
 **Authentication System:**
-- Replit Auth integration using OpenID Connect (OIDC)
-- Passport.js with OpenID Client strategy for OAuth flows
-- Express session middleware with PostgreSQL session store
+- **Dual Authentication**: Email/Password + Google OAuth (replacing Replit Auth)
+- Passport.js with Local Strategy (bcrypt password hashing) and Google OAuth2 Strategy
+- Express session middleware with PostgreSQL session store (connect-pg-simple)
 - Session-based authentication with secure HTTP-only cookies (7-day TTL)
 - Custom `isAuthenticated` middleware for route protection
+- Google OAuth callback URL: `/api/auth/google/callback` (configure in Google Cloud Console)
 
 **API Design:**
 - RESTful API endpoints under `/api` prefix
@@ -80,7 +81,7 @@ Preferred communication style: Simple, everyday language.
 
 **Data Model:**
 ```
-users (Replit Auth integrated)
+users (Dual Auth: Email/Password + Google OAuth)
   ├── courses (user's course notes)
   │     ├── summaries (AI-generated summaries)
   │     └── quizzes
@@ -89,7 +90,10 @@ users (Replit Auth integrated)
 ```
 
 **Core Entities:**
-- **Users**: Email, username, profile info (firstName, lastName, profileImageUrl)
+- **Users**: 
+  - Required: `email`, `firstName`, `lastName` (NOT NULL)
+  - Optional: `password` (null for Google OAuth), `googleId` (null for local auth), `profileImageUrl`
+  - **No username field** - uses firstName/lastName for display
 - **Courses**: Title, content, subject, timestamps, user relationship
 - **Summaries**: AI-generated course summaries linked to courses
 - **Quizzes**: Questions with multiple choice answers
@@ -108,8 +112,9 @@ users (Replit Auth integrated)
 - Connect-pg-simple for PostgreSQL session storage
 
 **Authentication Services:**
-- Replit Authentication (OAuth2/OIDC)
-- OpenID Connect client library for auth flows
+- Google OAuth 2.0 (via passport-google-oauth20)
+- Local authentication with bcryptjs for password hashing
+- Passport.js for authentication strategy management
 
 **Development Tools:**
 - Replit-specific Vite plugins for development experience:
@@ -138,12 +143,15 @@ users (Replit Auth integrated)
 ### Application Flow
 
 1. **Unauthenticated users** see the landing page with feature highlights and CTAs to sign up
-2. **Authentication** redirects to Replit OIDC flow, creates/updates user in database
-3. **Authenticated users** access dashboard with sidebar navigation
+2. **Authentication options**:
+   - Email/Password signup: Collects firstName, lastName, email, password
+   - Google OAuth: Auto-creates user from Google profile (firstName/lastName extracted from displayName)
+3. **Authenticated users** access dashboard with sidebar navigation showing "Bienvenue, {firstName} !"
 4. **Course management** allows creating, editing, and organizing course notes
-5. **AI summarization** processes course content through OpenRouter API
+5. **AI summarization** processes course content through OpenRouter API with DeepSeek R1
 6. **Quiz generation** creates personalized questions from course material
 7. **Performance tracking** visualizes progress and quiz results
+8. **Logout** clears session and redirects to /login via hard reload
 
 ### Security Considerations
 

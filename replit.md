@@ -22,7 +22,17 @@ Corrige Tes Cours is an AI-powered educational platform designed for French-spea
 - API Configuration:
   - Base URL: `https://openrouter.ai/api/v1`
   - Authentication: Bearer token via `OPENROUTER_API_KEY` environment variable
-  - HTTP headers include site referrer and title for usage tracking
+  - HTTP headers include site referrer (https://corrigetescours.com) and title for usage tracking
+
+## Recent Changes
+
+### October 15, 2025
+- **Dashboard Dark/Light Mode**: Added ThemeProvider to dashboard with theme toggle in header, persists theme in localStorage
+- **Course Read-Only View**: Added "Voir" button on course cards to display full course content in read-only dialog
+- **PDF Branding Update**: Changed PDF signature from "DeepSeek R1" to "Corrige Tes Cours" in summary PDFs
+- **PDF Markdown Rendering**: Improved markdown processing to remove raw markdown syntax (**bold**, _italic_) from PDF output
+- **Domain Configuration**: Updated OAuth callback and API referer URLs to use production domain (corrigetescours.com) via CUSTOM_DOMAIN environment variable
+- **Quiz Evaluation**: Verified correct evaluation logic - MCQ questions use simple answer matching, open questions use AI evaluation
 
 ## User Preferences
 
@@ -55,6 +65,7 @@ Preferred communication style: Simple, everyday language.
 - **Dark/Light Mode**: Full theme support with ThemeProvider, localStorage persistence, and smooth transitions
   - Theme toggle in Navbar for landing pages (desktop & mobile)
   - Theme toggle in top-right corner for auth pages (Login, Signup)
+  - Theme toggle in dashboard header (top-right corner) for authenticated users
   - Theme persists across navigation and browser sessions
 - Custom elevation system with hover/active states (`hover-elevate`, `active-elevate-2`)
 - Consistent styling across Home, Features, Pricing, About, Login, Signup, Legal, Privacy, and Terms pages
@@ -79,6 +90,7 @@ Preferred communication style: Simple, everyday language.
 - Session-based authentication with secure HTTP-only cookies (7-day TTL)
 - Custom `isAuthenticated` middleware for route protection
 - Google OAuth callback URL: `/api/auth/google/callback` (configure in Google Cloud Console)
+- **Domain Configuration**: Uses CUSTOM_DOMAIN environment variable for production domain (corrigetescours.com) or falls back to REPLIT_DOMAINS
 
 **API Design:**
 - RESTful API endpoints under `/api` prefix
@@ -110,8 +122,13 @@ users (Dual Auth: Email/Password + Google OAuth)
   - Optional: `password` (null for Google OAuth), `googleId` (null for local auth), `profileImageUrl`
   - **No username field** - uses firstName/lastName for display
 - **Courses**: Title, content, subject, timestamps, user relationship
+  - **View Mode**: Read-only dialog displays full course content with "Voir" button
+  - **Edit Mode**: Edit dialog for modifying course content
 - **Summaries**: AI-generated course summaries linked to courses
-- **Quizzes**: Questions with multiple choice answers
+  - **PDF Export**: Downloads with "Corrige Tes Cours" branding, clean markdown rendering
+- **Quizzes**: Questions with multiple choice answers and open-ended questions
+  - **MCQ Evaluation**: Simple answer matching (A, B, C, D)
+  - **Open Question Evaluation**: AI-powered scoring with detailed feedback
 - **Quiz Results**: User performance tracking with scores and timestamps
 
 ### External Dependencies

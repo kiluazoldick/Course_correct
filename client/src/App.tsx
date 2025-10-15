@@ -25,15 +25,16 @@ function Router() {
 
   return (
     <Switch>
+      {/* Public routes (always accessible) */}
+      <Route path="/login" component={Login} />
+      <Route path="/signup" component={Signup} />
+      <Route path="/features" component={Features} />
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/about" component={About} />
+      
+      {/* Conditional routes based on auth */}
       {!isAuthenticated ? (
-        <>
-          <Route path="/" component={LandingPage} />
-          <Route path="/features" component={Features} />
-          <Route path="/pricing" component={Pricing} />
-          <Route path="/about" component={About} />
-          <Route path="/login" component={Login} />
-          <Route path="/signup" component={Signup} />
-        </>
+        <Route path="/" component={LandingPage} />
       ) : (
         <>
           <Route path="/" component={Dashboard} />

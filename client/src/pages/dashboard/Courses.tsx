@@ -424,7 +424,7 @@ export default function Courses() {
 
       {/* Create Course Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Créer un nouveau cours</DialogTitle>
             <DialogDescription>
@@ -432,59 +432,52 @@ export default function Courses() {
             </DialogDescription>
           </DialogHeader>
           <Form {...createForm}>
-            <form onSubmit={createForm.handleSubmit(handleCreate)} className="flex-1 flex flex-col overflow-hidden">
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <FormField
-                  control={createForm.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Titre du cours</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: Introduction à l'algèbre linéaire"
-                          {...field}
-                          data-testid="input-course-title"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="subject"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Matière (optionnel)</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: Mathématiques"
-                          {...field}
-                          value={field.value || ''}
-                          data-testid="input-course-subject"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            <form onSubmit={createForm.handleSubmit(handleCreate)} className="space-y-4">
+              <FormField
+                control={createForm.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Titre du cours</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Ex: Introduction à l'algèbre linéaire"
+                        {...field}
+                        data-testid="input-course-title"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={createForm.control}
+                name="subject"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Matière (optionnel)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Ex: Mathématiques"
+                        {...field}
+                        value={field.value || ''}
+                        data-testid="input-course-subject"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={createForm.control}
                 name="content"
                 render={({ field }) => (
-                  <FormItem className="flex-1 flex flex-col overflow-hidden">
-                    <div className="flex items-center justify-between">
-                      <FormLabel>Contenu du cours</FormLabel>
-                      <span className="text-xs text-muted-foreground">
-                        {field.value?.length || 0} caractères • {Math.ceil((field.value?.split(/\s+/).filter(Boolean).length || 0))} mots
-                      </span>
-                    </div>
+                  <FormItem>
+                    <FormLabel>Contenu du cours</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Collez ou tapez le contenu de votre cours ici..."
-                        className="flex-1 resize-none font-mono text-sm"
+                        className="min-h-[200px]"
                         {...field}
                         data-testid="input-course-content"
                       />
@@ -493,7 +486,7 @@ export default function Courses() {
                   </FormItem>
                 )}
               />
-              <DialogFooter className="mt-4">
+              <DialogFooter>
                 <Button
                   type="button"
                   variant="outline"
@@ -517,7 +510,7 @@ export default function Courses() {
 
       {/* Edit Course Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Modifier le cours</DialogTitle>
             <DialogDescription>
@@ -525,59 +518,52 @@ export default function Courses() {
             </DialogDescription>
           </DialogHeader>
           <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(handleUpdate)} className="flex-1 flex flex-col overflow-hidden">
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <FormField
-                  control={editForm.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Titre du cours</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: Introduction à l'algèbre linéaire"
-                          {...field}
-                          data-testid="input-edit-course-title"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={editForm.control}
-                  name="subject"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Matière (optionnel)</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: Mathématiques"
-                          {...field}
-                          value={field.value || ''}
-                          data-testid="input-edit-course-subject"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            <form onSubmit={editForm.handleSubmit(handleUpdate)} className="space-y-4">
+              <FormField
+                control={editForm.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Titre du cours</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Ex: Introduction à l'algèbre linéaire"
+                        {...field}
+                        data-testid="input-edit-course-title"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="subject"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Matière (optionnel)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Ex: Mathématiques"
+                        {...field}
+                        value={field.value || ''}
+                        data-testid="input-edit-course-subject"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={editForm.control}
                 name="content"
                 render={({ field }) => (
-                  <FormItem className="flex-1 flex flex-col overflow-hidden">
-                    <div className="flex items-center justify-between">
-                      <FormLabel>Contenu du cours</FormLabel>
-                      <span className="text-xs text-muted-foreground">
-                        {field.value?.length || 0} caractères • {Math.ceil((field.value?.split(/\s+/).filter(Boolean).length || 0))} mots
-                      </span>
-                    </div>
+                  <FormItem>
+                    <FormLabel>Contenu du cours</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Collez ou tapez le contenu de votre cours ici..."
-                        className="flex-1 resize-none font-mono text-sm"
+                        className="min-h-[200px]"
                         {...field}
                         data-testid="input-edit-course-content"
                       />
@@ -586,7 +572,7 @@ export default function Courses() {
                   </FormItem>
                 )}
               />
-              <DialogFooter className="mt-4">
+              <DialogFooter>
                 <Button
                   type="button"
                   variant="outline"

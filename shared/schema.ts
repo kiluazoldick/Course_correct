@@ -26,11 +26,10 @@ export const sessions = pgTable(
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").notNull().unique(),
-  username: varchar("username").unique(),
   password: varchar("password"), // Nullable for Google OAuth users
   googleId: varchar("google_id").unique(), // Nullable for local auth users
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
   profileImageUrl: varchar("profile_image_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -39,15 +38,14 @@ export const users = pgTable("users", {
 // Schema for local registration (email + password)
 export const insertLocalUserSchema = createInsertSchema(users, {
   email: z.string().email("Email invalide"),
-  username: z.string().min(3, "Le nom d'utilisateur doit contenir au moins 3 caractères"),
+  firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
+  lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
 }).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
   googleId: true,
-  firstName: true,
-  lastName: true,
   profileImageUrl: true,
 });
 
@@ -57,7 +55,6 @@ export const insertGoogleUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   updatedAt: true,
   password: true,
-  username: true,
 });
 
 export type InsertLocalUser = z.infer<typeof insertLocalUserSchema>;

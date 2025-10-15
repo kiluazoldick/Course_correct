@@ -111,8 +111,8 @@ export function setupAuth(app: Express) {
                 user = await storage.createGoogleUser({
                   email: profile.emails?.[0]?.value || '',
                   googleId: profile.id,
-                  firstName: profile.name?.givenName,
-                  lastName: profile.name?.familyName,
+                  firstName: profile.name?.givenName || 'Utilisateur',
+                  lastName: profile.name?.familyName || 'Google',
                   profileImageUrl: profile.photos?.[0]?.value,
                 });
               }
@@ -166,17 +166,12 @@ export function setupAuth(app: Express) {
   // Local registration
   app.post('/api/auth/register', async (req, res) => {
     try {
-      const { email, username, password } = req.body;
+      const { email, firstName, lastName, password } = req.body;
 
       // Check if user exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ error: 'Cet email est déjà utilisé' });
-      }
-
-      const existingUsername = await storage.getUserByUsername(username);
-      if (existingUsername) {
-        return res.status(400).json({ error: 'Ce nom d\'utilisateur est déjà pris' });
       }
 
       // Hash password
@@ -185,7 +180,8 @@ export function setupAuth(app: Express) {
       // Create user
       const user = await storage.createLocalUser({
         email,
-        username,
+        firstName,
+        lastName,
         password: hashedPassword,
       });
 

@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { insertCourseSchema, type Course, type InsertCourse } from '@shared/schema';
-import { Plus, BookOpen, Trash2, Edit, Calendar, Sparkles, FileText } from 'lucide-react';
+import { Plus, BookOpen, Trash2, Edit, Calendar, Sparkles, FileText, Eye } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import ReactMarkdown from 'react-markdown';
 import jsPDF from 'jspdf';
@@ -30,6 +30,7 @@ export default function Courses() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const [currentSummary, setCurrentSummary] = useState<string | null>(null);
@@ -213,7 +214,7 @@ export default function Courses() {
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(100);
-      doc.text('Généré par DeepSeek R1', margin, yPosition);
+      doc.text('Généré par Corrige Tes Cours', margin, yPosition);
       yPosition += 10;
 
       // Add separator
@@ -233,27 +234,35 @@ export default function Courses() {
         let isTitle = false;
 
         if (line.startsWith('# ')) {
-          text = line.substring(2);
+          text = line.substring(2).replace(/\*\*/g, '');
           isTitle = true;
           doc.setFontSize(16);
           doc.setFont('helvetica', 'bold');
         } else if (line.startsWith('## ')) {
-          text = line.substring(3);
+          text = line.substring(3).replace(/\*\*/g, '');
           isTitle = true;
           doc.setFontSize(14);
           doc.setFont('helvetica', 'bold');
         } else if (line.startsWith('### ')) {
-          text = line.substring(4);
+          text = line.substring(4).replace(/\*\*/g, '');
           isTitle = true;
           doc.setFontSize(12);
           doc.setFont('helvetica', 'bold');
         } else if (line.startsWith('- ') || line.startsWith('* ')) {
-          text = '• ' + line.substring(2);
+          text = '• ' + line.substring(2).replace(/\*\*(.+?)\*\*/g, '$1').replace(/_(.+?)_/g, '$1');
           doc.setFont('helvetica', 'normal');
         } else if (line.match(/^\d+\./)) {
+          text = line.replace(/\*\*(.+?)\*\*/g, '$1').replace(/_(.+?)_/g, '$1');
           doc.setFont('helvetica', 'normal');
         } else {
+          text = line.replace(/\*\*(.+?)\*\*/g, '$1').replace(/_(.+?)_/g, '$1');
           doc.setFont('helvetica', 'normal');
+        }
+
+        // Skip empty lines but add spacing
+        if (!text.trim()) {
+          yPosition += 3;
+          return;
         }
 
         // Split text to fit page width
@@ -375,6 +384,19 @@ export default function Courses() {
                     : 'Générer un résumé IA'}
                 </Button>
                 <div className="flex gap-2 w-full">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedCourse(course);
+                      setIsViewOpen(true);
+                    }}
+                    data-testid={`button-view-course-${course.id}`}
+                    className="flex-1"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Voir
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -597,6 +619,49 @@ export default function Courses() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* View Course Dialog */}
+      <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-primary" />
+              {selectedCourse?.title}
+            </DialogTitle>
+            {selectedCourse?.subject && (
+              <DialogDescription>
+                Matière : {selectedCourse.subject}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="prose prose-sm max-w-none dark:prose-invert" data-testid="text-course-view-content">
+            <div className="whitespace-pre-wrap bg-muted/30 p-4 rounded-md">
+              {selectedCourse?.content}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsViewOpen(false)}
+              data-testid="button-close-view"
+            >
+              Fermer
+            </Button>
+            {selectedCourse && (
+              <Button
+                onClick={() => {
+                  setIsViewOpen(false);
+                  handleEdit(selectedCourse);
+                }}
+                data-testid="button-edit-from-view"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Modifier
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Summary Display Dialog */}
       <Dialog open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -606,7 +671,7 @@ export default function Courses() {
               Résumé : {selectedCourse?.title}
             </DialogTitle>
             <DialogDescription>
-              Résumé intelligent généré par DeepSeek v4
+              Résumé intelligent généré par Corrige Tes Cours
             </DialogDescription>
           </DialogHeader>
           <div className="prose prose-sm max-w-none dark:prose-invert" data-testid="text-summary-content">

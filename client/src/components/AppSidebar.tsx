@@ -11,6 +11,7 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { useLocation, Link } from 'wouter';
+import { queryClient } from '@/lib/queryClient';
 
 const menuItems = [
   {
@@ -41,7 +42,17 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      queryClient.setQueryData(['/api/auth/user'], null);
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   return (
     <Sidebar>
@@ -67,11 +78,9 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <a href="/api/logout" data-testid="button-logout">
-                <LogOut />
-                <span>Déconnexion</span>
-              </a>
+            <SidebarMenuButton onClick={handleLogout} data-testid="button-logout">
+              <LogOut />
+              <span>Déconnexion</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

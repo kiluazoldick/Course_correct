@@ -2,9 +2,22 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { useLocation } from 'wouter';
+import { queryClient } from '@/lib/queryClient';
 
 export default function Account() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      queryClient.setQueryData(['/api/auth/user'], null);
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const getInitials = () => {
     if (user?.firstName && user?.lastName) {
@@ -38,7 +51,7 @@ export default function Account() {
               <p className="font-semibold" data-testid="text-user-name">
                 {user?.firstName && user?.lastName
                   ? `${user.firstName} ${user.lastName}`
-                  : user?.username || 'Utilisateur'}
+                  : 'Utilisateur'}
               </p>
               <p className="text-sm text-muted-foreground" data-testid="text-user-email">
                 {user?.email}
@@ -54,9 +67,15 @@ export default function Account() {
               </p>
             </div>
             <div>
-              <label className="text-sm font-medium">Nom d'utilisateur</label>
-              <p className="text-sm text-muted-foreground" data-testid="text-username-value">
-                {user?.username || 'Non renseigné'}
+              <label className="text-sm font-medium">Prénom</label>
+              <p className="text-sm text-muted-foreground" data-testid="text-firstname-value">
+                {user?.firstName || 'Non renseigné'}
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Nom</label>
+              <p className="text-sm text-muted-foreground" data-testid="text-lastname-value">
+                {user?.lastName || 'Non renseigné'}
               </p>
             </div>
             <div>
@@ -77,7 +96,7 @@ export default function Account() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => (window.location.href = '/api/logout')}
+              onClick={handleLogout}
               data-testid="button-logout-account"
             >
               Se déconnecter

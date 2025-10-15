@@ -15,14 +15,6 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-muted-foreground">Chargement...</div>
-      </div>
-    );
-  }
-
   return (
     <Switch>
       {/* Public routes (always accessible) */}
@@ -33,7 +25,15 @@ function Router() {
       <Route path="/about" component={About} />
       
       {/* Conditional routes based on auth */}
-      {!isAuthenticated ? (
+      {isLoading ? (
+        <Route path="/">
+          {() => (
+            <div className="flex items-center justify-center min-h-screen">
+              <div className="text-muted-foreground">Chargement...</div>
+            </div>
+          )}
+        </Route>
+      ) : !isAuthenticated ? (
         <Route path="/" component={LandingPage} />
       ) : (
         <>

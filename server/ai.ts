@@ -13,7 +13,7 @@ export async function generateCourseSummary(courseContent: string, courseTitle: 
     headers: {
       'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://corrige-tes-cours.replit.app',
+      'HTTP-Referer': 'https://corrigetescours.com',
       'X-Title': 'Corrige Tes Cours',
     },
     body: JSON.stringify({
@@ -75,7 +75,7 @@ export async function generateQuiz(courseContent: string, courseTitle: string, q
     headers: {
       'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://corrige-tes-cours.replit.app',
+      'HTTP-Referer': 'https://corrigetescours.com',
       'X-Title': 'Corrige Tes Cours',
     },
     body: JSON.stringify({
@@ -140,7 +140,7 @@ export async function evaluateOpenAnswer(question: string, userAnswer: string, e
     headers: {
       'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://corrige-tes-cours.replit.app',
+      'HTTP-Referer': 'https://corrigetescours.com',
       'X-Title': 'Corrige Tes Cours',
     },
     body: JSON.stringify({

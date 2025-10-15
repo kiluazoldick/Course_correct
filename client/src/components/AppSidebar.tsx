@@ -48,7 +48,7 @@ export function AppSidebar() {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       queryClient.setQueryData(['/api/auth/user'], null);
-      window.location.href = '/login';
+      window.location.href = `${window.location.origin}/login`;
     } catch (error) {
       console.error('Logout error:', error);
     }

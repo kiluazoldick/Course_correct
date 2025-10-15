@@ -83,8 +83,9 @@ export function setupAuth(app: Express) {
 
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    const domain = process.env.CUSTOM_DOMAIN || process.env.REPLIT_DOMAINS?.split(',')[0];
     const callbackURL = process.env.NODE_ENV === 'production'
-      ? `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}/api/auth/google/callback`
+      ? `https://${domain}/api/auth/google/callback`
       : 'http://localhost:5000/api/auth/google/callback';
 
     passport.use(

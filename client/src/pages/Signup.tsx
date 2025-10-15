@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SiGoogle } from 'react-icons/si';
 import { UserPlus, Mail, Lock, User, GraduationCap } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
@@ -80,6 +81,9 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background p-4">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div 

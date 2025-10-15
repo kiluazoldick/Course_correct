@@ -10,7 +10,8 @@ import { useLocation } from 'wouter';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +45,7 @@ export default function Signup() {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, username, password }),
+        body: JSON.stringify({ email, firstName, lastName, password }),
       });
 
       const data = await response.json();
@@ -111,19 +112,37 @@ export default function Signup() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="username">Nom d'utilisateur</Label>
+                <Label htmlFor="firstName">Prénom</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="username"
+                    id="firstName"
                     type="text"
-                    placeholder="votreusername"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Jean"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
                     className="pl-10"
                     required
-                    minLength={3}
-                    data-testid="input-username"
+                    minLength={2}
+                    data-testid="input-firstname"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Nom</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="lastName"
+                    type="text"
+                    placeholder="Dupont"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="pl-10"
+                    required
+                    minLength={2}
+                    data-testid="input-lastname"
                   />
                 </div>
               </div>

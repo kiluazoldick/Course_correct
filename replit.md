@@ -38,11 +38,13 @@ Preferred communication style: Simple, everyday language.
 - CSS variables for dynamic theming support (light/dark modes)
 
 **Styling Strategy:**
-- Custom design system based on modern EdTech platforms (Notion, Linear)
-- Brand color palette: Primary blue (#007BFF) with deep night blue gradients
+- Minimalist, modern design with clean aesthetics to attract students
+- Unified components: **Navbar** (logo, navigation links, auth buttons) and **AppFooter** (company info, links, contact) used across all landing pages
+- Brand color palette: Primary blue (#007BFF) with subtle gradients
 - Inter and Poppins fonts from Google Fonts
 - Responsive design with mobile-first approach using Tailwind breakpoints
 - Custom elevation system with hover/active states (`hover-elevate`, `active-elevate-2`)
+- Consistent styling across Home, Features, Pricing, About, Login, and Signup pages
 
 **State Management:**
 - React Query for async server state with optimized caching (staleTime: 30s, refetchOnWindowFocus enabled)

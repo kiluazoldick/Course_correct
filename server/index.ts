@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { storage } from "./storage";
 
 const app = express();
 app.use(express.json());
@@ -68,4 +69,22 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
   });
+
+  // Cleanup expired anonymous uploads every hour
+  const cleanupExpiredUploads = async () => {
+    try {
+      const deletedCount = await storage.deleteExpiredAnonymousUploads();
+      if (deletedCount > 0) {
+        log(`Cleaned up ${deletedCount} expired anonymous upload(s)`);
+      }
+    } catch (error) {
+      console.error('Error cleaning up expired uploads:', error);
+    }
+  };
+
+  // Run cleanup immediately on startup
+  cleanupExpiredUploads();
+
+  // Then run cleanup every hour (3600000 ms)
+  setInterval(cleanupExpiredUploads, 3600000);
 })();

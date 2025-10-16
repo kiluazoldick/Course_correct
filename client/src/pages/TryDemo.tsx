@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
 import Navbar from '@/components/Navbar';
 import AppFooter from '@/components/AppFooter';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { motion } from 'framer-motion';
 
 interface AnonymousUpload {
@@ -25,7 +25,14 @@ export default function TryDemo() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [showSignupModal, setShowSignupModal] = useState(false);
+  const [hasRequestedSummary, setHasRequestedSummary] = useState(false);
   const uploadId = params?.uploadId || '';
+
+  // Reset state when uploadId changes
+  useEffect(() => {
+    setHasRequestedSummary(false);
+    summarizeMutation.reset(); // Clear any previous error/success state
+  }, [uploadId]);
 
   // Fetch the anonymous upload
   const { data: upload, isLoading } = useQuery<AnonymousUpload>({
@@ -33,17 +40,25 @@ export default function TryDemo() {
     enabled: !!uploadId,
   });
 
-  // Generate summary mutation
+  // Generate summary mutation - pass uploadId as context to avoid race conditions
   const summarizeMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest('POST', `/api/anonymous/${uploadId}/summarize`);
+    mutationFn: async (targetUploadId: string) => {
+      const res = await apiRequest('POST', `/api/anonymous/${targetUploadId}/summarize`);
       return res.json();
     },
-    onSuccess: () => {
-      toast({
-        title: "Résumé généré !",
-        description: "Votre résumé est prêt. Créez un compte gratuit pour le télécharger.",
-      });
+    onSuccess: (data, targetUploadId) => {
+      // Only update if this is still the current upload (prevent race conditions)
+      if (targetUploadId === uploadId) {
+        queryClient.setQueryData(['/api/anonymous', targetUploadId], (oldData: AnonymousUpload | undefined) => {
+          if (!oldData) return oldData;
+          return { ...oldData, summary: data.summary };
+        });
+        
+        toast({
+          title: "Résumé généré !",
+          description: "Votre résumé est prêt. Créez un compte gratuit pour le télécharger.",
+        });
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -51,15 +66,17 @@ export default function TryDemo() {
         description: error.message || "Impossible de générer le résumé",
         variant: "destructive",
       });
+      // Don't reset hasRequestedSummary to prevent retry loops
     },
   });
 
-  // Auto-generate summary when upload is loaded
+  // Auto-generate summary when upload is loaded (only once per upload, stop on error)
   useEffect(() => {
-    if (upload && !upload.summary && !summarizeMutation.isPending) {
-      summarizeMutation.mutate();
+    if (upload && !upload.summary && !hasRequestedSummary && !summarizeMutation.isPending && !summarizeMutation.isError) {
+      setHasRequestedSummary(true);
+      summarizeMutation.mutate(uploadId); // Pass uploadId as argument
     }
-  }, [upload]);
+  }, [upload, hasRequestedSummary]);
 
   const handleDownloadPDF = () => {
     setShowSignupModal(true);
@@ -140,6 +157,21 @@ export default function TryDemo() {
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" data-testid="loader-summary" />
                   <span className="ml-3 text-muted-foreground">Génération du résumé en cours...</span>
+                </div>
+              ) : summarizeMutation.isError ? (
+                <div className="text-center py-8">
+                  <p className="text-destructive mb-4">Erreur lors de la génération du résumé</p>
+                  <Button 
+                    onClick={() => {
+                      setHasRequestedSummary(false);
+                      summarizeMutation.reset();
+                      summarizeMutation.mutate(uploadId); // Pass uploadId as argument
+                    }}
+                    variant="outline"
+                    data-testid="button-retry-summary"
+                  >
+                    Réessayer
+                  </Button>
                 </div>
               ) : upload.summary ? (
                 <div className="prose prose-sm max-w-none" data-testid="text-summary-content">

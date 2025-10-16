@@ -14,31 +14,34 @@ export default function Pricing() {
       period: "toujours",
       description: "Pour commencer et découvrir la plateforme",
       features: [
-        "Cours illimités",
-        "Génération de résumés illimités",
-        "Quiz illimités",
-        "Statistiques de base",
-        "Support par email"
+        "Saisir ses cours (illimité)",
+        "Upload de fichiers : 2/mois (max 10MB)",
+        "Résumés IA (illimités)",
+        "Téléchargement PDF des résumés",
+        "Quiz personnalisés (illimités)",
+        "Tariq IA : 5 messages/session",
+        "Cooldown de 3h entre sessions",
+        "Statistiques de base"
       ],
       cta: "Commencer gratuitement",
       popular: false
     },
     {
-      name: "Étudiant",
+      name: "Premium",
       price: "1 500",
       period: "par mois",
       description: "Tout ce qu'il faut pour exceller dans vos études",
       features: [
         "Tout du plan Gratuit",
-        "Assistant IA personnel",
-        "Performance améliorée",
-        "Téléchargement de résumés PDF",
+        "Upload de fichiers illimité",
+        "Tariq IA illimité (pas de limite)",
+        "Pas de cooldown",
+        "Téléchargement PDF illimité",
         "Statistiques avancées",
         "Graphiques de progression détaillés",
-        "Analyses par matière",
-        "Support prioritaire 24/7"
+        "Support prioritaire"
       ],
-      cta: "Commencer maintenant",
+      cta: "Passer au Premium",
       popular: true
     }
   ];

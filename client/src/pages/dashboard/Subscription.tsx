@@ -151,23 +151,27 @@ export default function Subscription() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>Cours illimités</span>
+                  <span>Saisir ses cours (illimité)</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>Résumés automatiques</span>
+                  <span>Résumés IA (illimités)</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>Quiz personnalisés</span>
+                  <span>Téléchargement PDF des résumés</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  <span>Quiz personnalisés (illimités)</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <XCircle className="w-4 h-4" />
-                  <span>Aide IA (limité à 5 messages)</span>
+                  <span>Upload : 2 fichiers/mois (10MB max)</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <XCircle className="w-4 h-4" />
-                  <span>Export PDF premium</span>
+                  <span>Tariq IA : 5 messages/session (3h cooldown)</span>
                 </div>
               </div>
             )}
@@ -187,11 +191,19 @@ export default function Subscription() {
           <CardContent className="space-y-3">
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">Aide IA illimitée</span>
+              <span className="font-medium">Tout du plan Gratuit</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">Export PDF des résumés</span>
+              <span className="font-medium">Upload de fichiers illimité</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
+              <span className="font-medium">Tariq IA illimité (pas de limite)</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
+              <span className="font-medium">Pas de cooldown</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
@@ -200,10 +212,6 @@ export default function Subscription() {
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
               <span className="font-medium">Support prioritaire</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">Upload de fichiers (PDF/Word)</span>
             </div>
 
             <div className="pt-4 mt-4 border-t">

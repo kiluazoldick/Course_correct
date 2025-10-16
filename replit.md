@@ -43,6 +43,13 @@ Corrige Tes Cours is an AI-powered educational platform designed for French-spea
 ## Recent Changes
 
 ### October 16, 2025 (Latest)
+- **Custom Domain Configuration**: Fixed Google OAuth and logout redirects
+  - Configured CUSTOM_DOMAIN environment variable (corrigetescours.com)
+  - Google OAuth now redirects to custom domain instead of replit.app
+  - OAuth callback URL: `https://corrigetescours.com/api/auth/google/callback`
+  - Logout redirects to homepage (/) instead of /login for better UX
+  - Eliminated 404 error during logout - smooth transition to landing page
+  
 - **Freemium System Updates**: Refined pricing and feature structure
   - Updated Pricing page with accurate Free/Premium features
   - Free: Unlimited courses/summaries/quizzes, 2 file uploads/month, Tariq IA 5 messages/session

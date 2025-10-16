@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
-import { insertCourseSchema, insertQuizSchema, insertQuizResultSchema, insertSummarySchema } from "@shared/schema";
+import { insertCourseSchema, insertQuizSchema, insertQuizResultSchema, insertSummarySchema, updateUserProfileSchema } from "@shared/schema";
 import { generateCourseSummary, generateQuiz, evaluateOpenAnswer, chatWithAI } from "./ai";
 import multer from "multer";
 import { processUploadedFile } from "./fileProcessor";
@@ -175,6 +175,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: error.message });
       }
       res.status(500).json({ message: "Erreur lors de l'upload du fichier" });
+    }
+  });
+
+  // User profile routes
+  app.get('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const user = await storage.getUserById(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get subscription information
+      const subscription = await storage.getSubscriptionByUserId(userId);
+      const isPremium = subscription?.status === 'premium' && 
+                        subscription?.endDate && 
+                        new Date(subscription.endDate) > new Date();
+
+      // Return user info without password
+      const { password, ...userWithoutPassword } = user;
+      res.json({
+        user: userWithoutPassword,
+        plan: isPremium ? 'premium' : 'free',
+        subscription: subscription || null
+      });
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  app.put('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const validated = updateUserProfileSchema.parse(req.body);
+      
+      const updatedUser = await storage.updateUser(userId, validated);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      if (error instanceof Error && error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid profile data", errors: error });
+      }
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Configure multer for profile image uploads (2MB limit)
+  const profileUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 2 * 1024 * 1024, // 2 MB
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Type de fichier non supporté. Utilise JPG, PNG ou WebP'));
+      }
+    },
+  });
+
+  app.post('/api/user/profile/photo', isAuthenticated, profileUpload.single('photo'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Aucune photo n'a été uploadée" });
+      }
+
+      const userId = (req.user as any).id;
+      
+      // Convert image to base64 data URL
+      const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      
+      const updatedUser = await storage.updateUser(userId, {
+        profileImageUrl: base64Image
+      });
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({ profileImageUrl: updatedUser.profileImageUrl });
+    } catch (error) {
+      console.error("Error uploading profile photo:", error);
+      if (error instanceof Error) {
+        if (error.message.includes('File too large')) {
+          return res.status(413).json({ message: "La photo est trop volumineuse (max 2 MB)" });
+        }
+        return res.status(400).json({ message: error.message });
+      }
+      res.status(500).json({ message: "Erreur lors de l'upload de la photo" });
     }
   });
 

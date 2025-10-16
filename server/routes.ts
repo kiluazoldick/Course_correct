@@ -574,6 +574,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payment routes
+  app.post('/api/payment/initiate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const user = req.user as any;
+      const { lygosService } = await import('./lygos');
+
+      const DOMAIN = process.env.CUSTOM_DOMAIN || process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000';
+      const protocol = DOMAIN.includes('localhost') ? 'http' : 'https';
+      const baseUrl = `${protocol}://${DOMAIN}`;
+
+      const paymentResponse = await lygosService.createPayment({
+        title: 'Abonnement Premium - Corrige Tes Cours',
+        amount: 1500,
+        description: `Abonnement mensuel Premium pour ${user.firstName} ${user.lastName}`,
+        successUrl: `${baseUrl}/dashboard/subscription/success`,
+        failureUrl: `${baseUrl}/dashboard/subscription/failed`,
+      });
+
+      if (!paymentResponse.success) {
+        return res.status(400).json({ 
+          message: paymentResponse.error || 'Échec de création du paiement' 
+        });
+      }
+
+      const payment = await storage.createPayment({
+        userId,
+        subscriptionId: null,
+        amount: 1500,
+        currency: 'XAF',
+        status: 'pending',
+        paymentMethod: 'mobile_money',
+        lygosProductId: paymentResponse.productId || null,
+        lygosTransactionId: paymentResponse.orderId || null,
+        metadata: { checkoutUrl: paymentResponse.checkoutUrl },
+      });
+
+      res.json({
+        paymentId: payment.id,
+        checkoutUrl: paymentResponse.checkoutUrl,
+        orderId: paymentResponse.orderId,
+      });
+    } catch (error) {
+      console.error("Error initiating payment:", error);
+      res.status(500).json({ message: "Échec d'initialisation du paiement" });
+    }
+  });
+
+  app.get('/api/payment/status/:paymentId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const payment = await storage.getPayment(req.params.paymentId);
+
+      if (!payment || payment.userId !== userId) {
+        return res.status(404).json({ message: "Paiement introuvable" });
+      }
+
+      if (payment.status === 'completed') {
+        return res.json({ status: 'completed', payment });
+      }
+
+      if (payment.lygosTransactionId) {
+        const { lygosService } = await import('./lygos');
+        const status = await lygosService.getPaymentStatus(payment.lygosTransactionId);
+
+        if (status.status === 'success' && payment.status !== 'completed') {
+          const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
+            ? { ...payment.metadata as object, ...status.details }
+            : status.details;
+
+          const updatedPayment = await storage.updatePayment(payment.id, {
+            status: 'completed',
+            metadata: metadataUpdate,
+          });
+
+          const startDate = new Date();
+          const endDate = new Date();
+          endDate.setMonth(endDate.getMonth() + 1);
+
+          let subscription = await storage.getSubscriptionByUserId(userId);
+          if (subscription) {
+            const updatedSub = await storage.updateSubscription(subscription.id, {
+              status: 'premium',
+              startDate,
+              endDate,
+              paymentMethod: status.paymentMethod || 'mobile_money',
+              amount: 1500,
+              transactionId: status.transactionId || payment.lygosTransactionId,
+            });
+
+            if (updatedSub) {
+              await storage.updatePayment(payment.id, {
+                subscriptionId: updatedSub.id,
+              });
+              return res.json({ status: 'completed', payment: updatedPayment, subscription: updatedSub });
+            }
+          } else {
+            const newSub = await storage.createSubscription({
+              userId,
+              status: 'premium',
+              startDate,
+              endDate,
+              paymentMethod: status.paymentMethod || 'mobile_money',
+              amount: 1500,
+              transactionId: status.transactionId || payment.lygosTransactionId,
+            });
+
+            await storage.updatePayment(payment.id, {
+              subscriptionId: newSub.id,
+            });
+            return res.json({ status: 'completed', payment: updatedPayment, subscription: newSub });
+          }
+
+          return res.json({ status: 'completed', payment: updatedPayment });
+        } else if (status.status === 'failed') {
+          await storage.updatePayment(payment.id, { status: 'failed' });
+          return res.json({ status: 'failed', payment });
+        }
+      }
+
+      res.json({ status: payment.status, payment });
+    } catch (error) {
+      console.error("Error checking payment status:", error);
+      res.status(500).json({ message: "Échec de vérification du statut" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -211,3 +211,22 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
 
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type Payment = typeof payments.$inferSelect;
+
+// Anonymous uploads table for onboarding flow (test before signup)
+export const anonymousUploads = pgTable("anonymous_uploads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull(), // Cookie/localStorage identifier
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  summary: text("summary"), // AI-generated summary
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(), // Auto-delete after 48h if not claimed
+});
+
+export const insertAnonymousUploadSchema = createInsertSchema(anonymousUploads).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertAnonymousUpload = z.infer<typeof insertAnonymousUploadSchema>;
+export type AnonymousUpload = typeof anonymousUploads.$inferSelect;

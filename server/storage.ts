@@ -1,4 +1,4 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, gte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import { Pool, neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
@@ -53,6 +53,7 @@ export interface IStorage {
   createCourse(course: InsertCourse): Promise<Course>;
   updateCourse(id: string, course: Partial<InsertCourse>): Promise<Course | undefined>;
   deleteCourse(id: string): Promise<void>;
+  getUploadCountThisMonth(userId: string, startOfMonth: Date): Promise<number>;
 
   // Summaries
   getSummary(id: string): Promise<Summary | undefined>;
@@ -173,6 +174,18 @@ export class DbStorage implements IStorage {
 
   async deleteCourse(id: string): Promise<void> {
     await db.delete(courses).where(eq(courses.id, id));
+  }
+
+  async getUploadCountThisMonth(userId: string, startOfMonth: Date): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(courses)
+      .where(and(
+        eq(courses.userId, userId),
+        eq(courses.isUpload, 1),
+        gte(courses.createdAt, startOfMonth)
+      ));
+    return Number(result[0]?.count || 0);
   }
 
   // Summaries

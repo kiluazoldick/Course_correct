@@ -68,6 +68,7 @@ export const courses = pgTable("courses", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   subject: text("subject"),
+  isUpload: integer("is_upload").notNull().default(0), // 1 if created from file upload, 0 otherwise
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

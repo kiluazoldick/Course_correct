@@ -125,6 +125,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userId = (req.user as any).id;
+
+      // Check subscription status
+      const subscription = await storage.getSubscriptionByUserId(userId);
+      const isPremium = subscription?.status === 'premium' && 
+                        subscription?.endDate && 
+                        new Date(subscription.endDate) > new Date();
+
+      // If not premium, check upload limit (2 files per month)
+      if (!isPremium) {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const uploads = await storage.getUploadCountThisMonth(userId, startOfMonth);
+
+        if (uploads >= 2) {
+          return res.status(403).json({ 
+            message: "Limite d'upload atteinte",
+            limitExceeded: true,
+            limit: 2,
+            description: "Tu as atteint ta limite de 2 fichiers par mois. Passe au Premium pour des uploads illimités !"
+          });
+        }
+      }
+
       const { text, title } = await processUploadedFile(req.file.buffer, req.file.mimetype);
 
       if (!text || text.length < 50) {
@@ -133,12 +156,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create course from extracted text
+      // Create course from extracted text with isUpload flag
       const course = await storage.createCourse({
         userId,
         title: title,
         content: text,
         subject: req.body.subject || '',
+        isUpload: 1, // Mark as uploaded file
       });
 
       res.json(course);

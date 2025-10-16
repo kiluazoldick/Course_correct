@@ -45,14 +45,15 @@ export class LygosService {
       const orderId = params.orderId || nanoid();
       
       const payload = {
-        title: params.title,
         amount: params.amount,
-        description: params.description,
-        'success-url': params.successUrl,
-        'failure-url': params.failureUrl,
+        shop_name: params.title,
+        message: params.description,
+        order_id: orderId,
+        success_url: params.successUrl,
+        failure_url: params.failureUrl,
       };
 
-      const response = await fetch(`${this.baseUrl}/products`, {
+      const response = await fetch(`${this.baseUrl}/gateway`, {
         method: 'POST',
         headers: {
           'api-key': this.apiKey,
@@ -67,15 +68,15 @@ export class LygosService {
         console.error('Lygos API error:', data);
         return {
           success: false,
-          error: data.message || 'Failed to create payment',
+          error: data.detail || data.message || 'Failed to create payment',
         };
       }
 
       return {
         success: true,
-        checkoutUrl: data.checkoutUrl || data.checkout_url || data.url,
-        productId: data.productId || data.product_id || data.id,
-        orderId,
+        checkoutUrl: data.link || data.checkout_url || data.url,
+        productId: data.id,
+        orderId: data.order_id || orderId,
       };
     } catch (error) {
       console.error('Lygos payment creation error:', error);
@@ -86,9 +87,9 @@ export class LygosService {
     }
   }
 
-  async getPaymentStatus(orderId: string): Promise<LygosPaymentStatus> {
+  async getPaymentStatus(gatewayId: string): Promise<LygosPaymentStatus> {
     try {
-      const response = await fetch(`${this.baseUrl}/payment/status/${orderId}`, {
+      const response = await fetch(`${this.baseUrl}/gateway/${gatewayId}`, {
         method: 'GET',
         headers: {
           'api-key': this.apiKey,
@@ -106,11 +107,11 @@ export class LygosService {
       const status = data.status?.toLowerCase() || 'pending';
       
       return {
-        status: status === 'success' || status === 'completed' ? 'success' : 
-                status === 'failed' ? 'failed' : 'pending',
+        status: status === 'success' || status === 'completed' || status === 'paid' ? 'success' : 
+                status === 'failed' || status === 'cancelled' ? 'failed' : 'pending',
         amount: data.amount,
         paymentMethod: data.payment_method || data.paymentMethod,
-        transactionId: data.transaction_id || data.transactionId,
+        transactionId: data.id || data.transaction_id,
         details: data,
       };
     } catch (error) {

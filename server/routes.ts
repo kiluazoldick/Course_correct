@@ -635,9 +635,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ status: 'completed', payment });
       }
 
-      if (payment.lygosTransactionId) {
+      if (payment.lygosProductId) {
         const { lygosService } = await import('./lygos');
-        const status = await lygosService.getPaymentStatus(payment.lygosTransactionId);
+        const status = await lygosService.getPaymentStatus(payment.lygosProductId);
 
         if (status.status === 'success' && payment.status !== 'completed') {
           const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 

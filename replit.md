@@ -1,7 +1,9 @@
 # Corrige Tes Cours - Technical Documentation
 
 ## Overview
-Corrige Tes Cours is an AI-powered educational platform for French-speaking university students in Cameroon. It aims to enhance studying efficiency through automated course summaries, personalized quizzes, and performance tracking. The platform features a sales-focused landing page and a comprehensive user dashboard. It operates on a freemium model, offering both a free tier and a Premium subscription (1,500 XAF/month) with advanced features. Payment is processed via Mobile Money and credit cards through Lygos. The business vision is to provide accessible, AI-driven educational tools to improve student outcomes in Cameroon.
+Corrige Tes Cours is an AI-powered educational platform for French-speaking university students in Cameroon. It aims to enhance studying efficiency through automated course summaries, personalized quizzes, and performance tracking. The platform features a sales-focused landing page, an anonymous onboarding flow for conversion optimization, and a comprehensive user dashboard. It operates on a freemium model, offering both a free tier and a Premium subscription (1,500 XAF/month) with advanced features. Payment is processed via Mobile Money and credit cards through Lygos. The business vision is to provide accessible, AI-driven educational tools to improve student outcomes in Cameroon.
+
+**Latest Update (Jan 2025):** Implemented anonymous onboarding system allowing users to test the app (upload 1 course + generate summary) before creating an account, with seamless migration upon signup to maximize conversion rates.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -22,6 +24,7 @@ The backend uses Express.js with Node.js and TypeScript. It features a dual auth
 - **Content Management**: Users can create, edit, and organize course notes, upload PDF/Word documents (with automatic text extraction), and view course content in a read-only mode.
 - **AI Chatbot ("Tariq IA")**: An educational chatbot with a confident, motivating personality, offering smart suggestion prompts and managing message limits based on subscription tier.
 - **Subscription Management**: Automated downgrade to the Free tier upon Premium subscription expiration, with real-time status checks.
+- **Anonymous Onboarding Flow** (NEW): Conversion-focused system allowing visitors to test the app without account creation. Users upload a file, get AI summary generated, then create account with automatic migration of their test course. Features 48-hour expiration, sessionId tracking via localStorage, and hourly automated cleanup of expired uploads.
 
 ## External Dependencies
 

@@ -7,6 +7,7 @@ import Courses from './dashboard/Courses';
 import Quizzes from './dashboard/Quizzes';
 import Chat from './dashboard/Chat';
 import Performance from './dashboard/Performance';
+import Subscription from './dashboard/Subscription';
 import Account from './dashboard/Account';
 
 export default function Dashboard() {
@@ -34,6 +35,7 @@ export default function Dashboard() {
               <Route path="/quizzes" component={Quizzes} />
               <Route path="/chat" component={Chat} />
               <Route path="/performance" component={Performance} />
+              <Route path="/subscription" component={Subscription} />
               <Route path="/account" component={Account} />
             </Switch>
           </main>

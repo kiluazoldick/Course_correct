@@ -49,6 +49,7 @@ function Router() {
           <Route path="/quizzes" component={Dashboard} />
           <Route path="/chat" component={Dashboard} />
           <Route path="/performance" component={Dashboard} />
+          <Route path="/subscription" component={Dashboard} />
           <Route path="/account" component={Dashboard} />
         </>
       )}

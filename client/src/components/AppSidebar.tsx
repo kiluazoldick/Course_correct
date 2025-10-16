@@ -1,4 +1,4 @@
-import { LayoutDashboard, BookOpen, Brain, MessageCircle, TrendingUp, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Brain, MessageCircle, TrendingUp, Crown, User, LogOut } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -38,6 +38,11 @@ const menuItems = [
     title: 'Performances',
     url: '/performance',
     icon: TrendingUp,
+  },
+  {
+    title: 'Premium',
+    url: '/subscription',
+    icon: Crown,
   },
   {
     title: 'Mon compte',

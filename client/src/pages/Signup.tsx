@@ -22,6 +22,9 @@ export default function Signup() {
   const [, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
 
+  // Get uploadId from URL query params
+  const uploadId = new URLSearchParams(window.location.search).get('uploadId');
+
   useEffect(() => {
     if (isAuthenticated) {
       setLocation('/');
@@ -62,6 +65,26 @@ export default function Signup() {
 
       if (!response.ok) {
         throw new Error(data.error || 'Erreur lors de l\'inscription');
+      }
+
+      // If uploadId is present, migrate the anonymous upload
+      if (uploadId) {
+        try {
+          const migrateResponse = await fetch(`/api/anonymous/${uploadId}/migrate`, {
+            method: 'POST',
+            credentials: 'include',
+          });
+
+          if (migrateResponse.ok) {
+            toast({
+              title: 'Compte créé avec succès !',
+              description: 'Votre cours a été ajouté à votre dashboard.',
+            });
+          }
+        } catch (migrateError) {
+          console.error('Migration error:', migrateError);
+          // Don't block the signup flow if migration fails
+        }
       }
 
       window.location.href = '/';

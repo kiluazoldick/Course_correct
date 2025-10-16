@@ -19,6 +19,9 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
 
+  // Get uploadId from URL query params
+  const uploadId = new URLSearchParams(window.location.search).get('uploadId');
+
   useEffect(() => {
     if (isAuthenticated) {
       setLocation('/');
@@ -40,6 +43,26 @@ export default function Login() {
 
       if (!response.ok) {
         throw new Error(data.error || 'Erreur de connexion');
+      }
+
+      // If uploadId is present, migrate the anonymous upload
+      if (uploadId) {
+        try {
+          const migrateResponse = await fetch(`/api/anonymous/${uploadId}/migrate`, {
+            method: 'POST',
+            credentials: 'include',
+          });
+
+          if (migrateResponse.ok) {
+            toast({
+              title: 'Connexion réussie !',
+              description: 'Votre cours a été ajouté à votre dashboard.',
+            });
+          }
+        } catch (migrateError) {
+          console.error('Migration error:', migrateError);
+          // Don't block the login flow if migration fails
+        }
       }
 
       window.location.href = '/';

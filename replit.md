@@ -26,7 +26,29 @@ Corrige Tes Cours is an AI-powered educational platform designed for French-spea
 
 ## Recent Changes
 
-### October 15, 2025 (Latest)
+### October 16, 2025 (Latest)
+- **Lygos Payment Integration**: Fully integrated Mobile Money payments (MTN/Orange) via Lygos API
+  - Payment gateway creation with order tracking
+  - Real-time payment status verification
+  - Automatic Premium subscription activation upon successful payment
+  - Support for MTN Mobile Money, Orange Money, and credit cards
+  - Price: 1,500 XAF/month for Premium subscription
+  - Premium subscription management with start/end dates
+- **Premium Subscription Page**: Created dedicated subscription management interface
+  - Current plan display with status badge (Free/Premium)
+  - Premium features showcase with pricing
+  - One-click payment initiation
+  - Payment method display (MTN, Orange, Cards)
+  - Real-time payment status tracking with auto-refresh
+  - Success/failure payment notifications
+- **Payment Backend**: Complete payment processing infrastructure
+  - Lygos API service (`server/lygos.ts`) for gateway creation and status checks
+  - Payment initiation endpoint (`/api/payment/initiate`)
+  - Payment status verification endpoint (`/api/payment/status/:paymentId`)
+  - Automatic subscription creation/update on successful payment
+  - Payment history tracking in database
+
+### October 15, 2025
 - **AI Chatbot "Aide IA"**: Implemented educational chatbot using DeepSeek R1 via OpenRouter API
   - Free tier: 5 messages per session with 3-hour cooldown
   - Premium tier: Unlimited chatbot access

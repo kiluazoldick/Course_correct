@@ -103,15 +103,15 @@ export default function Subscription() {
   const endDate = subscription?.endDate ? new Date(subscription.endDate) : null;
 
   return (
-    <div className="container max-w-5xl py-8 space-y-8">
-      <div>
+    <div className="w-full py-8 px-6 space-y-8">
+      <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold" data-testid="text-subscription-title">Mon Abonnement</h1>
         <p className="text-muted-foreground mt-2">
           Gère ton abonnement et accède aux fonctionnalités Premium
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="max-w-7xl mx-auto grid gap-6 lg:grid-cols-2">
         <Card data-testid="card-current-plan">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -245,15 +245,16 @@ export default function Subscription() {
         </Card>
       </div>
 
-      <Card data-testid="card-payment-methods">
-        <CardHeader>
-          <CardTitle>Moyens de paiement</CardTitle>
-          <CardDescription>
-            Paye facilement avec Mobile Money ou carte bancaire
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+      <div className="max-w-7xl mx-auto">
+        <Card data-testid="card-payment-methods">
+          <CardHeader>
+            <CardTitle>Moyens de paiement</CardTitle>
+            <CardDescription>
+              Paye facilement avec Mobile Money ou carte bancaire
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex items-center gap-3 p-3 border rounded-md">
               <div className="p-2 bg-yellow-500/10 rounded-md">
                 <Smartphone className="w-5 h-5 text-yellow-600" />
@@ -292,10 +293,12 @@ export default function Subscription() {
             </p>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
 
       {paymentId && (
-        <Card className="border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20" data-testid="card-payment-pending">
+        <div className="max-w-7xl mx-auto">
+          <Card className="border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20" data-testid="card-payment-pending">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -311,7 +314,8 @@ export default function Subscription() {
               que nous détections automatiquement ton paiement.
             </p>
           </CardContent>
-        </Card>
+          </Card>
+        </div>
       )}
     </div>
   );

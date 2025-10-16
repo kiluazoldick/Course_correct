@@ -30,7 +30,7 @@ const menuItems = [
     icon: Brain,
   },
   {
-    title: 'Aide IA',
+    title: 'Tariq IA',
     url: '/chat',
     icon: MessageCircle,
   },

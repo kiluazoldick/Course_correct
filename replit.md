@@ -49,7 +49,7 @@ Corrige Tes Cours is an AI-powered educational platform designed for French-spea
   - Payment history tracking in database
 
 ### October 15, 2025
-- **AI Chatbot "Aide IA"**: Implemented educational chatbot using DeepSeek R1 via OpenRouter API
+- **AI Chatbot "Tariq IA"**: Implemented educational chatbot using DeepSeek R1 via OpenRouter API
   - Free tier: 5 messages per session with 3-hour cooldown
   - Premium tier: Unlimited chatbot access
   - Chat history with markdown rendering

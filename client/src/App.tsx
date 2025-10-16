@@ -13,6 +13,7 @@ import Signup from "@/pages/Signup";
 import LegalNotice from "@/pages/LegalNotice";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
+import TryDemo from "@/pages/TryDemo";
 import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/not-found";
 
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/legal" component={LegalNotice} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      <Route path="/try/:uploadId" component={TryDemo} />
       
       {/* Conditional routes based on auth */}
       {isLoading ? (

@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import AppFooter from '@/components/AppFooter';
+import TryNowSection from '@/components/TryNowSection';
 import { Brain, TrendingUp, BookOpen, Award, Sparkles, Zap, Target, ChevronRight, Upload, MessageCircle, BarChart3, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
@@ -157,6 +158,9 @@ export default function Home() {
           <div className="absolute top-1/4 -left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 -right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         </section>
+
+        {/* Try Now Section - Anonymous Upload */}
+        <TryNowSection />
 
         {/* Stats Section */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 border-y bg-muted/20">

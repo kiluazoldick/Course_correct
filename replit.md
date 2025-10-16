@@ -5,10 +5,26 @@
 Corrige Tes Cours is an AI-powered educational platform designed for French-speaking university students in Cameroon. The platform helps students study more effectively by providing automated course summaries, personalized quizzes, and performance tracking. The application features a modern, sales-focused landing page to attract users and a comprehensive dashboard for authenticated users to manage their coursework and track their progress.
 
 **Location**: Douala, Cameroun
-**Pricing**: Two plans available:
-- **Gratuit**: 0 XAF/forever - Unlimited courses, summaries, quizzes, basic stats
-- **Étudiant**: 1,500 XAF/month - All Free features + AI assistant, PDF downloads, advanced stats, priority support
-**Payment**: Mobile Money (MTN, Orange) and credit cards accepted
+
+**Pricing**: Freemium model with two plans:
+- **Gratuit** (0 XAF/forever):
+  - Saisir ses cours (illimité)
+  - Upload de fichiers : 2/mois (max 10MB)
+  - Résumés IA (illimités)
+  - Téléchargement PDF des résumés
+  - Quiz personnalisés (illimités)
+  - Tariq IA : 5 messages/session (cooldown 3h)
+  - Statistiques de base
+  
+- **Premium** (1,500 XAF/mois):
+  - Tout du plan Gratuit
+  - Upload de fichiers illimité
+  - Tariq IA illimité (pas de limite)
+  - Pas de cooldown
+  - Statistiques avancées
+  - Support prioritaire
+
+**Payment**: Mobile Money (MTN, Orange) and credit cards via Lygos
 **Contact**: contact@corrigetescours.cm
 
 ## AI Integration
@@ -27,6 +43,30 @@ Corrige Tes Cours is an AI-powered educational platform designed for French-spea
 ## Recent Changes
 
 ### October 16, 2025 (Latest)
+- **Freemium System Updates**: Refined pricing and feature structure
+  - Updated Pricing page with accurate Free/Premium features
+  - Free: Unlimited courses/summaries/quizzes, 2 file uploads/month, Tariq IA 5 messages/session
+  - Premium: All Free features + unlimited uploads, unlimited Tariq IA, advanced stats
+  - Subscription page updated to reflect real capabilities
+  
+- **Tariq IA Chatbot**: Renamed from "Aide IA" to "Tariq IA" with personality upgrade
+  - Inspired by Power Book character - confident, intelligent, motivating
+  - Educational focus with encouraging coaching style
+  - ChatGPT-inspired redesign: clean interface, gradient avatar, suggestion cards
+  - Empty state with 4 smart suggestion prompts for common student questions
+  - Message limit badge for free users with upgrade CTA
+  
+- **File Upload Limitations**: Implemented 2 files/month limit for free users
+  - Added `isUpload` column to courses table to track uploaded files
+  - Free users see limit exceeded message with Premium upgrade option
+  - Premium users have unlimited file uploads
+  - Count resets monthly automatically
+  
+- **Subscription Expiration Logic**: Automatic downgrade when Premium expires
+  - Real-time subscription status check on every request
+  - Users automatically return to Free tier when `endDate` passes
+  - No manual intervention required
+  
 - **Lygos Payment Integration**: Fully integrated Mobile Money payments (MTN/Orange) via Lygos API
   - Payment gateway creation with order tracking
   - Real-time payment status verification
@@ -34,6 +74,7 @@ Corrige Tes Cours is an AI-powered educational platform designed for French-spea
   - Support for MTN Mobile Money, Orange Money, and credit cards
   - Price: 1,500 XAF/month for Premium subscription
   - Premium subscription management with start/end dates
+  
 - **Premium Subscription Page**: Created dedicated subscription management interface
   - Current plan display with status badge (Free/Premium)
   - Premium features showcase with pricing
@@ -41,6 +82,7 @@ Corrige Tes Cours is an AI-powered educational platform designed for French-spea
   - Payment method display (MTN, Orange, Cards)
   - Real-time payment status tracking with auto-refresh
   - Success/failure payment notifications
+  
 - **Payment Backend**: Complete payment processing infrastructure
   - Lygos API service (`server/lygos.ts`) for gateway creation and status checks
   - Payment initiation endpoint (`/api/payment/initiate`)

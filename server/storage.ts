@@ -21,6 +21,8 @@ import {
   type InsertChatSession,
   type Payment,
   type InsertPayment,
+  type AnonymousUpload,
+  type InsertAnonymousUpload,
   users,
   courses,
   summaries,
@@ -29,6 +31,7 @@ import {
   subscriptions,
   chatSessions,
   payments,
+  anonymousUploads,
 } from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
@@ -94,6 +97,15 @@ export interface IStorage {
   getPaymentsByUserId(userId: string): Promise<Payment[]>;
   createPayment(payment: InsertPayment): Promise<Payment>;
   updatePayment(id: string, payment: Partial<InsertPayment>): Promise<Payment | undefined>;
+
+  // Anonymous Uploads (for onboarding flow)
+  getAnonymousUpload(id: string): Promise<AnonymousUpload | undefined>;
+  getAnonymousUploadBySessionId(sessionId: string): Promise<AnonymousUpload | undefined>;
+  createAnonymousUpload(upload: InsertAnonymousUpload): Promise<AnonymousUpload>;
+  updateAnonymousUpload(id: string, upload: Partial<InsertAnonymousUpload>): Promise<AnonymousUpload | undefined>;
+  deleteAnonymousUpload(id: string): Promise<void>;
+  deleteExpiredAnonymousUploads(): Promise<number>;
+  migrateAnonymousUploadToUser(uploadId: string, userId: string): Promise<Course>;
 }
 
 export class DbStorage implements IStorage {
@@ -330,6 +342,64 @@ export class DbStorage implements IStorage {
     const updated = { ...payment, updatedAt: new Date() };
     const result = await db.update(payments).set(updated).where(eq(payments.id, id)).returning();
     return result[0];
+  }
+
+  // Anonymous Uploads (for onboarding flow)
+  async getAnonymousUpload(id: string): Promise<AnonymousUpload | undefined> {
+    const result = await db.select().from(anonymousUploads).where(eq(anonymousUploads.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getAnonymousUploadBySessionId(sessionId: string): Promise<AnonymousUpload | undefined> {
+    const result = await db.select().from(anonymousUploads).where(eq(anonymousUploads.sessionId, sessionId)).limit(1);
+    return result[0];
+  }
+
+  async createAnonymousUpload(upload: InsertAnonymousUpload): Promise<AnonymousUpload> {
+    const result = await db.insert(anonymousUploads).values(upload).returning();
+    return result[0];
+  }
+
+  async updateAnonymousUpload(id: string, upload: Partial<InsertAnonymousUpload>): Promise<AnonymousUpload | undefined> {
+    const result = await db.update(anonymousUploads).set(upload).where(eq(anonymousUploads.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteAnonymousUpload(id: string): Promise<void> {
+    await db.delete(anonymousUploads).where(eq(anonymousUploads.id, id));
+  }
+
+  async deleteExpiredAnonymousUploads(): Promise<number> {
+    const now = new Date();
+    const result = await db.delete(anonymousUploads).where(sql`${anonymousUploads.expiresAt} < ${now}`).returning();
+    return result.length;
+  }
+
+  async migrateAnonymousUploadToUser(uploadId: string, userId: string): Promise<Course> {
+    const upload = await this.getAnonymousUpload(uploadId);
+    if (!upload) {
+      throw new Error("Upload anonyme introuvable");
+    }
+
+    const course = await this.createCourse({
+      userId,
+      title: upload.title,
+      content: upload.content,
+      subject: null,
+      isUpload: 1,
+    });
+
+    if (upload.summary) {
+      await this.createSummary({
+        courseId: course.id,
+        userId,
+        content: upload.summary,
+      });
+    }
+
+    await this.deleteAnonymousUpload(uploadId);
+
+    return course;
   }
 }
 

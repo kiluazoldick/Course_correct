@@ -117,6 +117,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Anonymous onboarding routes (test before signup)
+  app.post('/api/anonymous/upload', upload.single('file'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Aucun fichier n'a été uploadé" });
+      }
+
+      const sessionId = req.body.sessionId;
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID requis" });
+      }
+
+      // Check if session already has an upload (limit: 1 upload per anonymous session)
+      const existing = await storage.getAnonymousUploadBySessionId(sessionId);
+      if (existing) {
+        return res.status(400).json({ 
+          message: "Vous avez déjà testé l'application. Créez un compte gratuit pour continuer !",
+          existingUploadId: existing.id
+        });
+      }
+
+      // Process the uploaded file
+      const { text, title } = await processUploadedFile(req.file.buffer, req.file.mimetype);
+
+      // Create anonymous upload with 48h expiration
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 48);
+
+      const upload = await storage.createAnonymousUpload({
+        sessionId,
+        title: title || req.file.originalname,
+        content: text,
+        summary: null,
+        expiresAt,
+      });
+
+      res.json({ 
+        uploadId: upload.id,
+        title: upload.title,
+        content: upload.content
+      });
+    } catch (error) {
+      console.error("Error creating anonymous upload:", error);
+      res.status(500).json({ message: "Échec de l'upload du fichier" });
+    }
+  });
+
+  app.post('/api/anonymous/:uploadId/summarize', async (req: any, res) => {
+    try {
+      const { uploadId } = req.params;
+      const upload = await storage.getAnonymousUpload(uploadId);
+      
+      if (!upload) {
+        return res.status(404).json({ message: "Upload introuvable" });
+      }
+
+      // Generate AI summary
+      const summary = await generateCourseSummary(upload.content, upload.title);
+
+      // Update the upload with the summary
+      await storage.updateAnonymousUpload(uploadId, { summary });
+
+      res.json({ summary });
+    } catch (error) {
+      console.error("Error generating anonymous summary:", error);
+      res.status(500).json({ message: "Échec de la génération du résumé" });
+    }
+  });
+
+  app.get('/api/anonymous/:uploadId', async (req: any, res) => {
+    try {
+      const { uploadId } = req.params;
+      const upload = await storage.getAnonymousUpload(uploadId);
+      
+      if (!upload) {
+        return res.status(404).json({ message: "Upload introuvable" });
+      }
+
+      res.json(upload);
+    } catch (error) {
+      console.error("Error fetching anonymous upload:", error);
+      res.status(500).json({ message: "Échec de la récupération de l'upload" });
+    }
+  });
+
+  app.post('/api/anonymous/:uploadId/migrate', isAuthenticated, async (req: any, res) => {
+    try {
+      const { uploadId } = req.params;
+      const userId = (req.user as any).id;
+
+      const course = await storage.migrateAnonymousUploadToUser(uploadId, userId);
+
+      res.json({ 
+        message: "Cours migré avec succès!",
+        course
+      });
+    } catch (error) {
+      console.error("Error migrating anonymous upload:", error);
+      res.status(500).json({ message: "Échec de la migration du cours" });
+    }
+  });
+
   // File upload route
   app.post('/api/courses/upload', isAuthenticated, upload.single('file'), async (req: any, res) => {
     try {

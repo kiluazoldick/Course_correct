@@ -9,6 +9,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
+import { motion } from 'framer-motion';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -80,12 +81,27 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background p-4">
-      <div className="absolute top-4 right-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background p-4 relative overflow-hidden">
+      <div className="absolute top-4 right-4 z-20">
         <ThemeToggle />
       </div>
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+
+      {/* Decorative elements */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-md relative z-10"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="text-center mb-8"
+        >
           <div 
             className="inline-flex items-center gap-2 mb-4 cursor-pointer hover-elevate rounded-md px-3 py-2" 
             onClick={() => setLocation('/')}
@@ -96,9 +112,14 @@ export default function Signup() {
             </h1>
           </div>
           <p className="text-muted-foreground">Créez votre compte et commencez à réussir</p>
-        </div>
+        </motion.div>
 
-        <Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <Card className="backdrop-blur-sm bg-card/50">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Créer un compte</CardTitle>
             <CardDescription className="text-center">
@@ -244,11 +265,12 @@ export default function Signup() {
             </div>
           </CardContent>
         </Card>
+        </motion.div>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
           En créant un compte, vous acceptez nos conditions d'utilisation
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

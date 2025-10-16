@@ -13,7 +13,7 @@ export default function Account() {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       queryClient.setQueryData(['/api/auth/user'], null);
-      window.location.href = '/login';
+      window.location.href = '/';
     } catch (error) {
       console.error('Logout error:', error);
     }

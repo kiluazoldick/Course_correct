@@ -62,6 +62,15 @@ export type InsertGoogleUser = z.infer<typeof insertGoogleUserSchema>;
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
+// Schema for updating user profile
+export const updateUserProfileSchema = z.object({
+  firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères").optional(),
+  lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères").optional(),
+  profileImageUrl: z.string().url().optional().or(z.literal("")),
+});
+
+export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
+
 export const courses = pgTable("courses", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),

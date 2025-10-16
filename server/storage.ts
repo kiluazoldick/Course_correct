@@ -46,6 +46,7 @@ export interface IStorage {
   createLocalUser(user: InsertLocalUser): Promise<User>;
   createGoogleUser(user: InsertGoogleUser): Promise<User>;
   linkGoogleAccount(userId: string, googleId: string): Promise<User>;
+  updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
 
   // Courses
   getCourse(id: string): Promise<Course | undefined>;
@@ -147,6 +148,15 @@ export class DbStorage implements IStorage {
       .update(users)
       .set({ googleId, updatedAt: new Date() })
       .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, id))
       .returning();
     return user;
   }

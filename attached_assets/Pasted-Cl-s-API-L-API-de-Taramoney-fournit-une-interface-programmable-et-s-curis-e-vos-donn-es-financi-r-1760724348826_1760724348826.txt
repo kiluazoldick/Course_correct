@@ -1,0 +1,54 @@
+Clés API
+L'API de Taramoney fournit une interface programmable et sécurisée à vos données financières. Utilisez notre API pour créer des applications privées ou publiques, automatiser les flux de paiement, gérer les collections et intégrer Tara à vos systèmes existants. Tara permet aux entreprises de rationaliser leurs opérations financières avec précision et fiabilité.
+
+Chargement...
+Clé secrète du Webhook
+Le webhook de Taramoney vous permet de recevoir des notifications en temps réel pour les événements liés à vos paiements, collectes ou clients. Utilisez ce secret pour vérifier l'authenticité des requêtes entrantes et vous assurer que seuls les messages signés par Taramoney sont traités.
+
+Chargement...
+Documentation de l'API (côté serveur)
+Description
+Cette API génère un lien de paiement pour un produit ou un service offert par une entreprise.
+
+Méthode HTTP
+POST https://www.dklo.co/api/tara/order
+
+Corps de la requête
+{
+  "apiKey": "your-api-key",
+  "businessId": "hTZXOaQrgd",
+  "productId": "product-456",
+  "productName": "Product name",
+  "productPrice": 100,
+  "productDescription": "Product description",
+  "productPictureUrl": "https://example.com/image.jpg",
+  "returnUrl": "https://example.com/return",
+  "webHookUrl": "https://example.com/webhook"
+}
+Réponse attendue
+{
+  "status": "success",
+  "message": "Link successfully generated",
+  "whatsappLink": "https://wa.me/...",
+  "telegramLink": "https://t.me/...",
+  "dikaloLink": "https://dikalo.me/...",
+  "smsLink": "sms:+2376...?body=..."
+}
+Tester l'API
+Lancer un test
+Exemple cURL
+Vous pouvez intégrer l'appel API dans un formulaire côté serveur comme ceci :
+
+curl -X POST https://www.dklo.co/api/tara/order \
+  -H "Content-Type: application/json" \
+  -d '{
+  "apiKey": "your-api-key",
+  "businessId": "hTZXOaQrgd",
+  "productId": "product-456",
+  "productName": "Product name",
+  "productPrice": 100,
+  "productDescription": "Product description",
+  "productPictureUrl": "https://example.com/image.jpg",
+  "returnUrl": "https://example.com/return",
+  "webHookUrl": "https://example.com/webhook"
+}'

@@ -64,14 +64,14 @@ export default function Performance() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold" data-testid="text-performance-title">Performances</h1>
-        <p className="text-muted-foreground mt-1">Visualisez vos progrès et restez motivé</p>
+        <h1 className="text-2xl md:text-3xl font-bold" data-testid="text-performance-title">Performances</h1>
+        <p className="text-muted-foreground mt-1 text-sm md:text-base">Visualisez vos progrès et restez motivé</p>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium" data-testid="card-title-quizzes-completed">Quiz complétés</CardTitle>

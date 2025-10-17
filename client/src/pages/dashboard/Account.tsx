@@ -157,16 +157,17 @@ export default function Account() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold" data-testid="text-account-title">Mon Compte</h2>
-          <p className="text-muted-foreground mt-2">Gérez vos informations personnelles</p>
+          <h2 className="text-2xl md:text-3xl font-bold" data-testid="text-account-title">Mon Compte</h2>
+          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">Gérez vos informations personnelles</p>
         </div>
         {plan === 'premium' && (
           <Badge variant="default" className="gap-1" data-testid="badge-premium">
             <Crown className="w-3 h-3" />
-            Premium
+            <span className="hidden sm:inline">Premium</span>
+            <span className="sm:hidden">Pro</span>
           </Badge>
         )}
       </div>

@@ -357,20 +357,20 @@ export default function Courses() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0">
         <div>
-          <h2 className="text-3xl font-bold" data-testid="text-courses-title">Mes Cours</h2>
-          <p className="text-muted-foreground mt-2">Gérez vos cours et générez des résumés intelligents</p>
+          <h2 className="text-2xl md:text-3xl font-bold" data-testid="text-courses-title">Mes Cours</h2>
+          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">Gérez vos cours et générez des résumés intelligents</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setIsUploadOpen(true)} data-testid="button-upload-course">
-            <Upload className="w-4 h-4 mr-2" />
-            Importer
+          <Button variant="outline" size="sm" className="md:size-default" onClick={() => setIsUploadOpen(true)} data-testid="button-upload-course">
+            <Upload className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Importer</span>
           </Button>
-          <Button onClick={() => setIsCreateOpen(true)} data-testid="button-create-course">
-            <Plus className="w-4 h-4 mr-2" />
-            Nouveau cours
+          <Button size="sm" className="md:size-default" onClick={() => setIsCreateOpen(true)} data-testid="button-create-course">
+            <Plus className="w-4 h-4 md:mr-2" />
+            <span className="md:inline">Nouveau</span>
           </Button>
         </div>
       </div>
@@ -390,7 +390,7 @@ export default function Courses() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course) => (
             <Card key={course.id} className="hover-elevate" data-testid={`card-course-${course.id}`}>
               <CardHeader>

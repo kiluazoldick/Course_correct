@@ -32,17 +32,17 @@ export default function DashboardHome() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div>
-        <h2 className="text-3xl font-bold" data-testid="text-welcome-title">
+        <h2 className="text-2xl md:text-3xl font-bold" data-testid="text-welcome-title">
           Bienvenue{user?.firstName ? `, ${user.firstName}` : ''} !
         </h2>
-        <p className="text-muted-foreground mt-2" data-testid="text-welcome-subtitle">
+        <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base" data-testid="text-welcome-subtitle">
           Prêt à booster ta réussite aujourd'hui ?
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-3 md:gap-6 md:grid-cols-3">
         <Card data-testid="card-stat-courses">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Mes Cours</CardTitle>

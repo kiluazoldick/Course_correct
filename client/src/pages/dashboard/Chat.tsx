@@ -162,47 +162,47 @@ export default function Chat() {
         <div className="max-w-3xl mx-auto px-4 md:px-6">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-[calc(100vh-14rem)] text-center py-8 md:py-12">
-              <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl border-2 border-primary/20 flex items-center justify-center bg-primary/5 mb-6">
-                <GraduationCap className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl border-2 border-primary/20 flex items-center justify-center bg-primary/5 mb-4 md:mb-6">
+                <GraduationCap className="w-6 h-6 md:w-7 md:h-7 text-primary" />
               </div>
-              <h2 className="text-xl md:text-2xl font-semibold mb-2">Bonjour ! Je suis Tariq</h2>
-              <p className="text-sm md:text-base text-muted-foreground max-w-md mb-8 md:mb-10">
-                Ton assistant d'études intelligent. Pose-moi toutes tes questions académiques !
+              <h2 className="text-lg md:text-xl font-semibold mb-2">Bonjour ! Je suis Tariq</h2>
+              <p className="text-xs md:text-sm text-muted-foreground max-w-md mb-6 md:mb-8">
+                Ton assistant d'études intelligent. Pose-moi toutes tes questions !
               </p>
               
-              {/* Suggestion Cards - ChatGPT style */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 w-full max-w-2xl">
+              {/* Suggestion Cards - Taille réduite */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full max-w-xl">
                 <button
                   onClick={() => setMessage("Explique-moi le théorème de Pythagore")}
-                  className="p-3 md:p-4 border rounded-xl hover-elevate active-elevate-2 text-left transition-all"
+                  className="p-2.5 md:p-3 border rounded-lg hover-elevate active-elevate-2 text-left transition-all"
                   data-testid="suggestion-pythagore"
                 >
-                  <div className="font-medium text-sm md:text-base">Explication de concept</div>
-                  <div className="text-xs md:text-sm text-muted-foreground mt-1">Théorème de Pythagore</div>
+                  <div className="font-medium text-xs md:text-sm">Explication de concept</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Théorème de Pythagore</div>
                 </button>
                 <button
                   onClick={() => setMessage("Comment réviser efficacement pour un examen ?")}
-                  className="p-3 md:p-4 border rounded-xl hover-elevate active-elevate-2 text-left transition-all"
+                  className="p-2.5 md:p-3 border rounded-lg hover-elevate active-elevate-2 text-left transition-all"
                   data-testid="suggestion-revision"
                 >
-                  <div className="font-medium text-sm md:text-base">Méthode de révision</div>
-                  <div className="text-xs md:text-sm text-muted-foreground mt-1">Réviser efficacement</div>
+                  <div className="font-medium text-xs md:text-sm">Méthode de révision</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Réviser efficacement</div>
                 </button>
                 <button
                   onClick={() => setMessage("Donne-moi des astuces pour mémoriser mes cours")}
-                  className="p-3 md:p-4 border rounded-xl hover-elevate active-elevate-2 text-left transition-all"
+                  className="p-2.5 md:p-3 border rounded-lg hover-elevate active-elevate-2 text-left transition-all"
                   data-testid="suggestion-memorisation"
                 >
-                  <div className="font-medium text-sm md:text-base">Mémorisation</div>
-                  <div className="text-xs md:text-sm text-muted-foreground mt-1">Astuces de mémorisation</div>
+                  <div className="font-medium text-xs md:text-sm">Mémorisation</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Astuces de mémorisation</div>
                 </button>
                 <button
                   onClick={() => setMessage("Comment gérer mon stress avant les examens ?")}
-                  className="p-3 md:p-4 border rounded-xl hover-elevate active-elevate-2 text-left transition-all"
+                  className="p-2.5 md:p-3 border rounded-lg hover-elevate active-elevate-2 text-left transition-all"
                   data-testid="suggestion-stress"
                 >
-                  <div className="font-medium text-sm md:text-base">Gestion du stress</div>
-                  <div className="text-xs md:text-sm text-muted-foreground mt-1">Stress des examens</div>
+                  <div className="font-medium text-xs md:text-sm">Gestion du stress</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Stress des examens</div>
                 </button>
               </div>
             </div>
@@ -265,16 +265,16 @@ export default function Chat() {
 
       {/* Input Area - Fixed Bottom style ChatGPT */}
       <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-3xl mx-auto px-4 md:px-6 py-4 md:py-6">
+        <div className="max-w-3xl mx-auto px-4 md:px-6 py-3 md:py-4">
           {/* Limit Warning */}
           {!isPremium && messagesRemaining === 0 && session?.resetAt && (
-            <div className="mb-4 p-3 md:p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+            <div className="mb-3 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-4">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
                     Limite gratuite atteinte
                   </p>
-                  <p className="text-xs md:text-sm text-amber-700 dark:text-amber-300 mt-1">
+                  <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
                     Nouveau quota dans {
                       (() => {
                         const resetDate = new Date(session.resetAt);
@@ -297,15 +297,15 @@ export default function Chat() {
             </div>
           )}
           
-          {/* Input */}
-          <div className="relative">
+          {/* Input - Alignement corrigé */}
+          <div className="flex items-end gap-2">
             <Textarea
               ref={textareaRef}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyPress}
               placeholder="Envoie un message à Tariq..."
-              className="min-h-[52px] md:min-h-[56px] max-h-[200px] resize-none pr-12 md:pr-14 rounded-xl border-muted-foreground/20 focus-visible:ring-1"
+              className="flex-1 min-h-[44px] max-h-[200px] resize-none rounded-xl border-muted-foreground/20 focus-visible:ring-1"
               disabled={sendMessageMutation.isPending || (!isPremium && messagesRemaining === 0)}
               data-testid="input-message"
               rows={1}
@@ -314,18 +314,18 @@ export default function Chat() {
               onClick={handleSendMessage}
               disabled={!message.trim() || sendMessageMutation.isPending || (!isPremium && messagesRemaining === 0)}
               size="icon"
-              className="absolute bottom-1.5 right-1.5 h-9 w-9 md:h-10 md:w-10 rounded-lg"
+              className="h-[44px] w-[44px] rounded-xl flex-shrink-0"
               data-testid="button-send-message"
             >
               {sendMessageMutation.isPending ? (
-                <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <Send className="w-4 h-4 md:w-5 md:h-5" />
+                <Send className="w-5 h-5" />
               )}
             </Button>
           </div>
           
-          <p className="text-xs text-muted-foreground text-center mt-3 px-2">
+          <p className="text-xs text-muted-foreground text-center mt-2">
             Tariq peut faire des erreurs. Vérifie les informations importantes.
           </p>
         </div>

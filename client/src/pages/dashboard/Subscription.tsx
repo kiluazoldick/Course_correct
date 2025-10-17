@@ -57,12 +57,8 @@ export default function Subscription() {
     onSuccess: (data: PaymentResponse) => {
       setPaymentId(data.paymentId);
       if (data.checkoutUrl) {
-        window.open(data.checkoutUrl, '_blank');
+        window.location.href = data.checkoutUrl;
       }
-      toast({
-        title: "Paiement initié",
-        description: "Complète ton paiement dans la fenêtre qui s'est ouverte",
-      });
     },
     onError: (error: any) => {
       toast({

@@ -827,7 +827,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerEmail: user.email,
         customerPhone: user.phone || '',
         notifyUrl: `${baseUrl}/api/payment/webhook/cinetpay`,
-        returnUrl: `${baseUrl}/dashboard/subscription/success`,
+        returnUrl: `${baseUrl}/dashboard/subscription`,
         channels: 'ALL',
         lang: 'FR',
       });

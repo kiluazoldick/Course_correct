@@ -1003,7 +1003,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             startDate,
             endDate,
             paymentMethod: verificationResult.paymentMethod || 'mobile_money',
-            amount: parseInt(verificationResult.amount || '1500'),
+            amount: verificationResult.amount ? Number(verificationResult.amount) : 1500,
             transactionId: cpm_trans_id,
           });
         } else {
@@ -1013,7 +1013,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             startDate,
             endDate,
             paymentMethod: verificationResult.paymentMethod || 'mobile_money',
-            amount: parseInt(verificationResult.amount || '1500'),
+            amount: verificationResult.amount ? Number(verificationResult.amount) : 1500,
             transactionId: cpm_trans_id,
           });
 

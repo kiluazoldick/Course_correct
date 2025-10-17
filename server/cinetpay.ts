@@ -129,25 +129,49 @@ export class CinetPayService {
       });
 
       const data = await response.json();
+      console.log('CinetPay status response:', data);
 
-      if (!response.ok || data.code !== '00') {
-        console.error('CinetPay status check error:', data);
-        return { status: 'failed' };
+      // Handle different response codes according to CinetPay documentation
+      if (data.code === '00') {
+        // SUCCESS - Transaction completed
+        const status = data.data?.status?.toLowerCase() || 'pending';
+        return {
+          status: status === 'accepted' ? 'success' : 
+                  status === 'refused' ? 'failed' : 'pending',
+          amount: data.data?.amount,
+          paymentMethod: data.data?.payment_method,
+          transactionId: transactionId,
+          details: data.data,
+        };
+      } else if (data.code === '662' && data.message === 'WAITING_CUSTOMER_PAYMENT') {
+        // PENDING - Customer has not paid yet (this is NORMAL, not an error)
+        return {
+          status: 'pending',
+          amount: data.data?.amount,
+          paymentMethod: data.data?.payment_method || '',
+          transactionId: transactionId,
+          details: data.data,
+        };
+      } else if (data.code === '627' || data.message === 'TRANSACTION_CANCEL') {
+        // FAILED - Transaction cancelled/refused
+        return {
+          status: 'failed',
+          amount: data.data?.amount,
+          paymentMethod: data.data?.payment_method || '',
+          transactionId: transactionId,
+          details: data.data,
+        };
+      } else {
+        // Unknown status - treat as pending for safety
+        console.warn('Unknown CinetPay status code:', data.code, data.message);
+        return {
+          status: 'pending',
+          transactionId: transactionId,
+        };
       }
-
-      const status = data.data?.status?.toLowerCase() || 'pending';
-      
-      return {
-        status: status === 'accepted' || status === 'success' ? 'success' : 
-                status === 'refused' || status === 'failed' || status === 'cancelled' ? 'failed' : 'pending',
-        amount: data.data?.amount,
-        paymentMethod: data.data?.payment_method,
-        transactionId: data.data?.transaction_id,
-        details: data.data,
-      };
     } catch (error) {
       console.error('CinetPay status check error:', error);
-      return { status: 'failed' };
+      return { status: 'pending' }; // Return pending instead of failed on network errors
     }
   }
 

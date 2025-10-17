@@ -949,24 +949,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('CinetPay webhook received:', req.body);
 
-      const {
-        cpm_trans_id,
-        cpm_site_id,
-        cpm_amount,
-        cpm_trans_status,
-        cpm_payment_method,
-        signature,
-      } = req.body;
-
-      const { cinetpayService } = await import('./cinetpay');
+      const { cpm_trans_id, cpm_site_id } = req.body;
 
       // Verify webhook authenticity
-      if (cpm_site_id !== process.env.CINETPAY_SITE_ID) {
-        console.error('Invalid CinetPay site ID in webhook');
-        return res.status(403).json({ message: 'Invalid site ID' });
+      if (!cpm_trans_id || cpm_site_id !== process.env.CINETPAY_SITE_ID) {
+        console.error('Invalid CinetPay webhook data');
+        return res.status(403).json({ message: 'Invalid webhook data' });
       }
 
-      // Find payment by transaction ID (query all users' payments)
+      // Find payment by transaction ID
       const allPayments = await db.select().from(payments);
       const payment = allPayments.find((p: Payment) => p.lygosTransactionId === cpm_trans_id);
 
@@ -975,15 +966,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Payment not found' });
       }
 
-      // Update payment status based on webhook data
-      if (cpm_trans_status === '00' || cpm_trans_status === 'ACCEPTED') {
-        // Payment successful
+      // Skip if payment already completed (webhook can be called multiple times)
+      if (payment.status === 'completed') {
+        console.log('Payment already completed, skipping:', cpm_trans_id);
+        return res.status(200).send('OK');
+      }
+
+      // IMPORTANT: According to CinetPay docs, NEVER trust webhook data directly
+      // Always verify the transaction status via the API to avoid man-in-the-middle attacks
+      const { cinetpayService } = await import('./cinetpay');
+      const verificationResult = await cinetpayService.getPaymentStatus(cpm_trans_id);
+
+      console.log('CinetPay verification result:', verificationResult);
+
+      if (verificationResult.status === 'success') {
+        // Payment verified as successful
         const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
-          ? { ...payment.metadata as object, webhookData: req.body }
-          : { webhookData: req.body };
+          ? { ...payment.metadata as object, webhookData: req.body, verificationData: verificationResult }
+          : { webhookData: req.body, verificationData: verificationResult };
 
         await storage.updatePayment(payment.id, {
           status: 'completed',
+          paymentMethod: verificationResult.paymentMethod || 'mobile_money',
           metadata: metadataUpdate,
         });
 
@@ -998,8 +1002,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             status: 'premium',
             startDate,
             endDate,
-            paymentMethod: cpm_payment_method || 'mobile_money',
-            amount: parseInt(cpm_amount) || 1500,
+            paymentMethod: verificationResult.paymentMethod || 'mobile_money',
+            amount: parseInt(verificationResult.amount || '1500'),
             transactionId: cpm_trans_id,
           });
         } else {
@@ -1008,8 +1012,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             status: 'premium',
             startDate,
             endDate,
-            paymentMethod: cpm_payment_method || 'mobile_money',
-            amount: parseInt(cpm_amount) || 1500,
+            paymentMethod: verificationResult.paymentMethod || 'mobile_money',
+            amount: parseInt(verificationResult.amount || '1500'),
             transactionId: cpm_trans_id,
           });
 
@@ -1020,19 +1024,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log('Payment completed successfully via webhook:', cpm_trans_id);
         return res.status(200).send('OK');
-      } else {
-        // Payment failed
+      } else if (verificationResult.status === 'failed') {
+        // Payment verified as failed
         await storage.updatePayment(payment.id, {
           status: 'failed',
-          metadata: { webhookData: req.body },
+          metadata: { webhookData: req.body, verificationData: verificationResult },
         });
 
-        console.log('Payment failed via webhook:', cpm_trans_id);
+        console.log('Payment verified as failed:', cpm_trans_id);
+        return res.status(200).send('OK');
+      } else {
+        // Payment still pending (WAITING_CUSTOMER_PAYMENT)
+        // This is normal, don't update to failed, just acknowledge receipt
+        console.log('Payment still pending:', cpm_trans_id);
         return res.status(200).send('OK');
       }
     } catch (error) {
       console.error('CinetPay webhook error:', error);
-      return res.status(500).json({ message: 'Webhook processing failed' });
+      // Return 200 to prevent CinetPay from retrying on our internal errors
+      return res.status(200).send('ERROR');
     }
   });
 

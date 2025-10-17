@@ -6,6 +6,7 @@ Corrige Tes Cours is an AI-powered educational platform for French-speaking univ
 **Latest Update (Jan 2025):** 
 - Implemented anonymous onboarding system allowing users to test the app (upload 1 course + generate summary) before creating an account, with seamless migration upon signup to maximize conversion rates.
 - **Mobile-First UX (Oct 2025)**: Complete mobile optimization with WhatsApp-style bottom navigation bar. Sidebar hidden on mobile (<768px), replaced by fixed bottom nav with 5 items (Home, Cours, Chat, Stats, Profile). All dashboard pages optimized with responsive text sizes, compact spacing, and mobile-first layouts while desktop design remains unchanged.
+- **Chat Page Redesign (Oct 2025)**: Complete UI/UX overhaul inspired by ChatGPT for minimalist, clean aesthetic. Replaced flashy gradient avatars with simple bordered icons (GraduationCap for Tariq, "Tu" badge for user). Implemented ChatGPT-style layout with centered messages (max-w-3xl), fixed input at bottom with backdrop blur, generous spacing, and responsive design. Header streamlined to h-14 with minimal branding. Mobile-optimized with hidden badge text, compact buttons, and smaller avatars.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

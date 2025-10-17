@@ -4,7 +4,7 @@ import { createRequire } from 'module';
 
 // Use createRequire for CommonJS module in ESM context
 const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse');
+const { PDFParse: pdfParse } = require('pdf-parse');
 
 export interface ExtractedText {
   text: string;
@@ -12,11 +12,17 @@ export interface ExtractedText {
 }
 
 export async function extractTextFromPDF(fileBuffer: Buffer): Promise<ExtractedText> {
+  let parser: any = null;
+  
   try {
-    const data = await pdfParse(fileBuffer);
+    // Create parser instance with pdf-parse v2 API
+    parser = new pdfParse({ data: fileBuffer });
+    
+    // Extract text using v2 API
+    const result = await parser.getText();
     
     // Clean up text
-    const text = data.text
+    const text = result.text
       .replace(/\r\n/g, '\n')
       .replace(/\n{3,}/g, '\n\n')
       .trim();
@@ -57,6 +63,11 @@ export async function extractTextFromPDF(fileBuffer: Buffer): Promise<ExtractedT
       'Impossible d\'extraire le texte du PDF. ' +
       'Assurez-vous que le PDF contient du texte sélectionnable (non scanné).'
     );
+  } finally {
+    // Clean up resources
+    if (parser && typeof parser.destroy === 'function') {
+      await parser.destroy();
+    }
   }
 }
 

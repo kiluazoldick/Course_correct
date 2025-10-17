@@ -21,7 +21,7 @@ interface SubscriptionData {
 interface PaymentResponse {
   paymentId: string;
   checkoutUrl: string;
-  orderId: string;
+  transactionId: string;
 }
 
 interface PaymentStatusData {
@@ -288,7 +288,7 @@ export default function Subscription() {
 
           <div className="mt-4 p-4 bg-muted/50 rounded-md">
             <p className="text-sm text-muted-foreground">
-              💡 Tes paiements sont sécurisés par <span className="font-medium">Lygos</span>, 
+              💡 Tes paiements sont sécurisés par <span className="font-medium">CinetPay</span>, 
               la solution de paiement de confiance en Afrique.
             </p>
           </div>

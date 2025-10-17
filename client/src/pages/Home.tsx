@@ -324,6 +324,41 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Trustpilot Section */}
+        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-muted/20 border-y">
+          <div className="max-w-5xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center"
+            >
+              <h3 className="text-xl md:text-2xl font-semibold mb-6">
+                Rejoignez des milliers d'étudiants satisfaits
+              </h3>
+              <div className="flex justify-center">
+                <div className="w-full max-w-2xl">
+                  {/* Trustpilot Widget */}
+                  <div 
+                    className="trustpilot-widget" 
+                    data-locale="fr-FR" 
+                    data-template-id="56278e9abfbbba0bdcd568bc" 
+                    data-businessunit-id="68f27544aad66395e889c381" 
+                    data-style-height="52px" 
+                    data-style-width="100%" 
+                    data-token="da1d8c6a-d9fe-4532-8a96-30cdc4b952d8"
+                  >
+                    <a href="https://fr.trustpilot.com/review/corrigetescours.com" target="_blank" rel="noopener" className="text-primary hover:underline">
+                      Voir nos avis Trustpilot
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Premium CTA Section */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-primary/5">
           <div className="max-w-5xl mx-auto">

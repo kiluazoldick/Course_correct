@@ -2,10 +2,15 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
-import { insertCourseSchema, insertQuizSchema, insertQuizResultSchema, insertSummarySchema, updateUserProfileSchema } from "@shared/schema";
+import { insertCourseSchema, insertQuizSchema, insertQuizResultSchema, insertSummarySchema, updateUserProfileSchema, type Payment, payments } from "@shared/schema";
 import { generateCourseSummary, generateQuiz, evaluateOpenAnswer, chatWithAI } from "./ai";
 import multer from "multer";
 import { processUploadedFile } from "./fileProcessor";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import { Pool } from "@neondatabase/serverless";
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const db = drizzle(pool);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -804,18 +809,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = (req.user as any).id;
       const user = req.user as any;
-      const { lygosService } = await import('./lygos');
+      const { cinetpayService } = await import('./cinetpay');
 
       const DOMAIN = process.env.CUSTOM_DOMAIN || process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000';
       const protocol = DOMAIN.includes('localhost') ? 'http' : 'https';
       const baseUrl = `${protocol}://${DOMAIN}`;
 
-      const paymentResponse = await lygosService.createPayment({
-        title: 'Abonnement Premium - Corrige Tes Cours',
+      const transactionId = `CTC-${Date.now()}-${userId.slice(0, 8)}`;
+
+      const paymentResponse = await cinetpayService.createPayment({
         amount: 1500,
-        description: `Abonnement mensuel Premium pour ${user.firstName} ${user.lastName}`,
-        successUrl: `${baseUrl}/dashboard/subscription/success`,
-        failureUrl: `${baseUrl}/dashboard/subscription/failed`,
+        currency: 'XAF',
+        transactionId,
+        description: `Abonnement mensuel Premium - Corrige Tes Cours`,
+        customerName: user.firstName || 'Utilisateur',
+        customerSurname: user.lastName || 'CTC',
+        customerEmail: user.email,
+        customerPhone: user.phone || '',
+        notifyUrl: `${baseUrl}/api/payment/webhook/cinetpay`,
+        returnUrl: `${baseUrl}/dashboard/subscription/success`,
+        channels: 'ALL',
+        lang: 'FR',
       });
 
       if (!paymentResponse.success) {
@@ -831,15 +845,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: 'XAF',
         status: 'pending',
         paymentMethod: 'mobile_money',
-        lygosProductId: paymentResponse.productId || null,
-        lygosTransactionId: paymentResponse.orderId || null,
-        metadata: { checkoutUrl: paymentResponse.checkoutUrl },
+        lygosProductId: null,
+        lygosTransactionId: transactionId,
+        metadata: { 
+          checkoutUrl: paymentResponse.paymentUrl,
+          paymentToken: paymentResponse.paymentToken,
+          cinetpayTransactionId: transactionId,
+        },
       });
 
       res.json({
         paymentId: payment.id,
-        checkoutUrl: paymentResponse.checkoutUrl,
-        orderId: paymentResponse.orderId,
+        checkoutUrl: paymentResponse.paymentUrl,
+        transactionId: transactionId,
       });
     } catch (error) {
       console.error("Error initiating payment:", error);
@@ -860,9 +878,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ status: 'completed', payment });
       }
 
-      if (payment.lygosProductId) {
-        const { lygosService } = await import('./lygos');
-        const status = await lygosService.getPaymentStatus(payment.lygosProductId);
+      if (payment.lygosTransactionId) {
+        const { cinetpayService } = await import('./cinetpay');
+        const status = await cinetpayService.getPaymentStatus(payment.lygosTransactionId);
 
         if (status.status === 'success' && payment.status !== 'completed') {
           const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
@@ -923,6 +941,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error checking payment status:", error);
       res.status(500).json({ message: "Échec de vérification du statut" });
+    }
+  });
+
+  // CinetPay Webhook
+  app.post('/api/payment/webhook/cinetpay', async (req, res) => {
+    try {
+      console.log('CinetPay webhook received:', req.body);
+
+      const {
+        cpm_trans_id,
+        cpm_site_id,
+        cpm_amount,
+        cpm_trans_status,
+        cpm_payment_method,
+        signature,
+      } = req.body;
+
+      const { cinetpayService } = await import('./cinetpay');
+
+      // Verify webhook authenticity
+      if (cpm_site_id !== process.env.CINETPAY_SITE_ID) {
+        console.error('Invalid CinetPay site ID in webhook');
+        return res.status(403).json({ message: 'Invalid site ID' });
+      }
+
+      // Find payment by transaction ID (query all users' payments)
+      const allPayments = await db.select().from(payments);
+      const payment = allPayments.find((p: Payment) => p.lygosTransactionId === cpm_trans_id);
+
+      if (!payment) {
+        console.error('Payment not found for transaction:', cpm_trans_id);
+        return res.status(404).json({ message: 'Payment not found' });
+      }
+
+      // Update payment status based on webhook data
+      if (cpm_trans_status === '00' || cpm_trans_status === 'ACCEPTED') {
+        // Payment successful
+        const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
+          ? { ...payment.metadata as object, webhookData: req.body }
+          : { webhookData: req.body };
+
+        await storage.updatePayment(payment.id, {
+          status: 'completed',
+          metadata: metadataUpdate,
+        });
+
+        // Create or update subscription
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 1);
+
+        let subscription = await storage.getSubscriptionByUserId(payment.userId);
+        if (subscription) {
+          await storage.updateSubscription(subscription.id, {
+            status: 'premium',
+            startDate,
+            endDate,
+            paymentMethod: cpm_payment_method || 'mobile_money',
+            amount: parseInt(cpm_amount) || 1500,
+            transactionId: cpm_trans_id,
+          });
+        } else {
+          const newSub = await storage.createSubscription({
+            userId: payment.userId,
+            status: 'premium',
+            startDate,
+            endDate,
+            paymentMethod: cpm_payment_method || 'mobile_money',
+            amount: parseInt(cpm_amount) || 1500,
+            transactionId: cpm_trans_id,
+          });
+
+          await storage.updatePayment(payment.id, {
+            subscriptionId: newSub.id,
+          });
+        }
+
+        console.log('Payment completed successfully via webhook:', cpm_trans_id);
+        return res.status(200).send('OK');
+      } else {
+        // Payment failed
+        await storage.updatePayment(payment.id, {
+          status: 'failed',
+          metadata: { webhookData: req.body },
+        });
+
+        console.log('Payment failed via webhook:', cpm_trans_id);
+        return res.status(200).send('OK');
+      }
+    } catch (error) {
+      console.error('CinetPay webhook error:', error);
+      return res.status(500).json({ message: 'Webhook processing failed' });
     }
   });
 

@@ -3,7 +3,9 @@
 ## Overview
 Corrige Tes Cours is an AI-powered educational platform for French-speaking university students in Cameroon. It aims to enhance studying efficiency through automated course summaries, personalized quizzes, and performance tracking. The platform features a sales-focused landing page, an anonymous onboarding flow for conversion optimization, and a comprehensive user dashboard. It operates on a freemium model, offering both a free tier and a Premium subscription (1,500 XAF/month) with advanced features. Payment is processed via Mobile Money and credit cards through Lygos. The business vision is to provide accessible, AI-driven educational tools to improve student outcomes in Cameroon.
 
-**Latest Update (Jan 2025):** Implemented anonymous onboarding system allowing users to test the app (upload 1 course + generate summary) before creating an account, with seamless migration upon signup to maximize conversion rates.
+**Latest Update (Jan 2025):** 
+- Implemented anonymous onboarding system allowing users to test the app (upload 1 course + generate summary) before creating an account, with seamless migration upon signup to maximize conversion rates.
+- **Mobile-First UX (Oct 2025)**: Complete mobile optimization with WhatsApp-style bottom navigation bar. Sidebar hidden on mobile (<768px), replaced by fixed bottom nav with 5 items (Home, Cours, Chat, Stats, Profile). All dashboard pages optimized with responsive text sizes, compact spacing, and mobile-first layouts while desktop design remains unchanged.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -12,6 +14,8 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 The frontend is built with React 18 and TypeScript, using Vite for fast development. Wouter handles routing, and TanStack Query manages server state. UI components are built with Shadcn/ui and Radix UI, styled using Tailwind CSS, adhering to a minimalist, modern aesthetic with a NotebookLM-inspired design. The platform supports dynamic theming with dark/light modes, persists themes, and uses Inter and Poppins fonts. The design emphasizes responsiveness and a sales-focused user experience on landing pages, featuring consistent navigation and footers.
+
+**Mobile Navigation (Oct 2025)**: Implemented WhatsApp-style bottom navigation bar (`BottomNav.tsx`) visible only on mobile (<768px). Features 5 navigation items (Home, Cours, Chat, Stats, Profile) with active state highlighting. Sidebar completely hidden on mobile via responsive classes. Desktop experience unchanged with traditional sidebar navigation.
 
 ### Backend Architecture
 The backend uses Express.js with Node.js and TypeScript. It features a dual authentication system supporting Email/Password (with bcrypt hashing) and Google OAuth via Passport.js, utilizing session-based authentication with secure HTTP-only cookies and a PostgreSQL session store. APIs are RESTful, protected by `isAuthenticated` middleware, and use JSON for communication. The database layer employs Drizzle ORM with PostgreSQL (Neon serverless) for type-safe queries and schema management, including migrations. Core entities include Users, Courses, Summaries, Quizzes, and Quiz Results, with a focus on user, course, and AI-generated content management.

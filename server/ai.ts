@@ -29,7 +29,10 @@ INSTRUCTIONS IMPORTANTES :
 - Utilise des sauts de ligne pour séparer les sections
 - Pour les titres de section, écris-les simplement en MAJUSCULES suivis de deux-points
 - Pour les listes, utilise des tirets simples (-) ou numéros (1., 2., etc.)
-- Respecte tous les caractères spéciaux et accentués du texte original
+- Respecte les accents français (é, è, à, ô, ç, etc.)
+- Pour les flèches, utilise "->" au lieu de "→"
+- Pour les pourcentages, écris "%" normalement
+- Évite les symboles Unicode complexes (•, ≈, ≠, etc.)
 
 Le résumé doit :
 - Être concis mais complet

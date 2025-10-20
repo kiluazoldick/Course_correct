@@ -21,26 +21,50 @@ export async function generateCourseSummary(courseContent: string, courseTitle: 
       messages: [
         {
           role: 'system',
-          content: `Tu es un assistant éducatif expert qui crée des résumés de cours clairs et structurés pour les étudiants universitaires. 
-          
-Ton objectif est de synthétiser le contenu du cours en un résumé concis qui :
-- Identifie les concepts clés et les points essentiels
-- Organise l'information de manière logique avec des titres et sous-titres
-- Utilise des listes à puces pour faciliter la révision
-- Explique les termes techniques de manière accessible
-- Met en évidence les définitions importantes
-- Conserve les formules, théorèmes ou exemples cruciaux
+          content: `Tu es un assistant éducatif expert qui crée des résumés de cours clairs et structurés pour les étudiants universitaires.
 
-Format de sortie : Markdown avec une structure claire (# pour titres, ## pour sous-titres, - pour listes).`
+INSTRUCTIONS IMPORTANTES :
+- Génère UNIQUEMENT du texte brut, sans aucune balise Markdown (pas de #, ##, **, _, etc.)
+- N'ajoute JAMAIS "Résumé:", "Introduction:", ou autres préfixes artificiels
+- Utilise des sauts de ligne pour séparer les sections
+- Pour les titres de section, écris-les simplement en MAJUSCULES suivis de deux-points
+- Pour les listes, utilise des tirets simples (-) ou numéros (1., 2., etc.)
+- Respecte tous les caractères spéciaux et accentués du texte original
+
+Le résumé doit :
+- Être concis mais complet
+- Respecter le sens du texte d'origine
+- Être bien structuré, sans introduction ni conclusion artificielle
+- Utiliser un style neutre et académique
+- Identifier les concepts clés et points essentiels
+- Expliquer les termes techniques de manière accessible
+- Conserver les formules, théorèmes ou exemples cruciaux
+
+EXEMPLE DE FORMAT ATTENDU :
+
+TITRE DE SECTION 1:
+
+Texte explicatif avec les points importants.
+
+Points clés:
+- Premier point important
+- Deuxième point important
+- Troisième point important
+
+TITRE DE SECTION 2:
+
+Suite du résumé avec d'autres informations pertinentes.`
         },
         {
           role: 'user',
-          content: `Crée un résumé structuré et complet du cours suivant :
+          content: `Lis attentivement ce texte et génère un résumé clair et précis.
 
 Titre du cours : ${courseTitle}
 
-Contenu :
-${courseContent}`
+Contenu à résumer :
+${courseContent}
+
+Retourne uniquement du texte brut bien structuré, sans balises Markdown.`
         }
       ],
       temperature: 0.7,
@@ -60,7 +84,7 @@ ${courseContent}`
     throw new Error('No summary generated from OpenRouter API');
   }
 
-  return summary;
+  return summary.trim();
 }
 
 export async function generateQuiz(courseContent: string, courseTitle: string, quizType: 'mcq' | 'open' | 'mixed' = 'mixed'): Promise<any> {

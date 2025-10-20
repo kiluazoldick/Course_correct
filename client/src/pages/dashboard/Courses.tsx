@@ -232,6 +232,43 @@ export default function Courses() {
     generateSummaryMutation.mutate(course.id);
   };
 
+  const normalizePdfText = (text: string): string => {
+    return text
+      .replace(/→/g, '->')
+      .replace(/←/g, '<-')
+      .replace(/↑/g, '^')
+      .replace(/↓/g, 'v')
+      .replace(/•/g, '-')
+      .replace(/–/g, '-')
+      .replace(/—/g, '-')
+      .replace(/'/g, "'")
+      .replace(/'/g, "'")
+      .replace(/"/g, '"')
+      .replace(/"/g, '"')
+      .replace(/…/g, '...')
+      .replace(/≈/g, '~=')
+      .replace(/≠/g, '!=')
+      .replace(/≤/g, '<=')
+      .replace(/≥/g, '>=')
+      .replace(/×/g, 'x')
+      .replace(/÷/g, '/')
+      .replace(/±/g, '+/-')
+      .replace(/°/g, ' deg')
+      .replace(/µ/g, 'u')
+      .replace(/²/g, '2')
+      .replace(/³/g, '3')
+      .replace(/¹/g, '1')
+      .replace(/¼/g, '1/4')
+      .replace(/½/g, '1/2')
+      .replace(/¾/g, '3/4')
+      .replace(/€/g, 'EUR')
+      .replace(/£/g, 'GBP')
+      .replace(/¥/g, 'JPY')
+      .replace(/™/g, '(TM)')
+      .replace(/©/g, '(C)')
+      .replace(/®/g, '(R)');
+  };
+
   const downloadSummaryAsPdf = () => {
     if (!currentSummary || !selectedCourse) return;
 
@@ -257,7 +294,7 @@ export default function Courses() {
         doc.setTextColor(120);
         
         const footerY = pageHeight - 10;
-        doc.text('Généré par Corrige Tes Cours', margin, footerY);
+        doc.text(normalizePdfText('Genere par Corrige Tes Cours'), margin, footerY);
         doc.text(`Page ${pageNum}`, pageWidth - margin, footerY, { align: 'right' });
         
         doc.setDrawColor(200);
@@ -269,7 +306,8 @@ export default function Courses() {
       doc.setFontSize(20);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(0);
-      const titleLines = doc.splitTextToSize(`Résumé: ${selectedCourse.title}`, maxWidth);
+      const normalizedTitle = normalizePdfText(`Resume: ${selectedCourse.title}`);
+      const titleLines = doc.splitTextToSize(normalizedTitle, maxWidth);
       titleLines.forEach((line: string) => {
         doc.text(line, margin, yPosition);
         yPosition += 8;
@@ -284,7 +322,7 @@ export default function Courses() {
         month: 'long',
         year: 'numeric'
       });
-      doc.text(`Généré le ${date}`, margin, yPosition);
+      doc.text(normalizePdfText(`Genere le ${date}`), margin, yPosition);
       yPosition += 3;
 
       doc.setDrawColor(100);
@@ -296,7 +334,8 @@ export default function Courses() {
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(0);
       
-      const lines = currentSummary.split('\n');
+      const normalizedSummary = normalizePdfText(currentSummary);
+      const lines = normalizedSummary.split('\n');
       
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -340,8 +379,8 @@ export default function Courses() {
             yPosition = margin;
           }
           
-          if (!text.startsWith('•')) {
-            text = text.replace(/^-\s*/, '• ');
+          if (!text.startsWith('-')) {
+            text = text.replace(/^-\s*/, '- ');
           }
           
           const listLines = doc.splitTextToSize(text, maxWidth - 5);

@@ -12,7 +12,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { insertCourseSchema, type Course, type InsertCourse } from '@shared/schema';
 import { Plus, BookOpen, Trash2, Edit, Calendar, Sparkles, FileText, Eye, Upload } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
-import ReactMarkdown from 'react-markdown';
 import jsPDF from 'jspdf';
 import {
   AlertDialog,
@@ -237,95 +236,150 @@ export default function Courses() {
     if (!currentSummary || !selectedCourse) return;
 
     try {
-      const doc = new jsPDF();
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        putOnlyUsedFonts: true,
+        compress: true
+      });
+      
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 20;
       const maxWidth = pageWidth - 2 * margin;
+      const footerHeight = 15;
       let yPosition = margin;
 
-      // Add title
-      doc.setFontSize(18);
+      const addFooter = (pageNum: number) => {
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(120);
+        
+        const footerY = pageHeight - 10;
+        doc.text('Généré par Corrige Tes Cours', margin, footerY);
+        doc.text(`Page ${pageNum}`, pageWidth - margin, footerY, { align: 'right' });
+        
+        doc.setDrawColor(200);
+        doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
+      };
+
+      let pageNumber = 1;
+
+      doc.setFontSize(20);
       doc.setFont('helvetica', 'bold');
-      const title = `Résumé : ${selectedCourse.title}`;
-      doc.text(title, margin, yPosition);
-      yPosition += 15;
+      doc.setTextColor(0);
+      const titleLines = doc.splitTextToSize(`Résumé: ${selectedCourse.title}`, maxWidth);
+      titleLines.forEach((line: string) => {
+        doc.text(line, margin, yPosition);
+        yPosition += 8;
+      });
+      yPosition += 5;
 
-      // Add subtitle
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('helvetica', 'italic');
       doc.setTextColor(100);
-      doc.text('Généré par Corrige Tes Cours', margin, yPosition);
-      yPosition += 10;
+      const date = new Date().toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+      doc.text(`Généré le ${date}`, margin, yPosition);
+      yPosition += 3;
 
-      // Add separator
-      doc.setDrawColor(200);
+      doc.setDrawColor(100);
+      doc.setLineWidth(0.5);
       doc.line(margin, yPosition, pageWidth - margin, yPosition);
       yPosition += 10;
 
-      // Process markdown content (simple conversion)
       doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
       doc.setTextColor(0);
+      
       const lines = currentSummary.split('\n');
       
-      lines.forEach(line => {
-        // Handle different markdown elements
-        let text = line;
-        let isBold = false;
-        let isTitle = false;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        let text = line.trim();
 
-        if (line.startsWith('# ')) {
-          text = line.substring(2).replace(/\*\*/g, '');
-          isTitle = true;
-          doc.setFontSize(16);
-          doc.setFont('helvetica', 'bold');
-        } else if (line.startsWith('## ')) {
-          text = line.substring(3).replace(/\*\*/g, '');
-          isTitle = true;
-          doc.setFontSize(14);
-          doc.setFont('helvetica', 'bold');
-        } else if (line.startsWith('### ')) {
-          text = line.substring(4).replace(/\*\*/g, '');
-          isTitle = true;
-          doc.setFontSize(12);
-          doc.setFont('helvetica', 'bold');
-        } else if (line.startsWith('- ') || line.startsWith('* ')) {
-          text = '• ' + line.substring(2).replace(/\*\*(.+?)\*\*/g, '$1').replace(/_(.+?)_/g, '$1');
-          doc.setFont('helvetica', 'normal');
-        } else if (line.match(/^\d+\./)) {
-          text = line.replace(/\*\*(.+?)\*\*/g, '$1').replace(/_(.+?)_/g, '$1');
-          doc.setFont('helvetica', 'normal');
-        } else {
-          text = line.replace(/\*\*(.+?)\*\*/g, '$1').replace(/_(.+?)_/g, '$1');
-          doc.setFont('helvetica', 'normal');
+        if (!text) {
+          yPosition += 4;
+          continue;
         }
 
-        // Skip empty lines but add spacing
-        if (!text.trim()) {
-          yPosition += 3;
-          return;
-        }
-
-        // Split text to fit page width
-        const splitText = doc.splitTextToSize(text, maxWidth);
+        const isUpperCase = text === text.toUpperCase() && text.length > 3;
+        const isListItem = text.startsWith('-') || text.startsWith('•') || text.match(/^\d+\./);
         
-        splitText.forEach((textLine: string) => {
-          if (yPosition > pageHeight - margin) {
+        if (isUpperCase && text.endsWith(':')) {
+          if (yPosition > pageHeight - footerHeight - 20) {
+            addFooter(pageNumber);
             doc.addPage();
+            pageNumber++;
             yPosition = margin;
           }
-          doc.text(textLine, margin, yPosition);
-          yPosition += isTitle ? 8 : 6;
-        });
+          
+          yPosition += 5;
+          doc.setFontSize(13);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(50);
+          const titleText = doc.splitTextToSize(text, maxWidth);
+          titleText.forEach((t: string) => {
+            doc.text(t, margin, yPosition);
+            yPosition += 7;
+          });
+          yPosition += 2;
+          
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0);
+        } else if (isListItem) {
+          if (yPosition > pageHeight - footerHeight - 10) {
+            addFooter(pageNumber);
+            doc.addPage();
+            pageNumber++;
+            yPosition = margin;
+          }
+          
+          if (!text.startsWith('•')) {
+            text = text.replace(/^-\s*/, '• ');
+          }
+          
+          const listLines = doc.splitTextToSize(text, maxWidth - 5);
+          listLines.forEach((listLine: string, idx: number) => {
+            if (yPosition > pageHeight - footerHeight - 10) {
+              addFooter(pageNumber);
+              doc.addPage();
+              pageNumber++;
+              yPosition = margin;
+            }
+            doc.text(listLine, margin + (idx > 0 ? 5 : 0), yPosition);
+            yPosition += 5.5;
+          });
+        } else {
+          if (yPosition > pageHeight - footerHeight - 10) {
+            addFooter(pageNumber);
+            doc.addPage();
+            pageNumber++;
+            yPosition = margin;
+          }
+          
+          const textLines = doc.splitTextToSize(text, maxWidth);
+          textLines.forEach((textLine: string) => {
+            if (yPosition > pageHeight - footerHeight - 10) {
+              addFooter(pageNumber);
+              doc.addPage();
+              pageNumber++;
+              yPosition = margin;
+            }
+            doc.text(textLine, margin, yPosition);
+            yPosition += 5.5;
+          });
+          yPosition += 1;
+        }
+      }
 
-        // Add spacing after titles
-        if (isTitle) yPosition += 3;
-        
-        // Reset font for next line
-        doc.setFontSize(11);
-      });
+      addFooter(pageNumber);
 
-      // Save PDF
       const fileName = `resume-${selectedCourse.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.pdf`;
       doc.save(fileName);
 
@@ -791,9 +845,11 @@ export default function Courses() {
               Résumé intelligent généré par Corrige Tes Cours
             </DialogDescription>
           </DialogHeader>
-          <div className="prose prose-sm max-w-none dark:prose-invert" data-testid="text-summary-content">
+          <div className="bg-muted/30 rounded-lg p-6 max-w-none" data-testid="text-summary-content">
             {currentSummary && (
-              <ReactMarkdown>{currentSummary}</ReactMarkdown>
+              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
+                {currentSummary}
+              </pre>
             )}
           </div>
           <DialogFooter>

@@ -87,14 +87,19 @@ export async function generateQuiz(courseContent: string, courseTitle: string, q
 
 ${quizInstructions[quizType]}
 
+IMPORTANT pour les QCM :
+- Varie les bonnes réponses (ne les mets pas toujours en position A ou B)
+- Assure-toi qu'elles soient distribuées équitablement entre A, B, C et D
+- Les options doivent être plausibles pour tester vraiment la compréhension
+
 Format de sortie : JSON avec cette structure exacte :
 {
   "questions": [
     {
       "type": "mcq" | "open",
       "question": "La question ici",
-      "options": ["A", "B", "C", "D"], // seulement pour MCQ
-      "correctAnswer": "B", // pour MCQ, l'option correcte (A, B, C, ou D)
+      "options": ["Option A", "Option B", "Option C", "Option D"], // seulement pour MCQ
+      "correctAnswer": "Option B", // pour MCQ, l'option COMPLÈTE qui est correcte (pas juste la lettre)
       "explanation": "Explication de la réponse correcte"
     }
   ]
@@ -148,19 +153,31 @@ export async function evaluateOpenAnswer(question: string, userAnswer: string, e
       messages: [
         {
           role: 'system',
-          content: `Tu es un correcteur bienveillant qui évalue les réponses d'étudiants.
+          content: `Tu es un professeur bienveillant qui évalue les réponses d'étudiants de manière encourageante.
 
-Évalue la réponse de l'étudiant selon ces critères :
-- Pertinence par rapport à la question
-- Présence des points clés attendus
-- Clarté et précision de l'explication
+RÈGLES D'ÉVALUATION BIENVEILLANTE :
+✅ Une réponse courte mais qui contient les éléments essentiels mérite une très bonne note (80-100)
+✅ Si les mots-clés principaux sont présents, la note doit être élevée (70-100)
+✅ La forme de la réponse importe moins que le fond
+✅ Une réponse concise et précise vaut autant qu'une réponse détaillée
+✅ Valorise la compréhension même si l'expression n'est pas parfaite
 
-Donne un score de 0 à 100 et un feedback constructif.
+❌ Si la réponse est vide ou hors-sujet, la note est 0
+❌ Si la réponse ne contient aucun élément pertinent, la note est 0-20
+
+BARÈME :
+- 90-100 : Excellente compréhension, tous les points clés présents
+- 70-89 : Bonne compréhension, la plupart des points clés présents
+- 50-69 : Compréhension partielle, quelques points clés présents
+- 30-49 : Compréhension limitée, peu de points clés
+- 0-29 : Réponse inappropriée ou vide
+
+Sois OBJECTIF et BIENVEILLANT, mais n'hésite pas à donner 0 si la réponse est vide.
 
 Format de sortie : JSON avec cette structure exacte :
 {
   "score": 85,
-  "feedback": "Ton explication détaillée ici avec les points forts et axes d'amélioration"
+  "feedback": "Excellent travail ! Tu as bien saisi les concepts principaux. Points forts : [liste]. Pour améliorer : [suggestions]"
 }`
         },
         {
@@ -169,9 +186,9 @@ Format de sortie : JSON avec cette structure exacte :
 
 Points clés attendus : ${expectedPoints}
 
-Réponse de l'étudiant : ${userAnswer}
+Réponse de l'étudiant : ${userAnswer || "(réponse vide)"}
 
-Évalue cette réponse.`
+Évalue cette réponse en suivant les règles bienveillantes.`
         }
       ],
       temperature: 0.5,

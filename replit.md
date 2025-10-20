@@ -8,6 +8,10 @@ Corrige Tes Cours is an AI-powered educational platform for French-speaking univ
 - Implemented anonymous onboarding system allowing users to test the app (upload 1 course + generate summary) before creating an account, with seamless migration upon signup to maximize conversion rates.
 - **Mobile-First UX**: Complete mobile optimization with WhatsApp-style bottom navigation bar. Sidebar hidden on mobile (<768px), replaced by fixed bottom nav with 5 items (Home, Cours, Chat, Stats, Profile). All dashboard pages optimized with responsive text sizes, compact spacing, and mobile-first layouts while desktop design remains unchanged.
 - **Chat Page Redesign**: Complete UI/UX overhaul inspired by ChatGPT for minimalist, clean aesthetic. Replaced flashy gradient avatars with simple bordered icons (GraduationCap for Tariq, "Tu" badge for user). Implemented ChatGPT-style layout with centered messages (max-w-3xl), fixed input at bottom with backdrop blur, generous spacing, and responsive design. Header streamlined to h-14 with minimal branding. Mobile-optimized with hidden badge text, compact buttons, and smaller avatars.
+- **Quiz System Improvements** (Oct 20, 2025): Enhanced quiz generation and evaluation for better learning experience:
+  - **Randomized MCQ Options**: AI now varies correct answer positions (A, B, C, D) instead of always placing them in the same position, ensuring fair testing
+  - **Improved MCQ Evaluation**: Strict comparison of full option text for accurate scoring
+  - **Benevolent Open-Answer Evaluation**: More encouraging evaluation system that rewards concise answers containing key concepts (70-100 scores for answers with main keywords), reducing discouragement from overly strict grading. Evaluation criteria prioritize content over form, making short precise answers as valuable as detailed ones.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

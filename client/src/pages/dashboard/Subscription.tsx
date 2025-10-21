@@ -35,6 +35,47 @@ export default function Subscription() {
   const [, setLocation] = useLocation();
   const [paymentId, setPaymentId] = useState<string | null>(null);
 
+  // Check URL params for payment result (from return URL)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (params.get('success') === 'true') {
+      toast({
+        title: "Paiement réussi ! 🎉",
+        description: "Ton abonnement Premium est maintenant actif",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/subscription'] });
+      // Clean URL
+      window.history.replaceState({}, '', '/dashboard/subscription');
+    } else if (params.get('error')) {
+      const error = params.get('error');
+      let errorMessage = "Le paiement n'a pas été complété. Réessaye.";
+      
+      if (error === 'payment_failed') {
+        errorMessage = "Le paiement a été refusé. Vérifie tes informations et réessaye.";
+      } else if (error === 'payment_not_found') {
+        errorMessage = "Transaction introuvable. Contacte le support.";
+      } else if (error === 'server_error') {
+        errorMessage = "Erreur serveur. Réessaye dans quelques instants.";
+      }
+      
+      toast({
+        title: "Paiement échoué",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      // Clean URL
+      window.history.replaceState({}, '', '/dashboard/subscription');
+    } else if (params.get('pending') === 'true') {
+      toast({
+        title: "Paiement en attente",
+        description: "Ton paiement est en cours de traitement. Nous te confirmerons dès validation.",
+      });
+      // Clean URL
+      window.history.replaceState({}, '', '/dashboard/subscription');
+    }
+  }, [toast]);
+
   const { data: subscription, isLoading: subLoading } = useQuery<SubscriptionData>({
     queryKey: ['/api/subscription'],
   });

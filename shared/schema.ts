@@ -30,6 +30,7 @@ export const users = pgTable("users", {
   googleId: varchar("google_id").unique(), // Nullable for local auth users
   firstName: varchar("first_name").notNull(),
   lastName: varchar("last_name").notNull(),
+  phone: varchar("phone"), // Phone number for payments
   profileImageUrl: varchar("profile_image_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -66,6 +67,7 @@ export type User = typeof users.$inferSelect;
 export const updateUserProfileSchema = z.object({
   firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères").optional(),
   lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères").optional(),
+  phone: z.string().regex(/^\+?[0-9]{9,15}$/, "Numéro de téléphone invalide (ex: +237670000000)").optional().or(z.literal("")),
   profileImageUrl: z.string().url().optional().or(z.literal("")),
 });
 

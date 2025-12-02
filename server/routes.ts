@@ -838,11 +838,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: 'XAF',
         status: 'pending',
         paymentMethod: 'mobile_money',
-        lygosProductId: paymentResponse.productId || null,
-        lygosTransactionId: orderId,
+        lygosProductId: paymentResponse.productId || null, // Only store if we have actual gateway ID
+        lygosTransactionId: orderId, // Our internal order reference
         metadata: { 
           checkoutUrl: paymentResponse.checkoutUrl,
           lygosOrderId: orderId,
+          lygosGatewayId: paymentResponse.productId || null,
         },
       });
 
@@ -941,11 +942,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status, order_id } = req.query;
       const orderId = order_id as string;
-      const paymentStatus = status as string;
+      const urlStatus = status as string;
 
       console.log('=== Lygos Return URL ===');
       console.log('Order ID:', orderId);
-      console.log('Status from URL:', paymentStatus);
+      console.log('Status from URL:', urlStatus);
       console.log('Query params:', req.query);
 
       if (!orderId) {
@@ -953,7 +954,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.redirect('/dashboard/subscription?error=no_order_id');
       }
 
-      // Find payment by order ID
+      // Find payment by order ID (stored in lygosTransactionId)
       const allPayments = await db.select().from(payments);
       const payment = allPayments.find((p: Payment) => p.lygosTransactionId === orderId);
 
@@ -968,12 +969,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.redirect('/dashboard/subscription?success=true');
       }
 
-      // Check status from URL (Lygos redirects to success_url or failure_url)
-      if (paymentStatus === 'success') {
-        // Payment successful - update payment and subscription
+      // Try to verify via Lygos API if we have the gateway ID
+      let verifiedStatus: 'success' | 'failed' | 'pending' = 'pending';
+      let verifiedAmount: number | undefined;
+      let verificationResult: any = null;
+
+      if (payment.lygosProductId) {
+        try {
+          const { lygosService } = await import('./lygos');
+          const apiStatus = await lygosService.getPaymentStatus(payment.lygosProductId);
+          console.log('Lygos API verification result:', apiStatus);
+          
+          verifiedStatus = apiStatus.status;
+          verifiedAmount = apiStatus.amount;
+          verificationResult = apiStatus.details;
+        } catch (apiError) {
+          console.log('API verification failed, falling back to URL status:', apiError);
+          // Fall back to URL status if API verification fails
+          verifiedStatus = urlStatus === 'success' ? 'success' : 
+                          urlStatus === 'failed' ? 'failed' : 'pending';
+        }
+      } else {
+        // No gateway ID stored, trust URL status (Lygos redirects to correct URL)
+        console.log('No gateway ID, using URL status:', urlStatus);
+        verifiedStatus = urlStatus === 'success' ? 'success' : 
+                        urlStatus === 'failed' ? 'failed' : 'pending';
+      }
+
+      // Verify amount if available (should be >= 1500 XAF)
+      const expectedAmount = 1500;
+      if (verifiedStatus === 'success' && verifiedAmount && verifiedAmount < expectedAmount) {
+        console.error('❌ Amount mismatch! Expected:', expectedAmount, 'Got:', verifiedAmount);
+        verifiedStatus = 'failed';
+      }
+
+      if (verifiedStatus === 'success') {
+        // Payment verified as successful
         const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
-          ? { ...payment.metadata as object, returnStatus: 'success' }
-          : { returnStatus: 'success' };
+          ? { 
+              ...payment.metadata as object, 
+              returnStatus: 'success', 
+              returnedAt: new Date().toISOString(),
+              verificationResult,
+              verifiedAmount,
+            }
+          : { 
+              returnStatus: 'success', 
+              returnedAt: new Date().toISOString(),
+              verificationResult,
+              verifiedAmount,
+            };
 
         await storage.updatePayment(payment.id, {
           status: 'completed',
@@ -981,7 +1026,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           metadata: metadataUpdate,
         });
 
-        // Create or update subscription
+        // Create or update subscription for Premium access
         const startDate = new Date();
         const endDate = new Date();
         endDate.setMonth(endDate.getMonth() + 1);
@@ -993,9 +1038,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             startDate,
             endDate,
             paymentMethod: 'mobile_money',
-            amount: 1500,
+            amount: verifiedAmount || 1500,
             transactionId: orderId,
           });
+          console.log('✅ Subscription updated to Premium for user:', payment.userId);
         } else {
           const newSub = await storage.createSubscription({
             userId: payment.userId,
@@ -1003,29 +1049,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
             startDate,
             endDate,
             paymentMethod: 'mobile_money',
-            amount: 1500,
+            amount: verifiedAmount || 1500,
             transactionId: orderId,
           });
 
           await storage.updatePayment(payment.id, {
             subscriptionId: newSub.id,
           });
+          console.log('✅ New Premium subscription created for user:', payment.userId);
         }
 
-        console.log('✅ Payment completed successfully via Lygos return URL:', orderId);
+        console.log('✅ Payment verified and completed via Lygos:', orderId);
         return res.redirect('/dashboard/subscription?success=true');
-      } else if (paymentStatus === 'failed') {
-        // Payment failed
+      } else if (verifiedStatus === 'failed') {
+        // Payment verified as failed
+        const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
+          ? { 
+              ...payment.metadata as object, 
+              returnStatus: 'failed', 
+              returnedAt: new Date().toISOString(),
+              verificationResult,
+            }
+          : { 
+              returnStatus: 'failed', 
+              returnedAt: new Date().toISOString(),
+              verificationResult,
+            };
+
         await storage.updatePayment(payment.id, {
           status: 'failed',
-          metadata: { returnStatus: 'failed' },
+          metadata: metadataUpdate,
         });
 
-        console.log('❌ Payment failed via Lygos return URL:', orderId);
+        console.log('❌ Payment failed via Lygos:', orderId);
         return res.redirect('/dashboard/subscription?error=payment_failed');
       } else {
-        // Unknown status - treat as pending
-        console.log('⏳ Unknown payment status via Lygos return URL:', orderId, paymentStatus);
+        // Payment still pending
+        console.log('⏳ Payment still pending via Lygos:', orderId);
         return res.redirect('/dashboard/subscription?pending=true');
       }
     } catch (error) {

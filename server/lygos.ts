@@ -79,11 +79,13 @@ export class LygosService {
         };
       }
 
+      console.log('Lygos gateway ID:', data.id);
+      
       return {
         success: true,
         checkoutUrl: data.link,
-        productId: data.id,
-        orderId: orderId,
+        productId: data.id, // This is the Lygos gateway ID for status verification
+        orderId: orderId,    // This is our internal order reference
       };
     } catch (error) {
       console.error('Lygos payment creation error:', error);

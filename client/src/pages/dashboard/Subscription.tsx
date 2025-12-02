@@ -325,7 +325,7 @@ export default function Subscription() {
 
           <div className="mt-4 p-4 bg-muted/50 rounded-md">
             <p className="text-sm text-muted-foreground">
-              💡 Tes paiements sont sécurisés par <span className="font-medium">CinetPay</span>, 
+              Tes paiements sont sécurisés par <span className="font-medium">Lygos</span>, 
               la solution de paiement de confiance en Afrique.
             </p>
           </div>

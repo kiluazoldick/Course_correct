@@ -47,6 +47,13 @@ function DashboardContent() {
             <Route path="/performance" component={Performance} />
             <Route path="/subscription" component={Subscription} />
             <Route path="/account" component={Account} />
+            {/* Dashboard prefixed routes for payment redirects */}
+            <Route path="/dashboard/subscription" component={Subscription} />
+            <Route path="/dashboard/courses" component={Courses} />
+            <Route path="/dashboard/quizzes" component={Quizzes} />
+            <Route path="/dashboard/chat" component={Chat} />
+            <Route path="/dashboard/performance" component={Performance} />
+            <Route path="/dashboard/account" component={Account} />
           </Switch>
         </main>
 

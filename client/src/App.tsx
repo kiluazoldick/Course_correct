@@ -53,6 +53,13 @@ function Router() {
           <Route path="/performance" component={Dashboard} />
           <Route path="/subscription" component={Dashboard} />
           <Route path="/account" component={Dashboard} />
+          {/* Dashboard prefixed routes for payment redirects */}
+          <Route path="/dashboard/subscription" component={Dashboard} />
+          <Route path="/dashboard/courses" component={Dashboard} />
+          <Route path="/dashboard/quizzes" component={Dashboard} />
+          <Route path="/dashboard/chat" component={Dashboard} />
+          <Route path="/dashboard/performance" component={Dashboard} />
+          <Route path="/dashboard/account" component={Dashboard} />
         </>
       )}
       <Route component={NotFound} />

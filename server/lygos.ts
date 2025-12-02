@@ -4,9 +4,9 @@ const LYGOS_API_KEY = process.env.LYGOS_API_KEY;
 const LYGOS_API_URL = 'https://api.lygosapp.com/v1';
 
 export interface LygosPaymentRequest {
-  title: string;
+  shopName: string;
   amount: number;
-  description: string;
+  message: string;
   successUrl: string;
   failureUrl: string;
   orderId?: string;
@@ -42,16 +42,19 @@ export class LygosService {
 
   async createPayment(params: LygosPaymentRequest): Promise<LygosPaymentResponse> {
     try {
-      const orderId = params.orderId || nanoid();
+      const orderId = params.orderId || `CTC-${Date.now()}-${nanoid(8)}`;
       
       const payload = {
         amount: params.amount,
-        shop_name: params.title,
-        message: params.description,
+        shop_name: params.shopName,
+        message: params.message,
         order_id: orderId,
         success_url: params.successUrl,
         failure_url: params.failureUrl,
       };
+
+      console.log('=== Lygos Payment Request ===');
+      console.log('Payload:', JSON.stringify(payload, null, 2));
 
       const response = await fetch(`${this.baseUrl}/gateway`, {
         method: 'POST',
@@ -63,6 +66,10 @@ export class LygosService {
       });
 
       const data = await response.json();
+      
+      console.log('=== Lygos Payment Response ===');
+      console.log('Status:', response.status);
+      console.log('Data:', JSON.stringify(data, null, 2));
 
       if (!response.ok) {
         console.error('Lygos API error:', data);
@@ -74,9 +81,9 @@ export class LygosService {
 
       return {
         success: true,
-        checkoutUrl: data.link || data.checkout_url || data.url,
+        checkoutUrl: data.link,
         productId: data.id,
-        orderId: data.order_id || orderId,
+        orderId: orderId,
       };
     } catch (error) {
       console.error('Lygos payment creation error:', error);

@@ -30,10 +30,9 @@ interface QuizQuestion {
 
 export default function Quizzes() {
   const { toast } = useToast();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [quizType, setQuizType] = useState<'mcq' | 'open' | 'mixed'>('mixed');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null);
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -98,7 +97,6 @@ export default function Quizzes() {
   });
 
   const handleGenerateQuiz = () => {
-    setIsGenerating(true);
     generateQuizMutation.mutate();
   };
 
@@ -126,10 +124,8 @@ export default function Quizzes() {
     const unansweredCount = answers.filter(a => !a || a.trim() === '').length;
     if (unansweredCount > 0) {
       toast({
-        title: language === 'fr' ? 'Questions non répondues' : 'Unanswered questions',
-        description: language === 'fr' 
-          ? `Il reste ${unansweredCount} question(s) sans réponse.`
-          : `There are ${unansweredCount} unanswered question(s).`,
+        title: t.quizzesPage.unansweredQuestions,
+        description: t.quizzesPage.unansweredQuestionsDesc.replace('{count}', String(unansweredCount)),
         variant: 'destructive',
       });
       return;
@@ -166,9 +162,7 @@ export default function Quizzes() {
             {t.quizzesPage.generateQuiz}
           </CardTitle>
           <CardDescription data-testid="card-description-generate-quiz">
-            {language === 'fr' 
-              ? 'Sélectionnez un cours et le type de quiz que vous souhaitez générer'
-              : 'Select a course and the type of quiz you want to generate'}
+            {t.quizzesPage.generateQuizDesc}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -227,7 +221,7 @@ export default function Quizzes() {
                   <CardTitle className="text-base" data-testid={`card-title-quiz-${quiz.id}`}>{quiz.title}</CardTitle>
                   <CardDescription className="flex items-center gap-2" data-testid={`card-description-quiz-${quiz.id}`}>
                     <BookOpen className="w-4 h-4" />
-                    {(quiz.questions as QuizQuestion[]).length} questions
+                    {(quiz.questions as QuizQuestion[]).length} {t.quizzesPage.questions}
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
@@ -244,7 +238,7 @@ export default function Quizzes() {
                     data-testid={`button-take-quiz-${quiz.id}`}
                   >
                     <PlayCircle className="w-4 h-4 mr-2" />
-                    {language === 'fr' ? 'Passer le quiz' : 'Take quiz'}
+                    {t.quizzesPage.takeQuiz}
                   </Button>
                 </CardFooter>
               </Card>
@@ -346,7 +340,7 @@ export default function Quizzes() {
 
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg" data-testid="text-answer-details">
-                  {language === 'fr' ? 'Détails des réponses' : 'Answer details'}
+                  {t.quizzesPage.answerDetails}
                 </h3>
                 {quizResult.evaluations.map((evaluation: any, index: number) => {
                   const question = currentQuiz ? (currentQuiz.questions as QuizQuestion[])[evaluation.questionIndex] : null;

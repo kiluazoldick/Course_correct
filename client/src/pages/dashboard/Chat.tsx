@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Trash2, Crown, Sparkles, Loader2, GraduationCap } from 'lucide-react';
+import { Send, Trash2, Crown, Loader2, GraduationCap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
@@ -29,7 +29,7 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,7 +44,7 @@ export default function Chat() {
       const response = await apiRequest('POST', '/api/chat/message', { message: messageText });
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/chat/session'] });
       setMessage('');
       setTimeout(scrollToBottom, 100);
@@ -120,22 +120,17 @@ export default function Chat() {
   const isPremium = session?.isPremium || false;
   const messagesRemaining = session?.messagesRemaining ?? 5;
 
-  // Suggestions based on language
-  const suggestions = language === 'fr' ? [
-    { title: "Explication de concept", subtitle: "Théorème de Pythagore", message: "Explique-moi le théorème de Pythagore" },
-    { title: "Méthode de révision", subtitle: "Réviser efficacement", message: "Comment réviser efficacement pour un examen ?" },
-    { title: "Mémorisation", subtitle: "Astuces de mémorisation", message: "Donne-moi des astuces pour mémoriser mes cours" },
-    { title: "Gestion du stress", subtitle: "Stress des examens", message: "Comment gérer mon stress avant les examens ?" },
-  ] : [
-    { title: "Concept explanation", subtitle: "Pythagorean theorem", message: "Explain the Pythagorean theorem to me" },
-    { title: "Study method", subtitle: "Study effectively", message: "How to study effectively for an exam?" },
-    { title: "Memorization", subtitle: "Memory tips", message: "Give me tips to memorize my courses" },
-    { title: "Stress management", subtitle: "Exam stress", message: "How to manage my stress before exams?" },
+  // Suggestion cards from translations
+  const suggestionCards = [
+    t.chatPage.suggestionCards.concept,
+    t.chatPage.suggestionCards.study,
+    t.chatPage.suggestionCards.memory,
+    t.chatPage.suggestionCards.stress,
   ];
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header - Minimaliste style ChatGPT */}
+      {/* Header */}
       <div className="flex items-center justify-between h-14 px-4 md:px-6 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-md border-2 border-primary/20 flex items-center justify-center bg-primary/5">
@@ -172,7 +167,7 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Messages Area - Style ChatGPT */}
+      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 md:px-6">
           {messages.length === 0 ? (
@@ -181,7 +176,7 @@ export default function Chat() {
                 <GraduationCap className="w-6 h-6 md:w-7 md:h-7 text-primary" />
               </div>
               <h2 className="text-lg md:text-xl font-semibold mb-2">
-                {language === 'fr' ? 'Bonjour ! Je suis Tariq' : 'Hello! I\'m Tariq'}
+                {t.chatPage.greeting}
               </h2>
               <p className="text-xs md:text-sm text-muted-foreground max-w-md mb-6 md:mb-8">
                 {t.chatPage.subtitle}
@@ -189,7 +184,7 @@ export default function Chat() {
               
               {/* Suggestion Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full max-w-xl">
-                {suggestions.map((suggestion, idx) => (
+                {suggestionCards.map((suggestion, idx) => (
                   <button
                     key={idx}
                     onClick={() => setMessage(suggestion.message)}
@@ -205,17 +200,14 @@ export default function Chat() {
           ) : (
             <div className="py-6 md:py-8 space-y-6 md:space-y-8">
               {messages.map((msg, index) => (
-                <div
-                  key={index}
-                  className="group"
-                >
+                <div key={index} className="group">
                   <div className="flex gap-3 md:gap-4">
                     {/* Avatar */}
                     <div className="flex-shrink-0 pt-1">
                       {msg.role === 'user' ? (
                         <div className="w-7 h-7 md:w-8 md:h-8 rounded-md bg-primary/10 flex items-center justify-center">
                           <span className="text-xs md:text-sm font-medium text-primary">
-                            {language === 'fr' ? 'Tu' : 'You'}
+                            {t.chatPage.avatarYou}
                           </span>
                         </div>
                       ) : (
@@ -228,7 +220,7 @@ export default function Chat() {
                     {/* Content */}
                     <div className="flex-1 min-w-0 space-y-2">
                       <div className="font-semibold text-xs md:text-sm text-foreground/90">
-                        {msg.role === 'user' ? (language === 'fr' ? 'Toi' : 'You') : 'Tariq'}
+                        {msg.role === 'user' ? t.chatPage.avatarLabel : 'Tariq'}
                       </div>
                       <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-muted">
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -250,7 +242,7 @@ export default function Chat() {
                     <div className="font-semibold text-xs md:text-sm text-foreground/90">Tariq</div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm">{language === 'fr' ? 'En réflexion...' : 'Thinking...'}</span>
+                      <span className="text-sm">{t.chatPage.thinking}</span>
                     </div>
                   </div>
                 </div>
@@ -261,7 +253,7 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Input Area - Fixed Bottom style ChatGPT */}
+      {/* Input Area */}
       <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-3xl mx-auto px-4 md:px-6 py-3 md:py-4">
           {/* Limit Warning */}
@@ -273,7 +265,7 @@ export default function Chat() {
                     {t.chatPage.limitReached}
                   </p>
                   <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                    {language === 'fr' ? 'Nouveau quota dans' : 'New quota in'} {
+                    {t.chatPage.newQuotaIn} {
                       (() => {
                         const resetDate = new Date(session.resetAt);
                         const now = new Date();

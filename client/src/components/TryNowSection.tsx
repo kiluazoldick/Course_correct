@@ -2,15 +2,17 @@ import { useState, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, Loader2, Sparkles } from 'lucide-react';
+import { Upload, Loader2, Sparkles, Zap, Gift } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function TryNowSection() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useLanguage();
 
   const getOrCreateSessionId = () => {
     let sessionId = localStorage.getItem('anonymousSessionId');
@@ -24,7 +26,6 @@ export default function TryNowSection() {
   const handleFileUpload = async (file: File) => {
     if (!file) return;
 
-    // Check file type
     const allowedTypes = [
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -33,18 +34,17 @@ export default function TryNowSection() {
     
     if (!allowedTypes.includes(file.type)) {
       toast({
-        title: "Type de fichier non supporté",
-        description: "Veuillez uploader un fichier PDF ou Word (.docx)",
+        title: t.tryNowSection.errors.unsupportedType,
+        description: t.tryNowSection.errors.unsupportedTypeDesc,
         variant: "destructive",
       });
       return;
     }
 
-    // Check file size (10MB max)
     if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: "Fichier trop volumineux",
-        description: "La taille maximale est de 10 MB",
+        title: t.tryNowSection.errors.fileTooLarge,
+        description: t.tryNowSection.errors.fileTooLargeDesc,
         variant: "destructive",
       });
       return;
@@ -67,11 +67,10 @@ export default function TryNowSection() {
       if (!response.ok) {
         const error = await response.json();
         
-        // If user already tried, redirect to existing upload
         if (error.existingUploadId) {
           toast({
-            title: "Vous avez déjà testé !",
-            description: "Redirection vers votre résumé...",
+            title: t.tryNowSection.errors.alreadyTried,
+            description: t.tryNowSection.errors.alreadyTriedDesc,
           });
           setTimeout(() => {
             setLocation(`/try/${error.existingUploadId}`);
@@ -79,23 +78,22 @@ export default function TryNowSection() {
           return;
         }
         
-        throw new Error(error.message || 'Upload échoué');
+        throw new Error(error.message || t.tryNowSection.errors.uploadFailed);
       }
 
       const data = await response.json();
       
       toast({
-        title: "Fichier uploadé !",
-        description: "Génération de votre résumé en cours...",
+        title: t.tryNowSection.success.uploaded,
+        description: t.tryNowSection.success.generating,
       });
 
-      // Redirect to the preview page
       setLocation(`/try/${data.uploadId}`);
     } catch (error) {
       console.error('Upload error:', error);
       toast({
-        title: "Erreur",
-        description: error instanceof Error ? error.message : "Impossible d'uploader le fichier",
+        title: t.errors.generic,
+        description: error instanceof Error ? error.message : t.tryNowSection.errors.genericError,
         variant: "destructive",
       });
     } finally {
@@ -129,13 +127,13 @@ export default function TryNowSection() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
             <Sparkles className="w-4 h-4" />
-            Essai Gratuit Sans Inscription
+            {t.tryNowSection.badge}
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Testez l'IA maintenant
+            {t.tryNowSection.title}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Uploadez un cours et obtenez un résumé intelligent en quelques secondes. Aucun compte requis pour essayer !
+            {t.tryNowSection.subtitle}
           </p>
         </div>
 
@@ -152,10 +150,10 @@ export default function TryNowSection() {
               
               <div className="text-center space-y-2">
                 <h3 className="text-xl font-semibold">
-                  {uploading ? "Upload en cours..." : "Uploadez votre premier cours"}
+                  {uploading ? t.tryNowSection.uploading : t.tryNowSection.uploadTitle}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Formats supportés : PDF, Word (.docx) • Max 10 MB
+                  {t.tryNowSection.supportedFormats}
                 </p>
               </div>
 
@@ -179,18 +177,25 @@ export default function TryNowSection() {
                 {uploading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Upload en cours...
+                    {t.tryNowSection.uploading}
                   </>
                 ) : (
                   <>
                     <Upload className="w-4 h-4 mr-2" />
-                    Choisir un fichier
+                    {t.tryNowSection.chooseFile}
                   </>
                 )}
               </Button>
 
-              <p className="text-xs text-muted-foreground">
-                ⚡ Résumé généré en moins de 30 secondes • 🎁 1 essai gratuit sans inscription
+              <p className="text-xs text-muted-foreground flex items-center gap-4">
+                <span className="flex items-center gap-1">
+                  <Zap className="w-3 h-3" />
+                  {t.tryNowSection.benefits.split('•')[0].trim()}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Gift className="w-3 h-3" />
+                  {t.tryNowSection.benefits.split('•')[1]?.trim()}
+                </span>
               </p>
             </div>
           </CardContent>

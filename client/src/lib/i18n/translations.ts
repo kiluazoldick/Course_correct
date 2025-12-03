@@ -810,6 +810,32 @@ export const translations = {
       seeReviews: "Voir nos avis Trustpilot"
     },
     
+    // Try Now Section
+    tryNowSection: {
+      badge: "Essai Gratuit Sans Inscription",
+      title: "Testez l'IA maintenant",
+      subtitle: "Uploadez un cours et obtenez un résumé intelligent en quelques secondes. Aucun compte requis pour essayer !",
+      uploadTitle: "Uploadez votre premier cours",
+      uploading: "Upload en cours...",
+      supportedFormats: "Formats supportés : PDF, Word (.docx) • Max 10 MB",
+      chooseFile: "Choisir un fichier",
+      benefits: "Résumé généré en moins de 30 secondes • 1 essai gratuit sans inscription",
+      errors: {
+        unsupportedType: "Type de fichier non supporté",
+        unsupportedTypeDesc: "Veuillez uploader un fichier PDF ou Word (.docx)",
+        fileTooLarge: "Fichier trop volumineux",
+        fileTooLargeDesc: "La taille maximale est de 10 MB",
+        alreadyTried: "Vous avez déjà testé !",
+        alreadyTriedDesc: "Redirection vers votre résumé...",
+        uploadFailed: "Upload échoué",
+        genericError: "Impossible d'uploader le fichier"
+      },
+      success: {
+        uploaded: "Fichier uploadé !",
+        generating: "Génération de votre résumé en cours..."
+      }
+    },
+    
     // Errors
     errors: {
       generic: "Une erreur s'est produite",
@@ -1632,6 +1658,32 @@ export const translations = {
     // Trustpilot Section
     trustpilot: {
       seeReviews: "See our Trustpilot reviews"
+    },
+    
+    // Try Now Section
+    tryNowSection: {
+      badge: "Free Trial Without Signup",
+      title: "Try the AI now",
+      subtitle: "Upload a course and get an intelligent summary in seconds. No account required to try!",
+      uploadTitle: "Upload your first course",
+      uploading: "Uploading...",
+      supportedFormats: "Supported formats: PDF, Word (.docx) • Max 10 MB",
+      chooseFile: "Choose a file",
+      benefits: "Summary generated in less than 30 seconds • 1 free trial without signup",
+      errors: {
+        unsupportedType: "Unsupported file type",
+        unsupportedTypeDesc: "Please upload a PDF or Word (.docx) file",
+        fileTooLarge: "File too large",
+        fileTooLargeDesc: "Maximum size is 10 MB",
+        alreadyTried: "You've already tried!",
+        alreadyTriedDesc: "Redirecting to your summary...",
+        uploadFailed: "Upload failed",
+        genericError: "Unable to upload file"
+      },
+      success: {
+        uploaded: "File uploaded!",
+        generating: "Generating your summary..."
+      }
     },
     
     // Errors

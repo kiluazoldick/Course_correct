@@ -172,14 +172,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/anonymous/:uploadId/summarize', async (req: any, res) => {
     try {
       const { uploadId } = req.params;
+      const { language = 'fr' } = req.body;
       const upload = await storage.getAnonymousUpload(uploadId);
       
       if (!upload) {
         return res.status(404).json({ message: "Upload introuvable" });
       }
 
-      // Generate AI summary
-      const summary = await generateCourseSummary(upload.content, upload.title);
+      // Generate AI summary in selected language
+      const summary = await generateCourseSummary(upload.content, upload.title, language);
 
       // Update the upload with the summary
       await storage.updateAnonymousUpload(uploadId, { summary });
@@ -518,6 +519,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = (req.user as any).id;
       const course = await storage.getCourse(req.params.id);
+      const user = await storage.getUserById(userId);
       
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
@@ -527,7 +529,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
 
-      const summaryContent = await generateCourseSummary(course.content, course.title);
+      // Use user's language preference for AI generation
+      const language = (user?.language || 'fr') as 'fr' | 'en';
+      const summaryContent = await generateCourseSummary(course.content, course.title, language);
       
       const summary = await storage.createSummary({
         courseId: course.id,
@@ -548,6 +552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = (req.user as any).id;
       const { type = 'mixed' } = req.body;
       const course = await storage.getCourse(req.params.id);
+      const user = await storage.getUserById(userId);
       
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
@@ -557,7 +562,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
 
-      const quizData = await generateQuiz(course.content, course.title, type);
+      // Use user's language preference for AI generation
+      const language = (user?.language || 'fr') as 'fr' | 'en';
+      const quizData = await generateQuiz(course.content, course.title, type, language);
       
       const quiz = await storage.createQuiz({
         courseId: course.id,
@@ -579,6 +586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = (req.user as any).id;
       const { answers } = req.body;
       const quiz = await storage.getQuiz(req.params.id);
+      const user = await storage.getUserById(userId);
       
       if (!quiz) {
         return res.status(404).json({ message: "Quiz not found" });
@@ -588,6 +596,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
 
+      // Use user's language preference for AI evaluation
+      const language = (user?.language || 'fr') as 'fr' | 'en';
       const questions = quiz.questions as any[];
       let score = 0;
       const evaluations: any[] = [];
@@ -613,7 +623,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const evaluation = await evaluateOpenAnswer(
             question.question,
             userAnswer,
-            question.explanation
+            question.explanation,
+            language
           );
           score += evaluation.score / 100;
           evaluations.push({
@@ -701,8 +712,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const messages = (session.messages as any[]) || [];
       const conversationHistory = messages.slice(-10);
 
-      // Get AI response
-      const aiResponse = await chatWithAI(message, conversationHistory);
+      // Get user's language preference for AI chat
+      const user = await storage.getUserById(userId);
+      const language = (user?.language || 'fr') as 'fr' | 'en';
+
+      // Get AI response in user's preferred language
+      const aiResponse = await chatWithAI(message, conversationHistory, language);
 
       // Update session with new messages
       const updatedMessages = [

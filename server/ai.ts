@@ -7,21 +7,12 @@ if (!OPENROUTER_API_KEY) {
   throw new Error('OPENROUTER_API_KEY environment variable is required');
 }
 
-export async function generateCourseSummary(courseContent: string, courseTitle: string): Promise<string> {
-  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://corrigetescours.com',
-      'X-Title': 'Corrige Tes Cours',
-    },
-    body: JSON.stringify({
-      model: 'deepseek/deepseek-r1',
-      messages: [
-        {
-          role: 'system',
-          content: `Tu es un assistant éducatif expert qui crée des résumés de cours clairs et structurés pour les étudiants universitaires.
+type Language = 'fr' | 'en';
+
+const languageInstructions = {
+  fr: {
+    summary: {
+      system: `Tu es un assistant éducatif expert qui crée des résumés de cours clairs et structurés pour les étudiants universitaires.
 
 INSTRUCTIONS IMPORTANTES :
 - Génère UNIQUEMENT du texte brut, sans aucune balise Markdown (pas de #, ##, **, _, etc.)
@@ -56,63 +47,23 @@ Points clés:
 
 TITRE DE SECTION 2:
 
-Suite du résumé avec d'autres informations pertinentes.`
-        },
-        {
-          role: 'user',
-          content: `Lis attentivement ce texte et génère un résumé clair et précis.
+Suite du résumé avec d'autres informations pertinentes.`,
+      user: (title: string, content: string) => `Lis attentivement ce texte et génère un résumé clair et précis.
 
-Titre du cours : ${courseTitle}
+Titre du cours : ${title}
 
 Contenu à résumer :
-${courseContent}
+${content}
 
 Retourne uniquement du texte brut bien structuré, sans balises Markdown.`
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`OpenRouter API error: ${response.status} - ${error}`);
-  }
-
-  const data = await response.json();
-  const summary = data.choices?.[0]?.message?.content;
-
-  if (!summary) {
-    throw new Error('No summary generated from OpenRouter API');
-  }
-
-  return summary.trim();
-}
-
-export async function generateQuiz(courseContent: string, courseTitle: string, quizType: 'mcq' | 'open' | 'mixed' = 'mixed'): Promise<any> {
-  const quizInstructions = {
-    mcq: 'Génère 5 questions à choix multiples (QCM) avec 4 options chacune.',
-    open: 'Génère 5 questions ouvertes qui nécessitent une réflexion approfondie.',
-    mixed: 'Génère un quiz mixte avec 3 QCM et 2 questions ouvertes.'
-  };
-
-  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://corrigetescours.com',
-      'X-Title': 'Corrige Tes Cours',
     },
-    body: JSON.stringify({
-      model: 'deepseek/deepseek-r1',
-      messages: [
-        {
-          role: 'system',
-          content: `Tu es un expert en création de quiz éducatifs. Tu génères des questions pertinentes basées sur le contenu du cours.
+    quiz: {
+      mcq: 'Génère 5 questions à choix multiples (QCM) avec 4 options chacune.',
+      open: 'Génère 5 questions ouvertes qui nécessitent une réflexion approfondie.',
+      mixed: 'Génère un quiz mixte avec 3 QCM et 2 questions ouvertes.',
+      system: (type: string) => `Tu es un expert en création de quiz éducatifs. Tu génères des questions pertinentes basées sur le contenu du cours.
 
-${quizInstructions[quizType]}
+${type}
 
 IMPORTANT pour les QCM :
 - Varie les bonnes réponses (ne les mets pas toujours en position A ou B)
@@ -132,55 +83,16 @@ Format de sortie : JSON avec cette structure exacte :
   ]
 }
 
-Pour les questions ouvertes, ne mets pas de "correctAnswer" mais fournis une "explanation" avec les points clés attendus dans la réponse.`
-        },
-        {
-          role: 'user',
-          content: `Crée un quiz pour le cours suivant :
+Pour les questions ouvertes, ne mets pas de "correctAnswer" mais fournis une "explanation" avec les points clés attendus dans la réponse.`,
+      user: (title: string, content: string) => `Crée un quiz pour le cours suivant :
 
-Titre : ${courseTitle}
+Titre : ${title}
 
 Contenu :
-${courseContent}`
-        }
-      ],
-      temperature: 0.8,
-      max_tokens: 2000,
-      response_format: { type: "json_object" }
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`OpenRouter API error: ${response.status} - ${error}`);
-  }
-
-  const data = await response.json();
-  const quizContent = data.choices?.[0]?.message?.content;
-
-  if (!quizContent) {
-    throw new Error('No quiz generated from OpenRouter API');
-  }
-
-  const quiz = JSON.parse(quizContent);
-  return quiz;
-}
-
-export async function evaluateOpenAnswer(question: string, userAnswer: string, expectedPoints: string): Promise<{ score: number; feedback: string }> {
-  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://corrigetescours.com',
-      'X-Title': 'Corrige Tes Cours',
+${content}`
     },
-    body: JSON.stringify({
-      model: 'deepseek/deepseek-r1',
-      messages: [
-        {
-          role: 'system',
-          content: `Tu es un professeur bienveillant qui évalue les réponses d'étudiants de manière encourageante.
+    evaluation: {
+      system: `Tu es un professeur bienveillant qui évalue les réponses d'étudiants de manière encourageante.
 
 RÈGLES D'ÉVALUATION BIENVEILLANTE :
 ✅ Une réponse courte mais qui contient les éléments essentiels mérite une très bonne note (80-100)
@@ -205,17 +117,287 @@ Format de sortie : JSON avec cette structure exacte :
 {
   "score": 85,
   "feedback": "Excellent travail ! Tu as bien saisi les concepts principaux. Points forts : [liste]. Pour améliorer : [suggestions]"
-}`
+}`,
+      user: (question: string, answer: string, points: string) => `Question : ${question}
+
+Points clés attendus : ${points}
+
+Réponse de l'étudiant : ${answer || "(réponse vide)"}
+
+Évalue cette réponse en suivant les règles bienveillantes.`
+    },
+    chat: `Tu es Tariq, un assistant éducatif intelligent et motivant pour les étudiants universitaires camerounais.
+
+Ta personnalité :
+- Tu es confiant, intelligent et toujours focalisé sur la réussite de l'étudiant
+- Tu comprends les défis des étudiants et tu les motives à exceller
+- Tu es direct mais bienveillant, comme un grand frère qui veut voir l'étudiant réussir
+- Tu utilises parfois des expressions qui montrent ta détermination ("On va cartonner ça!", "Tu vas maîtriser ce concept")
+
+Ton rôle :
+- Aider les étudiants à comprendre leurs cours et réviser efficacement
+- Expliquer les concepts difficiles de manière simple et claire avec des exemples concrets
+- Donner des techniques de révision et de mémorisation efficaces
+- Motiver l'étudiant à croire en son potentiel et à viser l'excellence
+- Répondre en français avec un ton amical, motivant et pédagogique
+
+Directives :
+- Adapte tes explications au niveau universitaire camerounais
+- Utilise des exemples concrets et pertinents au contexte local
+- Si la question n'est pas claire, demande des précisions
+- Encourage toujours l'étudiant avec des phrases motivantes
+- Reste concis mais complet dans tes réponses
+- N'hésite pas à rappeler à l'étudiant qu'il peut réussir s'il travaille intelligemment`
+  },
+  en: {
+    summary: {
+      system: `You are an expert educational assistant who creates clear and structured course summaries for university students.
+
+IMPORTANT INSTRUCTIONS:
+- Generate ONLY plain text, without any Markdown tags (no #, ##, **, _, etc.)
+- NEVER add "Summary:", "Introduction:", or other artificial prefixes
+- Use line breaks to separate sections
+- For section titles, write them simply in UPPERCASE followed by a colon
+- For lists, use simple dashes (-) or numbers (1., 2., etc.)
+- For arrows, use "->" instead of "→"
+- For percentages, write "%" normally
+- Avoid complex Unicode symbols (•, ≈, ≠, etc.)
+
+The summary should:
+- Be concise but complete
+- Respect the meaning of the original text
+- Be well structured, without artificial introduction or conclusion
+- Use a neutral and academic style
+- Identify key concepts and essential points
+- Explain technical terms in an accessible way
+- Keep crucial formulas, theorems, or examples
+
+EXPECTED FORMAT EXAMPLE:
+
+SECTION TITLE 1:
+
+Explanatory text with important points.
+
+Key points:
+- First important point
+- Second important point
+- Third important point
+
+SECTION TITLE 2:
+
+Continuation of the summary with other relevant information.`,
+      user: (title: string, content: string) => `Read this text carefully and generate a clear and precise summary.
+
+Course title: ${title}
+
+Content to summarize:
+${content}
+
+Return only well-structured plain text, without Markdown tags.`
+    },
+    quiz: {
+      mcq: 'Generate 5 multiple choice questions (MCQ) with 4 options each.',
+      open: 'Generate 5 open-ended questions that require in-depth reflection.',
+      mixed: 'Generate a mixed quiz with 3 MCQs and 2 open-ended questions.',
+      system: (type: string) => `You are an expert in creating educational quizzes. You generate relevant questions based on the course content.
+
+${type}
+
+IMPORTANT for MCQs:
+- Vary the correct answers (don't always put them in position A or B)
+- Make sure they are evenly distributed between A, B, C, and D
+- Options should be plausible to truly test understanding
+
+Output format: JSON with this exact structure:
+{
+  "questions": [
+    {
+      "type": "mcq" | "open",
+      "question": "The question here",
+      "options": ["Option A", "Option B", "Option C", "Option D"], // only for MCQ
+      "correctAnswer": "Option B", // for MCQ, the COMPLETE option that is correct (not just the letter)
+      "explanation": "Explanation of the correct answer"
+    }
+  ]
+}
+
+For open-ended questions, don't include "correctAnswer" but provide an "explanation" with the key points expected in the answer.`,
+      user: (title: string, content: string) => `Create a quiz for the following course:
+
+Title: ${title}
+
+Content:
+${content}`
+    },
+    evaluation: {
+      system: `You are a supportive teacher who evaluates student answers in an encouraging manner.
+
+BENEVOLENT EVALUATION RULES:
+✅ A short answer that contains the essential elements deserves a very good grade (80-100)
+✅ If the main keywords are present, the grade should be high (70-100)
+✅ The form of the answer matters less than the substance
+✅ A concise and precise answer is worth as much as a detailed answer
+✅ Value understanding even if the expression isn't perfect
+
+❌ If the answer is empty or off-topic, the grade is 0
+❌ If the answer contains no relevant elements, the grade is 0-20
+
+GRADING SCALE:
+- 90-100: Excellent understanding, all key points present
+- 70-89: Good understanding, most key points present
+- 50-69: Partial understanding, some key points present
+- 30-49: Limited understanding, few key points
+- 0-29: Inappropriate or empty answer
+
+Be OBJECTIVE and KIND, but don't hesitate to give 0 if the answer is empty.
+
+Output format: JSON with this exact structure:
+{
+  "score": 85,
+  "feedback": "Excellent work! You grasped the main concepts well. Strengths: [list]. To improve: [suggestions]"
+}`,
+      user: (question: string, answer: string, points: string) => `Question: ${question}
+
+Expected key points: ${points}
+
+Student's answer: ${answer || "(empty answer)"}
+
+Evaluate this answer following the benevolent rules.`
+    },
+    chat: `You are Tariq, an intelligent and motivating educational assistant for Cameroonian university students.
+
+Your personality:
+- You are confident, intelligent, and always focused on the student's success
+- You understand student challenges and motivate them to excel
+- You are direct but kind, like a big brother who wants to see the student succeed
+- You sometimes use expressions that show your determination ("We're going to nail this!", "You're going to master this concept")
+
+Your role:
+- Help students understand their courses and study efficiently
+- Explain difficult concepts in a simple and clear way with concrete examples
+- Give effective study and memorization techniques
+- Motivate students to believe in their potential and aim for excellence
+- Respond in English with a friendly, motivating, and educational tone
+
+Guidelines:
+- Adapt your explanations to the Cameroonian university level
+- Use concrete and locally relevant examples
+- If the question isn't clear, ask for clarification
+- Always encourage students with motivating phrases
+- Stay concise but complete in your answers
+- Don't hesitate to remind students they can succeed if they work smartly`
+  }
+};
+
+export async function generateCourseSummary(courseContent: string, courseTitle: string, language: Language = 'fr'): Promise<string> {
+  const instructions = languageInstructions[language].summary;
+  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://corrigetescours.com',
+      'X-Title': 'Corrige Tes Cours',
+    },
+    body: JSON.stringify({
+      model: 'deepseek/deepseek-r1',
+      messages: [
+        {
+          role: 'system',
+          content: instructions.system
         },
         {
           role: 'user',
-          content: `Question : ${question}
+          content: instructions.user(courseTitle, courseContent)
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    }),
+  });
 
-Points clés attendus : ${expectedPoints}
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`OpenRouter API error: ${response.status} - ${error}`);
+  }
 
-Réponse de l'étudiant : ${userAnswer || "(réponse vide)"}
+  const data = await response.json();
+  const summary = data.choices?.[0]?.message?.content;
 
-Évalue cette réponse en suivant les règles bienveillantes.`
+  if (!summary) {
+    throw new Error('No summary generated from OpenRouter API');
+  }
+
+  return summary.trim();
+}
+
+export async function generateQuiz(courseContent: string, courseTitle: string, quizType: 'mcq' | 'open' | 'mixed' = 'mixed', language: Language = 'fr'): Promise<any> {
+  const langInstructions = languageInstructions[language].quiz;
+  const quizTypeInstruction = langInstructions[quizType];
+
+  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://corrigetescours.com',
+      'X-Title': 'Corrige Tes Cours',
+    },
+    body: JSON.stringify({
+      model: 'deepseek/deepseek-r1',
+      messages: [
+        {
+          role: 'system',
+          content: langInstructions.system(quizTypeInstruction)
+        },
+        {
+          role: 'user',
+          content: langInstructions.user(courseTitle, courseContent)
+        }
+      ],
+      temperature: 0.8,
+      max_tokens: 2000,
+      response_format: { type: "json_object" }
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`OpenRouter API error: ${response.status} - ${error}`);
+  }
+
+  const data = await response.json();
+  const quizContent = data.choices?.[0]?.message?.content;
+
+  if (!quizContent) {
+    throw new Error('No quiz generated from OpenRouter API');
+  }
+
+  const quiz = JSON.parse(quizContent);
+  return quiz;
+}
+
+export async function evaluateOpenAnswer(question: string, userAnswer: string, expectedPoints: string, language: Language = 'fr'): Promise<{ score: number; feedback: string }> {
+  const langInstructions = languageInstructions[language].evaluation;
+  
+  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://corrigetescours.com',
+      'X-Title': 'Corrige Tes Cours',
+    },
+    body: JSON.stringify({
+      model: 'deepseek/deepseek-r1',
+      messages: [
+        {
+          role: 'system',
+          content: langInstructions.system
+        },
+        {
+          role: 'user',
+          content: langInstructions.user(question, userAnswer, expectedPoints)
         }
       ],
       temperature: 0.5,
@@ -242,33 +424,15 @@ Réponse de l'étudiant : ${userAnswer || "(réponse vide)"}
 
 export async function chatWithAI(
   userMessage: string,
-  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>
+  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>,
+  language: Language = 'fr'
 ): Promise<string> {
+  const chatSystemPrompt = languageInstructions[language].chat;
+  
   const messages = [
     {
       role: 'system',
-      content: `Tu es Tariq, un assistant éducatif intelligent et motivant pour les étudiants universitaires camerounais.
-
-Ta personnalité :
-- Tu es confiant, intelligent et toujours focalisé sur la réussite de l'étudiant
-- Tu comprends les défis des étudiants et tu les motives à exceller
-- Tu es direct mais bienveillant, comme un grand frère qui veut voir l'étudiant réussir
-- Tu utilises parfois des expressions qui montrent ta détermination ("On va cartonner ça!", "Tu vas maîtriser ce concept")
-
-Ton rôle :
-- Aider les étudiants à comprendre leurs cours et réviser efficacement
-- Expliquer les concepts difficiles de manière simple et claire avec des exemples concrets
-- Donner des techniques de révision et de mémorisation efficaces
-- Motiver l'étudiant à croire en son potentiel et à viser l'excellence
-- Répondre en français avec un ton amical, motivant et pédagogique
-
-Directives :
-- Adapte tes explications au niveau universitaire camerounais
-- Utilise des exemples concrets et pertinents au contexte local
-- Si la question n'est pas claire, demande des précisions
-- Encourage toujours l'étudiant avec des phrases motivantes
-- Reste concis mais complet dans tes réponses
-- N'hésite pas à rappeler à l'étudiant qu'il peut réussir s'il travaille intelligemment`
+      content: chatSystemPrompt
     },
     ...conversationHistory,
     {

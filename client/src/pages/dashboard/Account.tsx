@@ -9,8 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Camera, Check, X, Crown } from 'lucide-react';
+import { Camera, Check, X, Crown, Globe, Sun, Moon } from 'lucide-react';
 import { updateUserProfileSchema, type UpdateUserProfile } from '@shared/schema';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
+import type { Language } from '@/lib/i18n/translations';
+import { useTheme } from '@/components/ThemeProvider';
 
 interface ProfileResponse {
   user: {
@@ -29,6 +32,8 @@ export default function Account() {
   const { user } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t, language, setLanguage } = useTranslation();
+  const { theme, setTheme } = useTheme();
 
   const [isEditing, setIsEditing] = useState(false);
   const [firstName, setFirstName] = useState(user?.firstName || '');
@@ -49,8 +54,8 @@ export default function Account() {
     },
     onSuccess: () => {
       toast({
-        title: "Profil mis à jour",
-        description: "Vos informations ont été modifiées avec succès",
+        title: t.success.updated,
+        description: language === 'fr' ? "Vos informations ont été modifiées avec succès" : "Your information has been successfully updated",
       });
       setIsEditing(false);
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
@@ -58,8 +63,31 @@ export default function Account() {
     },
     onError: (error: any) => {
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de mettre à jour le profil",
+        title: t.errors.generic,
+        description: error.message || (language === 'fr' ? "Impossible de mettre à jour le profil" : "Unable to update profile"),
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update language mutation
+  const updateLanguageMutation = useMutation({
+    mutationFn: async (newLanguage: Language) => {
+      const response = await apiRequest('PUT', '/api/user/language', { language: newLanguage });
+      return await response.json();
+    },
+    onSuccess: (_, newLanguage) => {
+      setLanguage(newLanguage);
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      toast({
+        title: newLanguage === 'fr' ? "Langue mise à jour" : "Language updated",
+        description: newLanguage === 'fr' ? "La langue a été changée en français" : "Language has been changed to English",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t.errors.generic,
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -85,16 +113,16 @@ export default function Account() {
     },
     onSuccess: () => {
       toast({
-        title: "Photo mise à jour",
-        description: "Votre photo de profil a été modifiée avec succès",
+        title: language === 'fr' ? "Photo mise à jour" : "Photo updated",
+        description: language === 'fr' ? "Votre photo de profil a été modifiée avec succès" : "Your profile photo has been successfully updated",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       queryClient.invalidateQueries({ queryKey: ['/api/user/profile'] });
     },
     onError: (error: any) => {
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de mettre à jour la photo",
+        title: t.errors.generic,
+        description: error.message || (language === 'fr' ? "Impossible de mettre à jour la photo" : "Unable to update photo"),
         variant: "destructive",
       });
     },
@@ -104,7 +132,7 @@ export default function Account() {
     const validation = updateUserProfileSchema.safeParse({ firstName, lastName });
     if (!validation.success) {
       toast({
-        title: "Erreur de validation",
+        title: language === 'fr' ? "Erreur de validation" : "Validation error",
         description: validation.error.errors[0].message,
         variant: "destructive",
       });
@@ -112,6 +140,12 @@ export default function Account() {
     }
 
     updateProfileMutation.mutate({ firstName, lastName });
+  };
+
+  const handleLanguageChange = (newLanguage: Language) => {
+    if (newLanguage !== language) {
+      updateLanguageMutation.mutate(newLanguage);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -126,8 +160,8 @@ export default function Account() {
 
     if (file.size > 2 * 1024 * 1024) {
       toast({
-        title: "Fichier trop volumineux",
-        description: "La photo ne doit pas dépasser 2 MB",
+        title: language === 'fr' ? "Fichier trop volumineux" : "File too large",
+        description: language === 'fr' ? "La photo ne doit pas dépasser 2 MB" : "Photo must not exceed 2 MB",
         variant: "destructive",
       });
       return;
@@ -160,8 +194,8 @@ export default function Account() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold" data-testid="text-account-title">Mon Compte</h2>
-          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">Gérez vos informations personnelles</p>
+          <h2 className="text-2xl md:text-3xl font-bold" data-testid="text-account-title">{t.account.title}</h2>
+          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">{t.account.subtitle}</p>
         </div>
         {plan === 'premium' && (
           <Badge variant="default" className="gap-1" data-testid="badge-premium">
@@ -176,9 +210,9 @@ export default function Account() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Profil</CardTitle>
+              <CardTitle>{t.account.profile.title}</CardTitle>
               <CardDescription>
-                {plan === 'free' ? 'Plan Gratuit' : 'Plan Premium'}
+                {plan === 'free' ? t.subscription.free : t.subscription.premium}
               </CardDescription>
             </div>
             {!isEditing && (
@@ -187,7 +221,7 @@ export default function Account() {
                 onClick={() => setIsEditing(true)}
                 data-testid="button-edit-profile"
               >
-                Modifier
+                {t.edit}
               </Button>
             )}
           </div>
@@ -222,7 +256,7 @@ export default function Account() {
               <p className="font-semibold" data-testid="text-user-name">
                 {user?.firstName && user?.lastName
                   ? `${user.firstName} ${user.lastName}`
-                  : 'Utilisateur'}
+                  : (language === 'fr' ? 'Utilisateur' : 'User')}
               </p>
               <p className="text-sm text-muted-foreground" data-testid="text-user-email">
                 {user?.email}
@@ -233,22 +267,22 @@ export default function Account() {
           {isEditing ? (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="firstName">Prénom</Label>
+                <Label htmlFor="firstName">{t.account.profile.firstName}</Label>
                 <Input
                   id="firstName"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Votre prénom"
+                  placeholder={language === 'fr' ? "Votre prénom" : "Your first name"}
                   data-testid="input-firstname"
                 />
               </div>
               <div>
-                <Label htmlFor="lastName">Nom</Label>
+                <Label htmlFor="lastName">{t.account.profile.lastName}</Label>
                 <Input
                   id="lastName"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Votre nom"
+                  placeholder={language === 'fr' ? "Votre nom" : "Your last name"}
                   data-testid="input-lastname"
                 />
               </div>
@@ -260,7 +294,7 @@ export default function Account() {
                   data-testid="button-save-profile"
                 >
                   <Check className="w-4 h-4 mr-2" />
-                  {updateProfileMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+                  {updateProfileMutation.isPending ? t.account.profile.saving : t.account.profile.save}
                 </Button>
                 <Button
                   variant="outline"
@@ -269,40 +303,40 @@ export default function Account() {
                   data-testid="button-cancel-edit"
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Annuler
+                  {t.cancel}
                 </Button>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Email</label>
+                <label className="text-sm font-medium">{t.account.profile.email}</label>
                 <p className="text-sm text-muted-foreground" data-testid="text-email-value">
-                  {user?.email || 'Non renseigné'}
+                  {user?.email || (language === 'fr' ? 'Non renseigné' : 'Not provided')}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium">Prénom</label>
+                <label className="text-sm font-medium">{t.account.profile.firstName}</label>
                 <p className="text-sm text-muted-foreground" data-testid="text-firstname-value">
-                  {user?.firstName || 'Non renseigné'}
+                  {user?.firstName || (language === 'fr' ? 'Non renseigné' : 'Not provided')}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium">Nom</label>
+                <label className="text-sm font-medium">{t.account.profile.lastName}</label>
                 <p className="text-sm text-muted-foreground" data-testid="text-lastname-value">
-                  {user?.lastName || 'Non renseigné'}
+                  {user?.lastName || (language === 'fr' ? 'Non renseigné' : 'Not provided')}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium">Date d'inscription</label>
+                <label className="text-sm font-medium">{language === 'fr' ? "Date d'inscription" : "Registration date"}</label>
                 <p className="text-sm text-muted-foreground" data-testid="text-join-date">
                   {user?.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString('fr-FR', {
+                    ? new Date(user.createdAt).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
                       })
-                    : 'Non disponible'}
+                    : (language === 'fr' ? 'Non disponible' : 'Not available')}
                 </p>
               </div>
             </div>
@@ -315,8 +349,87 @@ export default function Account() {
               onClick={handleLogout}
               data-testid="button-logout-account"
             >
-              Se déconnecter
+              {t.nav.logout}
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Preferences Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t.account.preferences.title}</CardTitle>
+          <CardDescription>
+            {language === 'fr' ? "Personnalisez votre expérience" : "Personalize your experience"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Language Preference */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Globe className="w-4 h-4 text-muted-foreground" />
+              <label className="text-sm font-medium">{t.account.preferences.language}</label>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {t.account.preferences.languageDesc}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant={language === 'fr' ? 'default' : 'outline'}
+                onClick={() => handleLanguageChange('fr')}
+                disabled={updateLanguageMutation.isPending}
+                className="flex-1"
+                data-testid="button-lang-fr"
+              >
+                <span className="mr-2">🇫🇷</span>
+                {t.account.preferences.french}
+              </Button>
+              <Button
+                variant={language === 'en' ? 'default' : 'outline'}
+                onClick={() => handleLanguageChange('en')}
+                disabled={updateLanguageMutation.isPending}
+                className="flex-1"
+                data-testid="button-lang-en"
+              >
+                <span className="mr-2">🇬🇧</span>
+                {t.account.preferences.english}
+              </Button>
+            </div>
+          </div>
+
+          {/* Theme Preference */}
+          <div className="space-y-3 pt-4 border-t">
+            <div className="flex items-center gap-2">
+              {theme === 'dark' ? (
+                <Moon className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <Sun className="w-4 h-4 text-muted-foreground" />
+              )}
+              <label className="text-sm font-medium">{t.account.preferences.theme}</label>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {t.account.preferences.themeDesc}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant={theme === 'light' ? 'default' : 'outline'}
+                onClick={() => setTheme('light')}
+                className="flex-1"
+                data-testid="button-theme-light"
+              >
+                <Sun className="w-4 h-4 mr-2" />
+                {t.account.preferences.light}
+              </Button>
+              <Button
+                variant={theme === 'dark' ? 'default' : 'outline'}
+                onClick={() => setTheme('dark')}
+                className="flex-1"
+                data-testid="button-theme-dark"
+              >
+                <Moon className="w-4 h-4 mr-2" />
+                {t.account.preferences.dark}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

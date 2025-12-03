@@ -336,6 +336,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user language preference
+  app.put('/api/user/language', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { language } = req.body;
+      
+      if (!language || !['fr', 'en'].includes(language)) {
+        return res.status(400).json({ message: "Invalid language. Must be 'fr' or 'en'" });
+      }
+      
+      const updatedUser = await storage.updateUser(userId, { language });
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({ language: updatedUser.language });
+    } catch (error) {
+      console.error("Error updating user language:", error);
+      res.status(500).json({ message: "Failed to update language" });
+    }
+  });
+
   // Configure multer for profile image uploads (2MB limit)
   const profileUpload = multer({
     storage: multer.memoryStorage(),

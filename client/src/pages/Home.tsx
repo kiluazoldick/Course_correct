@@ -6,62 +6,70 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
 
 export default function Home() {
+  const { t, language } = useTranslation();
+
   const features = [
     {
       icon: Brain,
-      title: "Résumés Intelligents",
-      description: "Des résumés clairs et structurés de vos cours en quelques secondes"
+      title: t.landing.features.summary.title,
+      description: t.landing.features.summary.description
     },
     {
       icon: BookOpen,
-      title: "Quiz Personnalisés",
-      description: "Testez vos connaissances avec des questions adaptées à votre niveau"
+      title: t.landing.features.quiz.title,
+      description: t.landing.features.quiz.description
     },
     {
       icon: TrendingUp,
-      title: "Suivi de Progression",
-      description: "Visualisez vos progrès et identifiez vos points à améliorer"
+      title: language === 'fr' ? "Suivi de Progression" : "Progress Tracking",
+      description: language === 'fr' ? "Visualisez vos progrès et identifiez vos points à améliorer" : "Visualize your progress and identify areas to improve"
     },
     {
       icon: Award,
-      title: "Résultats Garantis",
-      description: "Améliorez vos notes et réussissez vos examens avec confiance"
+      title: language === 'fr' ? "Résultats Garantis" : "Guaranteed Results",
+      description: language === 'fr' ? "Améliorez vos notes et réussissez vos examens avec confiance" : "Improve your grades and pass your exams with confidence"
     }
   ];
 
   const steps = [
     {
       icon: Upload,
-      title: "Importez vos cours",
-      description: "Saisissez ou uploadez vos notes de cours en PDF ou Word"
+      title: t.landing.howItWorks.step1.title,
+      description: t.landing.howItWorks.step1.description
     },
     {
       icon: Sparkles,
-      title: "L'IA résume pour vous",
-      description: "Obtenez un résumé clair et structuré instantanément"
+      title: t.landing.howItWorks.step2.title,
+      description: t.landing.howItWorks.step2.description
     },
     {
       icon: MessageCircle,
-      title: "Révisez avec Tariq IA",
-      description: "Posez vos questions et clarifiez les concepts difficiles"
+      title: language === 'fr' ? "Révisez avec Tariq IA" : "Review with Tariq AI",
+      description: language === 'fr' ? "Posez vos questions et clarifiez les concepts difficiles" : "Ask questions and clarify difficult concepts"
     },
     {
       icon: BarChart3,
-      title: "Progressez rapidement",
-      description: "Suivez vos résultats et améliorez vos performances"
+      title: t.landing.howItWorks.step3.title,
+      description: t.landing.howItWorks.step3.description
     }
   ];
 
-  const stats = [
+  const stats = language === 'fr' ? [
     { value: "5 min", label: "Temps moyen pour un résumé" },
     { value: "90%", label: "Étudiants satisfaits" },
     { value: "24/7", label: "Assistance IA disponible" },
     { value: "100%", label: "Gratuit pour commencer" }
+  ] : [
+    { value: "5 min", label: "Average time for a summary" },
+    { value: "90%", label: "Satisfied students" },
+    { value: "24/7", label: "AI assistance available" },
+    { value: "100%", label: "Free to start" }
   ];
 
-  const testimonials = [
+  const testimonials = language === 'fr' ? [
     {
       name: "Marie K.",
       role: "Étudiante en Médecine",
@@ -76,6 +84,22 @@ export default function Home() {
       name: "Aminata S.",
       role: "Étudiante en Économie",
       content: "Grâce aux quiz personnalisés, je sais exactement quoi réviser. Mes notes se sont vraiment améliorées !"
+    }
+  ] : [
+    {
+      name: "Marie K.",
+      role: "Medical Student",
+      content: "Corrige Tes Cours saved me so much time. The summaries are accurate and really help me retain the essentials."
+    },
+    {
+      name: "Joseph N.",
+      role: "Law Student",
+      content: "Tariq AI is like a personal tutor. It answers all my questions and helps me understand complex concepts."
+    },
+    {
+      name: "Aminata S.",
+      role: "Economics Student",
+      content: "Thanks to personalized quizzes, I know exactly what to review. My grades have really improved!"
     }
   ];
 
@@ -122,16 +146,16 @@ export default function Home() {
             >
               <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
-                Intelligence Artificielle de Pointe
+                {language === 'fr' ? "Intelligence Artificielle de Pointe" : "Cutting-Edge AI"}
               </div>
             </motion.div>
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70" data-testid="text-hero-title">
-              Réussissez vos études avec l'IA
+              {t.landing.heroTitle}
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto">
-              Transformez vos cours en résumés clairs, testez vos connaissances avec des quiz intelligents et progressez avec Tariq IA
+              {t.landing.heroSubtitle}
             </p>
             
             <motion.div
@@ -142,13 +166,13 @@ export default function Home() {
             >
               <Link href="/signup">
                 <Button size="lg" className="text-lg px-8 group" data-testid="button-cta-signup">
-                  Commencer gratuitement
+                  {t.landing.cta}
                   <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link href="/features">
                 <Button size="lg" variant="outline" className="text-lg px-8" data-testid="button-cta-features">
-                  Découvrir les fonctionnalités
+                  {language === 'fr' ? "Découvrir les fonctionnalités" : "Discover features"}
                 </Button>
               </Link>
             </motion.div>
@@ -197,10 +221,10 @@ export default function Home() {
               className="text-center mb-16"
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Comment ça marche ?
+                {t.landing.howItWorks.title}
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Un processus simple en 4 étapes pour transformer votre façon d'étudier
+                {language === 'fr' ? "Un processus simple en 4 étapes pour transformer votre façon d'étudier" : "A simple 4-step process to transform the way you study"}
               </p>
             </motion.div>
 
@@ -246,10 +270,10 @@ export default function Home() {
               className="text-center mb-16"
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Tout ce dont vous avez besoin pour réussir
+                {t.landing.features.title}
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Des outils puissants mais simples à utiliser pour optimiser vos révisions
+                {t.landing.features.subtitle}
               </p>
             </motion.div>
 
@@ -288,10 +312,10 @@ export default function Home() {
               className="text-center mb-16"
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Ce que disent nos étudiants
+                {language === 'fr' ? "Ce que disent nos étudiants" : "What our students say"}
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Rejoignez des milliers d'étudiants qui transforment leur façon d'apprendre
+                {language === 'fr' ? "Rejoignez des milliers d'étudiants qui transforment leur façon d'apprendre" : "Join thousands of students transforming the way they learn"}
               </p>
             </motion.div>
 
@@ -335,7 +359,7 @@ export default function Home() {
               className="text-center"
             >
               <h3 className="text-xl md:text-2xl font-semibold mb-6">
-                Rejoignez des milliers d'étudiants satisfaits
+                {language === 'fr' ? "Rejoignez des milliers d'étudiants satisfaits" : "Join thousands of satisfied students"}
               </h3>
               <div className="flex justify-center">
                 <div className="w-full max-w-2xl">
@@ -374,31 +398,33 @@ export default function Home() {
                     <div>
                       <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-4">
                         <Zap className="w-4 h-4" />
-                        Offre de lancement
+                        {language === 'fr' ? "Offre de lancement" : "Launch offer"}
                       </div>
                       <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                        Passez au Premium
+                        {language === 'fr' ? "Passez au Premium" : "Upgrade to Premium"}
                       </h2>
                       <p className="text-muted-foreground mb-6">
-                        Uploads illimités, Tariq IA sans limite, statistiques avancées et support prioritaire pour seulement 1 500 XAF/mois
+                        {language === 'fr' 
+                          ? "Uploads illimités, Tariq IA sans limite, statistiques avancées et support prioritaire pour seulement 1 500 XAF/mois"
+                          : "Unlimited uploads, unlimited Tariq AI, advanced statistics and priority support for only 1,500 XAF/month"}
                       </p>
                       <div className="space-y-2 mb-6">
                         <div className="flex items-center gap-2">
                           <CheckCircle className="w-5 h-5 text-primary" />
-                          <span>Uploads de fichiers illimités</span>
+                          <span>{t.subscription.features.unlimitedUploads}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <CheckCircle className="w-5 h-5 text-primary" />
-                          <span>Tariq IA illimité (0 cooldown)</span>
+                          <span>{t.subscription.features.unlimitedChat}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <CheckCircle className="w-5 h-5 text-primary" />
-                          <span>Statistiques avancées</span>
+                          <span>{t.subscription.features.advancedStats}</span>
                         </div>
                       </div>
                       <Link href="/pricing">
                         <Button size="lg" className="w-full md:w-auto">
-                          Voir les plans
+                          {language === 'fr' ? "Voir les plans" : "View plans"}
                         </Button>
                       </Link>
                     </div>
@@ -408,7 +434,7 @@ export default function Home() {
                         <div className="text-muted-foreground mb-4">XAF / mois</div>
                         <div className="inline-flex items-center gap-2 text-sm text-primary">
                           <Target className="w-4 h-4" />
-                          Essai gratuit disponible
+                          {language === 'fr' ? "Essai gratuit disponible" : "Free trial available"}
                         </div>
                       </div>
                     </div>
@@ -429,19 +455,19 @@ export default function Home() {
             className="max-w-4xl mx-auto text-center"
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Prêt à transformer vos révisions ?
+              {t.landing.cta2.title}
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Rejoignez des milliers d'étudiants qui réussissent avec Corrige Tes Cours
+              {t.landing.cta2.subtitle}
             </p>
             <Link href="/signup">
               <Button size="lg" className="text-lg px-8 group" data-testid="button-final-cta">
-                Créer mon compte gratuit
+                {language === 'fr' ? "Créer mon compte gratuit" : "Create my free account"}
                 <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
             <p className="text-sm text-muted-foreground mt-4">
-              Aucune carte bancaire requise • Démarrez en 2 minutes
+              {language === 'fr' ? "Aucune carte bancaire requise • Démarrez en 2 minutes" : "No credit card required • Start in 2 minutes"}
             </p>
           </motion.div>
         </section>

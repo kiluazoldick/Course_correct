@@ -2,16 +2,19 @@ import { useState } from 'react';
 import { GraduationCap, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { Link, useLocation } from 'wouter';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
+  const { t } = useTranslation();
 
   const navItems = [
-    { href: '/features', label: 'Fonctionnalités', testId: 'nav-features' },
-    { href: '/pricing', label: 'Tarifs', testId: 'nav-pricing' },
-    { href: '/about', label: 'À propos', testId: 'nav-about' },
+    { href: '/features', label: t.nav.features, testId: 'nav-features' },
+    { href: '/pricing', label: t.nav.pricing, testId: 'nav-pricing' },
+    { href: '/about', label: t.nav.about, testId: 'nav-about' },
   ];
 
   return (
@@ -38,15 +41,16 @@ export default function Navbar() {
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
+            <LanguageToggle />
             <ThemeToggle />
             <Link href="/login">
               <Button variant="ghost" size="sm" data-testid="button-login">
-                Connexion
+                {t.nav.login}
               </Button>
             </Link>
             <Link href="/signup">
               <Button size="sm" data-testid="button-signup-header">
-                Commencer
+                {t.nav.signup}
               </Button>
             </Link>
           </div>
@@ -79,7 +83,11 @@ export default function Navbar() {
               ))}
               <div className="flex flex-col gap-2 pt-2 border-t mt-2">
                 <div className="flex items-center justify-between px-3 py-2">
-                  <span className="text-sm font-medium">Thème</span>
+                  <span className="text-sm font-medium">{t.account.preferences.language}</span>
+                  <LanguageToggle />
+                </div>
+                <div className="flex items-center justify-between px-3 py-2">
+                  <span className="text-sm font-medium">{t.account.preferences.theme}</span>
                   <ThemeToggle />
                 </div>
                 <Link href="/login">
@@ -89,7 +97,7 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     data-testid="button-mobile-login"
                   >
-                    Connexion
+                    {t.nav.login}
                   </Button>
                 </Link>
                 <Link href="/signup">
@@ -98,7 +106,7 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     data-testid="button-mobile-signup"
                   >
-                    Commencer
+                    {t.nav.signup}
                   </Button>
                 </Link>
               </div>

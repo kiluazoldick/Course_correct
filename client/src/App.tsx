@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import LandingPage from "@/pages/Home";
 import Features from "@/pages/Features";
@@ -16,6 +17,7 @@ import Terms from "@/pages/Terms";
 import TryDemo from "@/pages/TryDemo";
 import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/not-found";
+import type { Language } from "@/lib/i18n/translations";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -67,12 +69,23 @@ function Router() {
   );
 }
 
+function AppWithLanguage() {
+  const { user } = useAuth();
+  const userLanguage = (user?.language as Language) || undefined;
+  
+  return (
+    <LanguageProvider initialLanguage={userLanguage}>
+      <Toaster />
+      <Router />
+    </LanguageProvider>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light">
-        <Toaster />
-        <Router />
+        <AppWithLanguage />
       </ThemeProvider>
     </QueryClientProvider>
   );

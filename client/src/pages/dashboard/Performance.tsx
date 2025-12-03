@@ -3,8 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { type QuizResult, type Quiz, type Course } from '@shared/schema';
 import { TrendingUp, Award, Target, BookOpen } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function Performance() {
+  const { t, language } = useLanguage();
+  
   const { data: quizResults = [] } = useQuery<QuizResult[]>({
     queryKey: ['/api/quiz-results'],
   });
@@ -29,9 +32,9 @@ export default function Performance() {
 
   // Prepare chart data
   const scoreDistribution = [
-    { name: 'Excellent (80-100%)', value: quizResults.filter(r => r.score >= 80).length, color: '#10b981' },
-    { name: 'Bon (60-79%)', value: quizResults.filter(r => r.score >= 60 && r.score < 80).length, color: '#f59e0b' },
-    { name: 'À améliorer (<60%)', value: quizResults.filter(r => r.score < 60).length, color: '#ef4444' },
+    { name: t.performancePage.excellent, value: quizResults.filter(r => r.score >= 80).length, color: '#10b981' },
+    { name: t.performancePage.good, value: quizResults.filter(r => r.score >= 60 && r.score < 80).length, color: '#f59e0b' },
+    { name: t.performancePage.needsImprovement, value: quizResults.filter(r => r.score < 60).length, color: '#ef4444' },
   ].filter(item => item.value > 0);
 
   const recentScores = quizResults
@@ -66,28 +69,28 @@ export default function Performance() {
   return (
     <div className="space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold" data-testid="text-performance-title">Performances</h1>
-        <p className="text-muted-foreground mt-1 text-sm md:text-base">Visualisez vos progrès et restez motivé</p>
+        <h1 className="text-2xl md:text-3xl font-bold" data-testid="text-performance-title">{t.performancePage.title}</h1>
+        <p className="text-muted-foreground mt-1 text-sm md:text-base">{t.performancePage.subtitle}</p>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium" data-testid="card-title-quizzes-completed">Quiz complétés</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 gap-2">
+            <CardTitle className="text-sm font-medium" data-testid="card-title-quizzes-completed">{t.performancePage.totalQuizzes}</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold" data-testid="text-total-quizzes">{totalQuizzes}</div>
             <p className="text-xs text-muted-foreground" data-testid="text-active-courses-count">
-              {totalCourses} cours actifs
+              {totalCourses} {t.performancePage.activeCourses}
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium" data-testid="card-title-average-score">Score moyen</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 gap-2">
+            <CardTitle className="text-sm font-medium" data-testid="card-title-average-score">{t.performancePage.averageScore}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -95,14 +98,14 @@ export default function Performance() {
               {averageScore}%
             </div>
             <p className="text-xs text-muted-foreground" data-testid="text-average-score-description">
-              Sur tous les quiz
+              {language === 'fr' ? 'Sur tous les quiz' : 'Across all quizzes'}
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium" data-testid="card-title-highest-score">Meilleur score</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 gap-2">
+            <CardTitle className="text-sm font-medium" data-testid="card-title-highest-score">{t.performancePage.bestScore}</CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -110,20 +113,20 @@ export default function Performance() {
               {highestScore}%
             </div>
             <p className="text-xs text-muted-foreground" data-testid="text-highest-score-description">
-              Record personnel
+              {t.performancePage.bestResult}
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium" data-testid="card-title-courses-studied">Cours étudiés</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 gap-2">
+            <CardTitle className="text-sm font-medium" data-testid="card-title-courses-studied">{t.performancePage.totalCourses}</CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold" data-testid="text-total-courses">{totalCourses}</div>
             <p className="text-xs text-muted-foreground" data-testid="text-total-courses-description">
-              Matières actives
+              {t.performancePage.activeCourses}
             </p>
           </CardContent>
         </Card>
@@ -133,9 +136,9 @@ export default function Performance() {
         <Card>
           <CardContent className="flex items-center justify-center h-64">
             <div className="text-center">
-              <p className="text-muted-foreground" data-testid="text-no-performance-data">Aucune donnée de performance</p>
+              <p className="text-muted-foreground" data-testid="text-no-performance-data">{t.performancePage.noData}</p>
               <p className="text-sm text-muted-foreground mt-2" data-testid="text-no-performance-instructions">
-                Complétez des quiz pour voir vos statistiques
+                {t.performancePage.noDataDesc}
               </p>
             </div>
           </CardContent>
@@ -148,8 +151,10 @@ export default function Performance() {
             {scoreDistribution.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle data-testid="card-title-score-distribution">Distribution des scores</CardTitle>
-                  <CardDescription data-testid="card-description-score-distribution">Répartition de vos performances</CardDescription>
+                  <CardTitle data-testid="card-title-score-distribution">{t.performancePage.scoreDistribution}</CardTitle>
+                  <CardDescription data-testid="card-description-score-distribution">
+                    {language === 'fr' ? 'Répartition de vos performances' : 'Distribution of your performance'}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300} data-testid="chart-score-distribution">
@@ -179,8 +184,10 @@ export default function Performance() {
             {recentScores.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle data-testid="card-title-recent-evolution">Évolution récente</CardTitle>
-                  <CardDescription data-testid="card-description-recent-evolution">Vos derniers scores de quiz</CardDescription>
+                  <CardTitle data-testid="card-title-recent-evolution">{t.performancePage.recentProgress}</CardTitle>
+                  <CardDescription data-testid="card-description-recent-evolution">
+                    {language === 'fr' ? 'Vos derniers scores de quiz' : 'Your recent quiz scores'}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300} data-testid="chart-recent-scores">
@@ -215,8 +222,10 @@ export default function Performance() {
           {coursePerformance.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle data-testid="card-title-performance-by-course">Performance par cours</CardTitle>
-                <CardDescription data-testid="card-description-performance-by-course">Scores moyens pour chaque matière</CardDescription>
+                <CardTitle data-testid="card-title-performance-by-course">{t.performancePage.performanceByCourse}</CardTitle>
+                <CardDescription data-testid="card-description-performance-by-course">
+                  {language === 'fr' ? 'Scores moyens pour chaque matière' : 'Average scores for each subject'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={400} data-testid="chart-course-performance">
@@ -231,10 +240,10 @@ export default function Performance() {
                             <div className="bg-background border rounded-lg p-3 shadow-lg" data-testid="tooltip-course-performance">
                               <p className="font-medium" data-testid="tooltip-course-name">{payload[0].payload.name}</p>
                               <p className="text-sm text-muted-foreground" data-testid="tooltip-course-avg-score">
-                                Score moyen: {payload[0].value}%
+                                {language === 'fr' ? 'Score moyen' : 'Average score'}: {payload[0].value}%
                               </p>
                               <p className="text-sm text-muted-foreground" data-testid="tooltip-course-quiz-count">
-                                Quiz: {payload[0].payload.quizCount}
+                                {t.performancePage.quizzes}: {payload[0].payload.quizCount}
                               </p>
                             </div>
                           );
@@ -252,8 +261,10 @@ export default function Performance() {
           {/* Recent Quiz Results */}
           <Card>
             <CardHeader>
-              <CardTitle data-testid="card-title-quiz-history">Historique des quiz</CardTitle>
-              <CardDescription data-testid="card-description-quiz-history">Vos derniers résultats</CardDescription>
+              <CardTitle data-testid="card-title-quiz-history">{language === 'fr' ? 'Historique des quiz' : 'Quiz history'}</CardTitle>
+              <CardDescription data-testid="card-description-quiz-history">
+                {language === 'fr' ? 'Vos derniers résultats' : 'Your recent results'}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -269,7 +280,7 @@ export default function Performance() {
                       <div>
                         <p className="font-medium" data-testid={`text-quiz-title-${result.id}`}>{quiz?.title || 'Quiz'}</p>
                         <p className="text-sm text-muted-foreground" data-testid={`text-quiz-info-${result.id}`}>
-                          {course?.title || 'Cours'} • {result.totalQuestions} questions
+                          {course?.title || (language === 'fr' ? 'Cours' : 'Course')} • {result.totalQuestions} questions
                         </p>
                       </div>
                       <div className={`text-2xl font-bold ${getScoreColor(result.score)}`} data-testid={`text-quiz-score-${result.id}`}>

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'wouter';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -28,6 +29,7 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
+  const { t, language } = useLanguage();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -56,14 +58,14 @@ export default function Chat() {
           : `${minutes} minutes`;
         
         toast({
-          title: "Limite atteinte",
-          description: `Tu as utilisé tes 5 messages gratuits. Reviens dans ${timeText} ou passe au plan Premium pour continuer !`,
+          title: t.chatPage.limitReached,
+          description: t.chatPage.limitReachedDesc.replace('{time}', timeText),
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Erreur",
-          description: "Impossible d'envoyer le message. Réessaye.",
+          title: t.chatPage.error,
+          description: t.chatPage.cannotSend,
           variant: "destructive",
         });
       }
@@ -77,8 +79,8 @@ export default function Chat() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/chat/session'] });
       toast({
-        title: "Conversation effacée",
-        description: "L'historique de conversation a été supprimé.",
+        title: t.chatPage.chatCleared,
+        description: t.chatPage.chatClearedDesc,
       });
     },
   });
@@ -118,6 +120,19 @@ export default function Chat() {
   const isPremium = session?.isPremium || false;
   const messagesRemaining = session?.messagesRemaining ?? 5;
 
+  // Suggestions based on language
+  const suggestions = language === 'fr' ? [
+    { title: "Explication de concept", subtitle: "Théorème de Pythagore", message: "Explique-moi le théorème de Pythagore" },
+    { title: "Méthode de révision", subtitle: "Réviser efficacement", message: "Comment réviser efficacement pour un examen ?" },
+    { title: "Mémorisation", subtitle: "Astuces de mémorisation", message: "Donne-moi des astuces pour mémoriser mes cours" },
+    { title: "Gestion du stress", subtitle: "Stress des examens", message: "Comment gérer mon stress avant les examens ?" },
+  ] : [
+    { title: "Concept explanation", subtitle: "Pythagorean theorem", message: "Explain the Pythagorean theorem to me" },
+    { title: "Study method", subtitle: "Study effectively", message: "How to study effectively for an exam?" },
+    { title: "Memorization", subtitle: "Memory tips", message: "Give me tips to memorize my courses" },
+    { title: "Stress management", subtitle: "Exam stress", message: "How to manage my stress before exams?" },
+  ];
+
   return (
     <div className="flex flex-col h-full">
       {/* Header - Minimaliste style ChatGPT */}
@@ -126,19 +141,19 @@ export default function Chat() {
           <div className="w-7 h-7 rounded-md border-2 border-primary/20 flex items-center justify-center bg-primary/5">
             <GraduationCap className="w-4 h-4 text-primary" />
           </div>
-          <span className="font-semibold text-sm md:text-base" data-testid="text-chat-title">Tariq IA</span>
+          <span className="font-semibold text-sm md:text-base" data-testid="text-chat-title">{t.chatPage.title}</span>
         </div>
         
         <div className="flex items-center gap-2">
           {!isPremium && (
             <Badge variant="secondary" className="hidden md:flex gap-1 text-xs" data-testid="badge-messages-remaining">
-              {messagesRemaining} restant{messagesRemaining > 1 ? 's' : ''}
+              {messagesRemaining} {t.chatPage.messagesLeft}
             </Badge>
           )}
           {isPremium && (
             <Badge variant="default" className="gap-1" data-testid="badge-premium">
               <Crown className="w-3 h-3" />
-              <span className="hidden md:inline">Premium</span>
+              <span className="hidden md:inline">{t.chatPage.premiumBadge}</span>
             </Badge>
           )}
           {messages.length > 0 && (
@@ -151,7 +166,7 @@ export default function Chat() {
               className="h-8 w-8 p-0 md:w-auto md:px-3"
             >
               <Trash2 className="w-4 h-4" />
-              <span className="hidden md:inline ml-2">Effacer</span>
+              <span className="hidden md:inline ml-2">{t.chatPage.clearChat}</span>
             </Button>
           )}
         </div>
@@ -165,45 +180,26 @@ export default function Chat() {
               <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl border-2 border-primary/20 flex items-center justify-center bg-primary/5 mb-4 md:mb-6">
                 <GraduationCap className="w-6 h-6 md:w-7 md:h-7 text-primary" />
               </div>
-              <h2 className="text-lg md:text-xl font-semibold mb-2">Bonjour ! Je suis Tariq</h2>
+              <h2 className="text-lg md:text-xl font-semibold mb-2">
+                {language === 'fr' ? 'Bonjour ! Je suis Tariq' : 'Hello! I\'m Tariq'}
+              </h2>
               <p className="text-xs md:text-sm text-muted-foreground max-w-md mb-6 md:mb-8">
-                Ton assistant d'études intelligent. Pose-moi toutes tes questions !
+                {t.chatPage.subtitle}
               </p>
               
-              {/* Suggestion Cards - Taille réduite */}
+              {/* Suggestion Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full max-w-xl">
-                <button
-                  onClick={() => setMessage("Explique-moi le théorème de Pythagore")}
-                  className="p-2.5 md:p-3 border rounded-lg hover-elevate active-elevate-2 text-left transition-all"
-                  data-testid="suggestion-pythagore"
-                >
-                  <div className="font-medium text-xs md:text-sm">Explication de concept</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Théorème de Pythagore</div>
-                </button>
-                <button
-                  onClick={() => setMessage("Comment réviser efficacement pour un examen ?")}
-                  className="p-2.5 md:p-3 border rounded-lg hover-elevate active-elevate-2 text-left transition-all"
-                  data-testid="suggestion-revision"
-                >
-                  <div className="font-medium text-xs md:text-sm">Méthode de révision</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Réviser efficacement</div>
-                </button>
-                <button
-                  onClick={() => setMessage("Donne-moi des astuces pour mémoriser mes cours")}
-                  className="p-2.5 md:p-3 border rounded-lg hover-elevate active-elevate-2 text-left transition-all"
-                  data-testid="suggestion-memorisation"
-                >
-                  <div className="font-medium text-xs md:text-sm">Mémorisation</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Astuces de mémorisation</div>
-                </button>
-                <button
-                  onClick={() => setMessage("Comment gérer mon stress avant les examens ?")}
-                  className="p-2.5 md:p-3 border rounded-lg hover-elevate active-elevate-2 text-left transition-all"
-                  data-testid="suggestion-stress"
-                >
-                  <div className="font-medium text-xs md:text-sm">Gestion du stress</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Stress des examens</div>
-                </button>
+                {suggestions.map((suggestion, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setMessage(suggestion.message)}
+                    className="p-2.5 md:p-3 border rounded-lg hover-elevate active-elevate-2 text-left transition-all"
+                    data-testid={`suggestion-${idx}`}
+                  >
+                    <div className="font-medium text-xs md:text-sm">{suggestion.title}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">{suggestion.subtitle}</div>
+                  </button>
+                ))}
               </div>
             </div>
           ) : (
@@ -218,7 +214,9 @@ export default function Chat() {
                     <div className="flex-shrink-0 pt-1">
                       {msg.role === 'user' ? (
                         <div className="w-7 h-7 md:w-8 md:h-8 rounded-md bg-primary/10 flex items-center justify-center">
-                          <span className="text-xs md:text-sm font-medium text-primary">Tu</span>
+                          <span className="text-xs md:text-sm font-medium text-primary">
+                            {language === 'fr' ? 'Tu' : 'You'}
+                          </span>
                         </div>
                       ) : (
                         <div className="w-7 h-7 md:w-8 md:h-8 rounded-md border-2 border-primary/20 flex items-center justify-center bg-primary/5">
@@ -230,7 +228,7 @@ export default function Chat() {
                     {/* Content */}
                     <div className="flex-1 min-w-0 space-y-2">
                       <div className="font-semibold text-xs md:text-sm text-foreground/90">
-                        {msg.role === 'user' ? 'Toi' : 'Tariq'}
+                        {msg.role === 'user' ? (language === 'fr' ? 'Toi' : 'You') : 'Tariq'}
                       </div>
                       <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-muted">
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -252,7 +250,7 @@ export default function Chat() {
                     <div className="font-semibold text-xs md:text-sm text-foreground/90">Tariq</div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm">En réflexion...</span>
+                      <span className="text-sm">{language === 'fr' ? 'En réflexion...' : 'Thinking...'}</span>
                     </div>
                   </div>
                 </div>
@@ -272,10 +270,10 @@ export default function Chat() {
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-4">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-                    Limite gratuite atteinte
+                    {t.chatPage.limitReached}
                   </p>
                   <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                    Nouveau quota dans {
+                    {language === 'fr' ? 'Nouveau quota dans' : 'New quota in'} {
                       (() => {
                         const resetDate = new Date(session.resetAt);
                         const now = new Date();
@@ -290,21 +288,21 @@ export default function Chat() {
                 <Link href="/subscription">
                   <Button size="sm" className="w-full md:w-auto" data-testid="button-upgrade-from-limit">
                     <Crown className="w-3 h-3 mr-1" />
-                    Premium
+                    {t.chatPage.premiumBadge}
                   </Button>
                 </Link>
               </div>
             </div>
           )}
           
-          {/* Input - Alignement corrigé */}
+          {/* Input */}
           <div className="flex items-end gap-2">
             <Textarea
               ref={textareaRef}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder="Envoie un message à Tariq..."
+              placeholder={t.chatPage.placeholder}
               className="flex-1 min-h-[44px] max-h-[200px] resize-none rounded-xl border-muted-foreground/20 focus-visible:ring-1"
               disabled={sendMessageMutation.isPending || (!isPremium && messagesRemaining === 0)}
               data-testid="input-message"
@@ -326,7 +324,7 @@ export default function Chat() {
           </div>
           
           <p className="text-xs text-muted-foreground text-center mt-2">
-            Tariq peut faire des erreurs. Vérifie les informations importantes.
+            {t.chatPage.disclaimer}
           </p>
         </div>
       </div>

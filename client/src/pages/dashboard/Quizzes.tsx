@@ -11,6 +11,7 @@ import { type Quiz, type Course } from '@shared/schema';
 import { Brain, CheckCircle2, XCircle, PlayCircle, Trophy, BookOpen, Sparkles } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import ReactMarkdown from 'react-markdown';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import {
   Select,
   SelectContent,
@@ -29,6 +30,7 @@ interface QuizQuestion {
 
 export default function Quizzes() {
   const { toast } = useToast();
+  const { t, language } = useLanguage();
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [quizType, setQuizType] = useState<'mcq' | 'open' | 'mixed'>('mixed');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -49,7 +51,7 @@ export default function Quizzes() {
 
   const generateQuizMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedCourse) throw new Error('Veuillez sélectionner un cours');
+      if (!selectedCourse) throw new Error(t.quizzesPage.selectCourse);
       const response = await apiRequest('POST', `/api/courses/${selectedCourse}/generate-quiz`, { type: quizType });
       return await response.json();
     },
@@ -60,14 +62,14 @@ export default function Quizzes() {
       setAnswers(new Array((data.questions as QuizQuestion[]).length).fill(''));
       queryClient.invalidateQueries({ queryKey: ['/api/quizzes'] });
       toast({
-        title: 'Quiz généré',
-        description: 'Votre quiz intelligent est prêt !',
+        title: t.quizzesPage.quizGenerated,
+        description: t.quizzesPage.quizGeneratedDesc,
       });
     },
     onError: (error: any) => {
       toast({
-        title: 'Erreur',
-        description: error?.message || 'Impossible de générer le quiz.',
+        title: t.quizzesPage.error,
+        description: error?.message || t.quizzesPage.cannotGenerate,
         variant: 'destructive',
       });
     },
@@ -88,8 +90,8 @@ export default function Quizzes() {
     },
     onError: (error: any) => {
       toast({
-        title: 'Erreur',
-        description: error?.message || 'Impossible d\'évaluer le quiz.',
+        title: t.quizzesPage.error,
+        description: error?.message || t.quizzesPage.cannotEvaluate,
         variant: 'destructive',
       });
     },
@@ -124,8 +126,10 @@ export default function Quizzes() {
     const unansweredCount = answers.filter(a => !a || a.trim() === '').length;
     if (unansweredCount > 0) {
       toast({
-        title: 'Questions non répondues',
-        description: `Il reste ${unansweredCount} question(s) sans réponse.`,
+        title: language === 'fr' ? 'Questions non répondues' : 'Unanswered questions',
+        description: language === 'fr' 
+          ? `Il reste ${unansweredCount} question(s) sans réponse.`
+          : `There are ${unansweredCount} unanswered question(s).`,
         variant: 'destructive',
       });
       return;
@@ -149,8 +153,8 @@ export default function Quizzes() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold" data-testid="text-quizzes-title">Quiz Intelligents</h1>
-          <p className="text-muted-foreground mt-1">Testez vos connaissances avec des quiz générés par IA</p>
+          <h1 className="text-3xl font-bold" data-testid="text-quizzes-title">{t.quizzesPage.title}</h1>
+          <p className="text-muted-foreground mt-1">{t.quizzesPage.subtitle}</p>
         </div>
       </div>
 
@@ -159,19 +163,21 @@ export default function Quizzes() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2" data-testid="card-title-generate-quiz">
             <Sparkles className="w-5 h-5 text-primary" />
-            Générer un nouveau quiz
+            {t.quizzesPage.generateQuiz}
           </CardTitle>
           <CardDescription data-testid="card-description-generate-quiz">
-            Sélectionnez un cours et le type de quiz que vous souhaitez générer
+            {language === 'fr' 
+              ? 'Sélectionnez un cours et le type de quiz que vous souhaitez générer'
+              : 'Select a course and the type of quiz you want to generate'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label data-testid="label-course">Cours</Label>
+              <Label data-testid="label-course">{t.quizzesPage.selectCourse}</Label>
               <Select value={selectedCourse || ''} onValueChange={setSelectedCourse}>
                 <SelectTrigger data-testid="select-course">
-                  <SelectValue placeholder="Choisir un cours" />
+                  <SelectValue placeholder={t.quizzesPage.selectCoursePlaceholder} />
                 </SelectTrigger>
                 <SelectContent>
                   {courses.map((course) => (
@@ -183,15 +189,15 @@ export default function Quizzes() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label data-testid="label-quiz-type">Type de quiz</Label>
+              <Label data-testid="label-quiz-type">{t.quizzesPage.quizType}</Label>
               <Select value={quizType} onValueChange={(value: any) => setQuizType(value)}>
                 <SelectTrigger data-testid="select-quiz-type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mcq" data-testid="select-item-quiz-type-mcq">QCM uniquement</SelectItem>
-                  <SelectItem value="open" data-testid="select-item-quiz-type-open">Questions ouvertes</SelectItem>
-                  <SelectItem value="mixed" data-testid="select-item-quiz-type-mixed">Mixte (QCM + Ouvertes)</SelectItem>
+                  <SelectItem value="mcq" data-testid="select-item-quiz-type-mcq">{t.quizzesPage.mcq}</SelectItem>
+                  <SelectItem value="open" data-testid="select-item-quiz-type-open">{t.quizzesPage.openEnded}</SelectItem>
+                  <SelectItem value="mixed" data-testid="select-item-quiz-type-mixed">{t.quizzesPage.mixed}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -205,7 +211,7 @@ export default function Quizzes() {
             data-testid="button-generate-quiz"
           >
             <Brain className="w-4 h-4 mr-2" />
-            {generateQuizMutation.isPending ? 'Génération en cours...' : 'Générer le quiz'}
+            {generateQuizMutation.isPending ? t.quizzesPage.generating : t.quizzesPage.generate}
           </Button>
         </CardFooter>
       </Card>
@@ -213,7 +219,7 @@ export default function Quizzes() {
       {/* Previous Quizzes */}
       {quizzes.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold mb-4" data-testid="text-previous-quizzes">Quiz précédents</h2>
+          <h2 className="text-xl font-semibold mb-4" data-testid="text-previous-quizzes">{t.quizzesPage.recentQuizzes}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {quizzes.map((quiz) => (
               <Card key={quiz.id} className="hover-elevate" data-testid={`card-quiz-${quiz.id}`}>
@@ -238,7 +244,7 @@ export default function Quizzes() {
                     data-testid={`button-take-quiz-${quiz.id}`}
                   >
                     <PlayCircle className="w-4 h-4 mr-2" />
-                    Passer le quiz
+                    {language === 'fr' ? 'Passer le quiz' : 'Take quiz'}
                   </Button>
                 </CardFooter>
               </Card>
@@ -256,7 +262,7 @@ export default function Quizzes() {
               {currentQuiz?.title}
             </DialogTitle>
             <DialogDescription data-testid="dialog-description-quiz">
-              Question {currentQuestionIndex + 1} sur {currentQuiz ? (currentQuiz.questions as QuizQuestion[]).length : 0}
+              {t.quizzesPage.question} {currentQuestionIndex + 1} {t.quizzesPage.of} {currentQuiz ? (currentQuiz.questions as QuizQuestion[]).length : 0}
             </DialogDescription>
           </DialogHeader>
 
@@ -283,7 +289,7 @@ export default function Quizzes() {
                 <Textarea
                   value={answers[currentQuestionIndex] || ''}
                   onChange={(e) => handleAnswerChange(e.target.value)}
-                  placeholder="Entrez votre réponse ici..."
+                  placeholder={t.quizzesPage.answerPlaceholder}
                   rows={5}
                   data-testid={`textarea-answer-${currentQuestionIndex}`}
                 />
@@ -299,11 +305,11 @@ export default function Quizzes() {
                 disabled={currentQuestionIndex === 0}
                 data-testid="button-previous-question"
               >
-                Précédent
+                {t.quizzesPage.previous}
               </Button>
               {currentQuiz && currentQuestionIndex < (currentQuiz.questions as QuizQuestion[]).length - 1 ? (
                 <Button onClick={handleNextQuestion} data-testid="button-next-question">
-                  Suivant
+                  {t.quizzesPage.next}
                 </Button>
               ) : (
                 <Button
@@ -311,7 +317,7 @@ export default function Quizzes() {
                   disabled={evaluateQuizMutation.isPending}
                   data-testid="button-submit-quiz"
                 >
-                  {evaluateQuizMutation.isPending ? 'Évaluation...' : 'Soumettre'}
+                  {evaluateQuizMutation.isPending ? t.quizzesPage.submitting : t.quizzesPage.submit}
                 </Button>
               )}
             </div>
@@ -325,21 +331,23 @@ export default function Quizzes() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2" data-testid="dialog-title-results">
               <Trophy className="w-5 h-5 text-primary" />
-              Résultats du quiz
+              {t.quizzesPage.results}
             </DialogTitle>
           </DialogHeader>
 
           {quizResult && (
             <div className="space-y-6">
               <div className="text-center p-6 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground mb-2" data-testid="text-score-label">Votre score</p>
+                <p className="text-sm text-muted-foreground mb-2" data-testid="text-score-label">{t.quizzesPage.score}</p>
                 <p className={`text-5xl font-bold ${getScoreColor(quizResult.finalScore)}`} data-testid="text-final-score">
                   {quizResult.finalScore}%
                 </p>
               </div>
 
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg" data-testid="text-answer-details">Détails des réponses</h3>
+                <h3 className="font-semibold text-lg" data-testid="text-answer-details">
+                  {language === 'fr' ? 'Détails des réponses' : 'Answer details'}
+                </h3>
                 {quizResult.evaluations.map((evaluation: any, index: number) => {
                   const question = currentQuiz ? (currentQuiz.questions as QuizQuestion[])[evaluation.questionIndex] : null;
                   if (!question) return null;
@@ -361,7 +369,7 @@ export default function Quizzes() {
                               {evaluation.score}
                             </div>
                           )}
-                          Question {index + 1}
+                          {t.quizzesPage.question} {index + 1}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
@@ -369,19 +377,19 @@ export default function Quizzes() {
                           <p className="font-medium" data-testid={`text-evaluation-question-${index}`}>{question.question}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground" data-testid={`text-user-answer-label-${index}`}>Votre réponse :</p>
+                          <p className="text-sm text-muted-foreground" data-testid={`text-user-answer-label-${index}`}>{t.quizzesPage.yourAnswerLabel} :</p>
                           <p className="text-sm" data-testid={`text-user-answer-${index}`}>{evaluation.userAnswer}</p>
                         </div>
                         {evaluation.correctAnswer && (
                           <div>
-                            <p className="text-sm text-muted-foreground" data-testid={`text-correct-answer-label-${index}`}>Réponse correcte :</p>
+                            <p className="text-sm text-muted-foreground" data-testid={`text-correct-answer-label-${index}`}>{t.quizzesPage.correctAnswerLabel} :</p>
                             <p className="text-sm font-medium text-green-600 dark:text-green-400" data-testid={`text-correct-answer-${index}`}>
                               {evaluation.correctAnswer}
                             </p>
                           </div>
                         )}
                         <div>
-                          <p className="text-sm text-muted-foreground" data-testid={`text-explanation-label-${index}`}>Explication :</p>
+                          <p className="text-sm text-muted-foreground" data-testid={`text-explanation-label-${index}`}>{t.quizzesPage.feedback} :</p>
                           <div className="text-sm prose prose-sm dark:prose-invert" data-testid={`text-explanation-${index}`}>
                             <ReactMarkdown>
                               {evaluation.feedback || evaluation.explanation}
@@ -398,7 +406,7 @@ export default function Quizzes() {
 
           <DialogFooter>
             <Button onClick={() => setIsResultOpen(false)} data-testid="button-close-results">
-              Fermer
+              {t.quizzesPage.close}
             </Button>
           </DialogFooter>
         </DialogContent>

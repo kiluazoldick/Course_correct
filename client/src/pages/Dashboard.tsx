@@ -1,7 +1,6 @@
 import { Switch, Route } from 'wouter';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { BottomNav } from '@/components/BottomNav';
 import DashboardHome from './dashboard/DashboardHome';
 import Courses from './dashboard/Courses';
@@ -21,20 +20,18 @@ function DashboardContent() {
 
       <div className="flex flex-col flex-1 w-full">
         {/* Header mobile simplifié (sans sidebar toggle) */}
-        <header className="flex md:hidden items-center justify-between px-4 py-3 border-b bg-background">
+        <header className="flex md:hidden items-center justify-center px-4 py-3 border-b bg-background">
           <h1 className="text-lg font-semibold" data-testid="text-app-title">
             Corrige Tes Cours
           </h1>
-          <ThemeToggle />
         </header>
 
         {/* Header desktop avec sidebar toggle */}
-        <header className="hidden md:flex items-center justify-between p-4 border-b">
+        <header className="hidden md:flex items-center p-4 border-b gap-4">
           <SidebarTrigger data-testid="button-sidebar-toggle" />
           <h1 className="text-lg font-semibold" data-testid="text-app-title">
             Corrige Tes Cours
           </h1>
-          <ThemeToggle />
         </header>
 
         {/* Main content optimisé mobile/desktop */}

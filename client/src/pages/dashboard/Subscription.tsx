@@ -8,7 +8,8 @@ import { Loader2, CheckCircle2, XCircle, Crown, Smartphone, CreditCard } from 'l
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface SubscriptionData {
   status: string;
@@ -32,6 +33,7 @@ interface PaymentStatusData {
 
 export default function Subscription() {
   const { toast } = useToast();
+  const { t, language } = useLanguage();
   const [, setLocation] = useLocation();
   const [paymentId, setPaymentId] = useState<string | null>(null);
 
@@ -41,26 +43,32 @@ export default function Subscription() {
     
     if (params.get('success') === 'true') {
       toast({
-        title: "Paiement réussi ! 🎉",
-        description: "Ton abonnement Premium est maintenant actif",
+        title: t.subscriptionPage.paymentSuccess,
+        description: t.subscriptionPage.paymentSuccessDesc,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/subscription'] });
       // Clean URL
       window.history.replaceState({}, '', '/dashboard/subscription');
     } else if (params.get('error')) {
       const error = params.get('error');
-      let errorMessage = "Le paiement n'a pas été complété. Réessaye.";
+      let errorMessage: string = t.subscriptionPage.paymentFailedDesc;
       
       if (error === 'payment_failed') {
-        errorMessage = "Le paiement a été refusé. Vérifie tes informations et réessaye.";
+        errorMessage = language === 'fr' 
+          ? "Le paiement a été refusé. Vérifie tes informations et réessaye."
+          : "Payment was declined. Check your information and try again.";
       } else if (error === 'payment_not_found') {
-        errorMessage = "Transaction introuvable. Contacte le support.";
+        errorMessage = language === 'fr' 
+          ? "Transaction introuvable. Contacte le support."
+          : "Transaction not found. Contact support.";
       } else if (error === 'server_error') {
-        errorMessage = "Erreur serveur. Réessaye dans quelques instants.";
+        errorMessage = language === 'fr' 
+          ? "Erreur serveur. Réessaye dans quelques instants."
+          : "Server error. Try again in a moment.";
       }
       
       toast({
-        title: "Paiement échoué",
+        title: t.subscriptionPage.paymentFailed,
         description: errorMessage,
         variant: "destructive",
       });
@@ -68,13 +76,13 @@ export default function Subscription() {
       window.history.replaceState({}, '', '/dashboard/subscription');
     } else if (params.get('pending') === 'true') {
       toast({
-        title: "Paiement en attente",
-        description: "Ton paiement est en cours de traitement. Nous te confirmerons dès validation.",
+        title: t.subscriptionPage.paymentPending,
+        description: t.subscriptionPage.paymentPendingDesc,
       });
       // Clean URL
       window.history.replaceState({}, '', '/dashboard/subscription');
     }
-  }, [toast]);
+  }, [toast, t, language]);
 
   const { data: subscription, isLoading: subLoading } = useQuery<SubscriptionData>({
     queryKey: ['/api/subscription'],
@@ -103,8 +111,8 @@ export default function Subscription() {
     },
     onError: (error: any) => {
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible d'initier le paiement",
+        title: language === 'fr' ? "Erreur" : "Error",
+        description: error.message || (language === 'fr' ? "Impossible d'initier le paiement" : "Unable to initiate payment"),
         variant: "destructive",
       });
     },
@@ -114,19 +122,19 @@ export default function Subscription() {
     if (paymentStatus?.status === 'completed') {
       queryClient.invalidateQueries({ queryKey: ['/api/subscription'] });
       toast({
-        title: "Paiement réussi ! 🎉",
-        description: "Ton abonnement Premium est maintenant actif",
+        title: t.subscriptionPage.paymentSuccess,
+        description: t.subscriptionPage.paymentSuccessDesc,
       });
       setPaymentId(null);
     } else if (paymentStatus?.status === 'failed') {
       toast({
-        title: "Paiement échoué",
-        description: "Le paiement n'a pas été complété. Réessaye.",
+        title: t.subscriptionPage.paymentFailed,
+        description: t.subscriptionPage.paymentFailedDesc,
         variant: "destructive",
       });
       setPaymentId(null);
     }
-  }, [paymentStatus, toast]);
+  }, [paymentStatus, toast, t]);
 
   if (subLoading) {
     return (
@@ -142,9 +150,9 @@ export default function Subscription() {
   return (
     <div className="w-full py-8 px-6 space-y-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold" data-testid="text-subscription-title">Mon Abonnement</h1>
+        <h1 className="text-3xl font-bold" data-testid="text-subscription-title">{t.subscriptionPage.title}</h1>
         <p className="text-muted-foreground mt-2">
-          Gère ton abonnement et accède aux fonctionnalités Premium
+          {t.subscriptionPage.subtitle}
         </p>
       </div>
 
@@ -152,63 +160,63 @@ export default function Subscription() {
         <Card data-testid="card-current-plan">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Plan actuel</CardTitle>
+              <CardTitle>{t.subscriptionPage.currentPlan}</CardTitle>
               <Badge variant={isPremium ? "default" : "secondary"} data-testid="badge-plan-status">
                 {isPremium ? (
                   <>
                     <Crown className="w-3 h-3 mr-1" />
-                    Premium
+                    {t.subscriptionPage.premium}
                   </>
                 ) : (
-                  "Gratuit"
+                  t.subscriptionPage.free
                 )}
               </Badge>
             </div>
             <CardDescription>
               {isPremium
-                ? "Tu profites de toutes les fonctionnalités Premium"
-                : "Passe au Premium pour débloquer toutes les fonctionnalités"}
+                ? (language === 'fr' ? "Tu profites de toutes les fonctionnalités Premium" : "You're enjoying all Premium features")
+                : (language === 'fr' ? "Passe au Premium pour débloquer toutes les fonctionnalités" : "Upgrade to Premium to unlock all features")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {isPremium && endDate ? (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Date d'expiration</span>
+                  <span className="text-muted-foreground">{t.subscriptionPage.expiresOn}</span>
                   <span className="font-medium" data-testid="text-expiry-date">
-                    {format(endDate, 'dd MMMM yyyy', { locale: fr })}
+                    {format(endDate, 'dd MMMM yyyy', { locale: language === 'fr' ? fr : enUS })}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Montant</span>
-                  <span className="font-medium">1 500 XAF/mois</span>
+                  <span className="text-muted-foreground">{language === 'fr' ? 'Montant' : 'Amount'}</span>
+                  <span className="font-medium">{t.subscriptionPage.price}{t.subscriptionPage.perMonth}</span>
                 </div>
               </div>
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>Saisir ses cours (illimité)</span>
+                  <span>{language === 'fr' ? 'Saisir ses cours (illimité)' : 'Create courses (unlimited)'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>Résumés IA (illimités)</span>
+                  <span>{language === 'fr' ? 'Résumés IA (illimités)' : 'AI Summaries (unlimited)'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>Téléchargement PDF des résumés</span>
+                  <span>{language === 'fr' ? 'Téléchargement PDF des résumés' : 'PDF download of summaries'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>Quiz personnalisés (illimités)</span>
+                  <span>{language === 'fr' ? 'Quiz personnalisés (illimités)' : 'Personalized quizzes (unlimited)'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <XCircle className="w-4 h-4" />
-                  <span>Upload : 2 fichiers/mois (10MB max)</span>
+                  <span>{language === 'fr' ? 'Upload : 2 fichiers/mois (10MB max)' : 'Upload: 2 files/month (10MB max)'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <XCircle className="w-4 h-4" />
-                  <span>Tariq IA : 5 messages/session (3h cooldown)</span>
+                  <span>{language === 'fr' ? 'Tariq IA : 5 messages/session (3h cooldown)' : 'Tariq AI: 5 messages/session (3h cooldown)'}</span>
                 </div>
               </div>
             )}
@@ -219,41 +227,41 @@ export default function Subscription() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Crown className="w-5 h-5 text-yellow-500" />
-              <CardTitle>Fonctionnalités Premium</CardTitle>
+              <CardTitle>{t.subscriptionPage.features.title}</CardTitle>
             </div>
             <CardDescription>
-              Débloquez tout le potentiel de Corrige Tes Cours
+              {language === 'fr' ? 'Débloquez tout le potentiel de Corrige Tes Cours' : 'Unlock the full potential of Corrige Tes Cours'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">Tout du plan Gratuit</span>
+              <span className="font-medium">{language === 'fr' ? 'Tout du plan Gratuit' : 'Everything from Free plan'}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">Upload de fichiers illimité</span>
+              <span className="font-medium">{t.subscriptionPage.features.unlimitedUploads}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">Tariq IA illimité (pas de limite)</span>
+              <span className="font-medium">{t.subscriptionPage.features.unlimitedChat}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">Pas de cooldown</span>
+              <span className="font-medium">{language === 'fr' ? 'Pas de cooldown' : 'No cooldown'}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">Statistiques avancées</span>
+              <span className="font-medium">{t.subscriptionPage.features.advancedStats}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">Support prioritaire</span>
+              <span className="font-medium">{t.subscriptionPage.features.prioritySupport}</span>
             </div>
 
             <div className="pt-4 mt-4 border-t">
               <div className="text-3xl font-bold mb-2" data-testid="text-price">
-                1 500 <span className="text-lg font-normal text-muted-foreground">XAF/mois</span>
+                {t.subscriptionPage.price} <span className="text-lg font-normal text-muted-foreground">{t.subscriptionPage.perMonth}</span>
               </div>
 
               {!isPremium && (
@@ -267,12 +275,14 @@ export default function Subscription() {
                   {initiateMutation.isPending || (paymentId && statusLoading) ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {paymentId ? "Vérification du paiement..." : "Initialisation..."}
+                      {paymentId 
+                        ? (language === 'fr' ? "Vérification du paiement..." : "Verifying payment...") 
+                        : t.subscriptionPage.subscribing}
                     </>
                   ) : (
                     <>
                       <Crown className="w-4 h-4 mr-2" />
-                      Passer au Premium
+                      {t.subscriptionPage.subscribe}
                     </>
                   )}
                 </Button>
@@ -285,9 +295,9 @@ export default function Subscription() {
       <div className="max-w-7xl mx-auto">
         <Card data-testid="card-payment-methods">
           <CardHeader>
-            <CardTitle>Moyens de paiement</CardTitle>
+            <CardTitle>{t.subscriptionPage.paymentMethods}</CardTitle>
             <CardDescription>
-              Paye facilement avec Mobile Money ou carte bancaire
+              {language === 'fr' ? 'Paye facilement avec Mobile Money ou carte bancaire' : 'Pay easily with Mobile Money or credit card'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -297,8 +307,8 @@ export default function Subscription() {
                 <Smartphone className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
-                <div className="font-medium text-sm">MTN Mobile Money</div>
-                <div className="text-xs text-muted-foreground">Cameroun</div>
+                <div className="font-medium text-sm">{t.subscriptionPage.mtnMomo}</div>
+                <div className="text-xs text-muted-foreground">{language === 'fr' ? 'Cameroun' : 'Cameroon'}</div>
               </div>
             </div>
 
@@ -307,8 +317,8 @@ export default function Subscription() {
                 <Smartphone className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <div className="font-medium text-sm">Orange Money</div>
-                <div className="text-xs text-muted-foreground">Cameroun</div>
+                <div className="font-medium text-sm">{t.subscriptionPage.orangeMoney}</div>
+                <div className="text-xs text-muted-foreground">{language === 'fr' ? 'Cameroun' : 'Cameroon'}</div>
               </div>
             </div>
 
@@ -317,7 +327,7 @@ export default function Subscription() {
                 <CreditCard className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <div className="font-medium text-sm">Carte bancaire</div>
+                <div className="font-medium text-sm">{t.subscriptionPage.creditCard}</div>
                 <div className="text-xs text-muted-foreground">Visa, Mastercard</div>
               </div>
             </div>
@@ -325,8 +335,10 @@ export default function Subscription() {
 
           <div className="mt-4 p-4 bg-muted/50 rounded-md">
             <p className="text-sm text-muted-foreground">
-              Tes paiements sont sécurisés par <span className="font-medium">Lygos</span>, 
-              la solution de paiement de confiance en Afrique.
+              {language === 'fr' 
+                ? <>Tes paiements sont sécurisés par <span className="font-medium">CinetPay</span>, la solution de paiement de confiance en Afrique.</>
+                : <>Your payments are secured by <span className="font-medium">CinetPay</span>, the trusted payment solution in Africa.</>
+              }
             </p>
           </div>
         </CardContent>
@@ -339,16 +351,19 @@ export default function Subscription() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Loader2 className="w-5 h-5 animate-spin" />
-              Paiement en cours
+              {language === 'fr' ? 'Paiement en cours' : 'Payment in progress'}
             </CardTitle>
             <CardDescription>
-              Nous attendons la confirmation de ton paiement...
+              {language === 'fr' 
+                ? 'Nous attendons la confirmation de ton paiement...'
+                : 'Waiting for payment confirmation...'}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm">
-              Si tu as fermé la fenêtre de paiement, tu peux la rouvrir ou attendre 
-              que nous détections automatiquement ton paiement.
+              {language === 'fr' 
+                ? "Si tu as fermé la fenêtre de paiement, tu peux la rouvrir ou attendre que nous détections automatiquement ton paiement."
+                : "If you closed the payment window, you can reopen it or wait for us to automatically detect your payment."}
             </p>
           </CardContent>
           </Card>

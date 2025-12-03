@@ -13,6 +13,7 @@ import { insertCourseSchema, type Course, type InsertCourse } from '@shared/sche
 import { Plus, BookOpen, Trash2, Edit, Calendar, Sparkles, FileText, Eye, Upload } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import jsPDF from 'jspdf';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +27,7 @@ import {
 
 export default function Courses() {
   const { toast } = useToast();
+  const { t, language } = useLanguage();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -43,8 +45,8 @@ export default function Courses() {
 
   const createForm = useForm<InsertCourse>({
     resolver: zodResolver(insertCourseSchema.extend({
-      title: insertCourseSchema.shape.title.min(1, "Le titre est requis"),
-      content: insertCourseSchema.shape.content.min(10, "Le contenu doit contenir au moins 10 caractères"),
+      title: insertCourseSchema.shape.title.min(1, t.coursesPage.titleRequired),
+      content: insertCourseSchema.shape.content.min(10, t.coursesPage.contentRequired),
     })),
     defaultValues: {
       title: '',
@@ -56,8 +58,8 @@ export default function Courses() {
 
   const editForm = useForm<InsertCourse>({
     resolver: zodResolver(insertCourseSchema.extend({
-      title: insertCourseSchema.shape.title.min(1, "Le titre est requis"),
-      content: insertCourseSchema.shape.content.min(10, "Le contenu doit contenir au moins 10 caractères"),
+      title: insertCourseSchema.shape.title.min(1, t.coursesPage.titleRequired),
+      content: insertCourseSchema.shape.content.min(10, t.coursesPage.contentRequired),
     })),
     defaultValues: {
       title: '',
@@ -76,14 +78,14 @@ export default function Courses() {
       setIsCreateOpen(false);
       createForm.reset();
       toast({
-        title: 'Cours créé',
-        description: 'Votre cours a été créé avec succès.',
+        title: t.coursesPage.courseCreated,
+        description: t.coursesPage.courseCreatedDesc,
       });
     },
     onError: () => {
       toast({
-        title: 'Erreur',
-        description: 'Impossible de créer le cours.',
+        title: t.coursesPage.error,
+        description: t.coursesPage.cannotCreate,
         variant: 'destructive',
       });
     },
@@ -99,14 +101,14 @@ export default function Courses() {
       setSelectedCourse(null);
       editForm.reset();
       toast({
-        title: 'Cours modifié',
-        description: 'Vos modifications ont été enregistrées.',
+        title: t.coursesPage.courseUpdated,
+        description: t.coursesPage.courseUpdatedDesc,
       });
     },
     onError: () => {
       toast({
-        title: 'Erreur',
-        description: 'Impossible de modifier le cours.',
+        title: t.coursesPage.error,
+        description: t.coursesPage.cannotUpdate,
         variant: 'destructive',
       });
     },
@@ -121,14 +123,14 @@ export default function Courses() {
       setIsDeleteOpen(false);
       setSelectedCourse(null);
       toast({
-        title: 'Cours supprimé',
-        description: 'Le cours a été supprimé avec succès.',
+        title: t.coursesPage.courseDeleted,
+        description: t.coursesPage.courseDeletedDesc,
       });
     },
     onError: () => {
       toast({
-        title: 'Erreur',
-        description: 'Impossible de supprimer le cours.',
+        title: t.coursesPage.error,
+        description: t.coursesPage.cannotDelete,
         variant: 'destructive',
       });
     },
@@ -144,14 +146,14 @@ export default function Courses() {
       setIsSummaryOpen(true);
       queryClient.invalidateQueries({ queryKey: ['/api/summaries'] });
       toast({
-        title: 'Résumé généré',
-        description: 'Votre résumé intelligent est prêt !',
+        title: t.coursesPage.summaryGenerated,
+        description: t.coursesPage.summaryGeneratedDesc,
       });
     },
     onError: (error: any) => {
       toast({
-        title: 'Erreur',
-        description: error?.message || 'Impossible de générer le résumé.',
+        title: t.coursesPage.error,
+        description: error?.message || t.coursesPage.cannotGenerateSummary,
         variant: 'destructive',
       });
     },
@@ -182,14 +184,14 @@ export default function Courses() {
       setUploadFile(null);
       setUploadSubject('');
       toast({
-        title: 'Fichier importé',
-        description: 'Ton cours a été créé à partir du fichier.',
+        title: t.coursesPage.fileUploaded,
+        description: t.coursesPage.fileUploadedDesc,
       });
     },
     onError: (error: any) => {
       toast({
-        title: 'Erreur',
-        description: error?.message || 'Impossible d\'importer le fichier.',
+        title: t.coursesPage.uploadError,
+        description: error?.message || t.coursesPage.uploadErrorDesc,
         variant: 'destructive',
       });
     },
@@ -306,7 +308,8 @@ export default function Courses() {
       doc.setFontSize(20);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(0);
-      const normalizedTitle = normalizePdfText(`Resume: ${selectedCourse.title}`);
+      const summaryLabel = language === 'fr' ? 'Resume' : 'Summary';
+      const normalizedTitle = normalizePdfText(`${summaryLabel}: ${selectedCourse.title}`);
       const titleLines = doc.splitTextToSize(normalizedTitle, maxWidth);
       titleLines.forEach((line: string) => {
         doc.text(line, margin, yPosition);
@@ -317,12 +320,13 @@ export default function Courses() {
       doc.setFontSize(10);
       doc.setFont('helvetica', 'italic');
       doc.setTextColor(100);
-      const date = new Date().toLocaleDateString('fr-FR', {
+      const date = new Date().toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', {
         day: 'numeric',
         month: 'long',
         year: 'numeric'
       });
-      doc.text(normalizePdfText(`Genere le ${date}`), margin, yPosition);
+      const generatedLabel = language === 'fr' ? 'Genere le' : 'Generated on';
+      doc.text(normalizePdfText(`${generatedLabel} ${date}`), margin, yPosition);
       yPosition += 3;
 
       doc.setDrawColor(100);
@@ -419,18 +423,19 @@ export default function Courses() {
 
       addFooter(pageNumber);
 
-      const fileName = `resume-${selectedCourse.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.pdf`;
+      const fileNamePrefix = language === 'fr' ? 'resume' : 'summary';
+      const fileName = `${fileNamePrefix}-${selectedCourse.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.pdf`;
       doc.save(fileName);
 
       toast({
-        title: 'PDF téléchargé',
-        description: 'Le résumé a été téléchargé avec succès.',
+        title: language === 'fr' ? 'PDF téléchargé' : 'PDF downloaded',
+        description: language === 'fr' ? 'Le résumé a été téléchargé avec succès.' : 'The summary has been downloaded successfully.',
       });
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast({
-        title: 'Erreur',
-        description: 'Impossible de générer le PDF.',
+        title: t.coursesPage.error,
+        description: language === 'fr' ? 'Impossible de générer le PDF.' : 'Unable to generate PDF.',
         variant: 'destructive',
       });
     }
@@ -441,8 +446,8 @@ export default function Courses() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-bold">Mes Cours</h2>
-            <p className="text-muted-foreground mt-2">Chargement...</p>
+            <h2 className="text-3xl font-bold">{t.coursesPage.title}</h2>
+            <p className="text-muted-foreground mt-2">{language === 'fr' ? 'Chargement...' : 'Loading...'}</p>
           </div>
         </div>
       </div>
@@ -453,17 +458,17 @@ export default function Courses() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold" data-testid="text-courses-title">Mes Cours</h2>
-          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">Gérez vos cours et générez des résumés intelligents</p>
+          <h2 className="text-2xl md:text-3xl font-bold" data-testid="text-courses-title">{t.coursesPage.title}</h2>
+          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">{t.coursesPage.subtitle}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="md:size-default" onClick={() => setIsUploadOpen(true)} data-testid="button-upload-course">
             <Upload className="w-4 h-4 md:mr-2" />
-            <span className="hidden md:inline">Importer</span>
+            <span className="hidden md:inline">{t.coursesPage.uploadFile}</span>
           </Button>
           <Button size="sm" className="md:size-default" onClick={() => setIsCreateOpen(true)} data-testid="button-create-course">
             <Plus className="w-4 h-4 md:mr-2" />
-            <span className="md:inline">Nouveau</span>
+            <span className="md:inline">{language === 'fr' ? 'Nouveau' : 'New'}</span>
           </Button>
         </div>
       </div>
@@ -472,13 +477,13 @@ export default function Courses() {
         <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
           <div className="text-center">
             <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-4">Aucun cours pour le moment</p>
+            <p className="text-muted-foreground mb-4">{t.coursesPage.noCourses}</p>
             <Button
               variant="outline"
               onClick={() => setIsCreateOpen(true)}
               data-testid="button-create-first-course"
             >
-              Créer mon premier cours
+              {t.coursesPage.createCourse}
             </Button>
           </div>
         </div>
@@ -501,7 +506,7 @@ export default function Courses() {
                 <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground">
                   <Calendar className="w-3 h-3" />
                   <span>
-                    {new Date(course.createdAt).toLocaleDateString('fr-FR', {
+                    {new Date(course.createdAt).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', {
                       day: 'numeric',
                       month: 'short',
                       year: 'numeric',
@@ -520,8 +525,8 @@ export default function Courses() {
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   {generateSummaryMutation.isPending && selectedCourse?.id === course.id
-                    ? 'Génération...'
-                    : 'Générer un résumé IA'}
+                    ? t.coursesPage.generatingSummary
+                    : t.coursesPage.generateSummary}
                 </Button>
                 <div className="flex gap-2 w-full">
                   <Button
@@ -535,7 +540,7 @@ export default function Courses() {
                     className="flex-1"
                   >
                     <Eye className="w-4 h-4 mr-2" />
-                    Voir
+                    {t.coursesPage.view}
                   </Button>
                   <Button
                     variant="outline"
@@ -545,7 +550,7 @@ export default function Courses() {
                     className="flex-1"
                   >
                     <Edit className="w-4 h-4 mr-2" />
-                    Modifier
+                    {t.coursesPage.edit}
                   </Button>
                   <Button
                     variant="outline"
@@ -566,9 +571,11 @@ export default function Courses() {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Créer un nouveau cours</DialogTitle>
+            <DialogTitle>{t.coursesPage.createCourse}</DialogTitle>
             <DialogDescription>
-              Ajoutez le contenu de votre cours pour générer des résumés et des quiz intelligents.
+              {language === 'fr' 
+                ? 'Ajoutez le contenu de votre cours pour générer des résumés et des quiz intelligents.'
+                : 'Add your course content to generate intelligent summaries and quizzes.'}
             </DialogDescription>
           </DialogHeader>
           <Form {...createForm}>
@@ -578,10 +585,10 @@ export default function Courses() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Titre du cours</FormLabel>
+                    <FormLabel>{t.coursesPage.courseTitle}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ex: Introduction à l'algèbre linéaire"
+                        placeholder={t.coursesPage.courseTitlePlaceholder}
                         {...field}
                         data-testid="input-course-title"
                       />
@@ -595,10 +602,10 @@ export default function Courses() {
                 name="subject"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Matière (optionnel)</FormLabel>
+                    <FormLabel>{t.coursesPage.subject} ({language === 'fr' ? 'optionnel' : 'optional'})</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ex: Mathématiques"
+                        placeholder={t.coursesPage.subjectPlaceholder}
                         {...field}
                         value={field.value || ''}
                         data-testid="input-course-subject"
@@ -613,10 +620,10 @@ export default function Courses() {
                 name="content"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contenu du cours</FormLabel>
+                    <FormLabel>{t.coursesPage.content}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Collez ou tapez le contenu de votre cours ici..."
+                        placeholder={t.coursesPage.contentPlaceholder}
                         className="min-h-[200px]"
                         {...field}
                         data-testid="input-course-content"
@@ -633,14 +640,16 @@ export default function Courses() {
                   onClick={() => setIsCreateOpen(false)}
                   data-testid="button-cancel-create"
                 >
-                  Annuler
+                  {t.coursesPage.cancel}
                 </Button>
                 <Button
                   type="submit"
                   disabled={createMutation.isPending}
                   data-testid="button-submit-create"
                 >
-                  {createMutation.isPending ? 'Création...' : 'Créer le cours'}
+                  {createMutation.isPending 
+                    ? (language === 'fr' ? 'Création...' : 'Creating...') 
+                    : t.coursesPage.create}
                 </Button>
               </DialogFooter>
             </form>
@@ -652,9 +661,9 @@ export default function Courses() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Modifier le cours</DialogTitle>
+            <DialogTitle>{language === 'fr' ? 'Modifier le cours' : 'Edit course'}</DialogTitle>
             <DialogDescription>
-              Modifiez le contenu de votre cours.
+              {language === 'fr' ? 'Modifiez le contenu de votre cours.' : 'Modify your course content.'}
             </DialogDescription>
           </DialogHeader>
           <Form {...editForm}>
@@ -664,10 +673,10 @@ export default function Courses() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Titre du cours</FormLabel>
+                    <FormLabel>{t.coursesPage.courseTitle}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ex: Introduction à l'algèbre linéaire"
+                        placeholder={t.coursesPage.courseTitlePlaceholder}
                         {...field}
                         data-testid="input-edit-course-title"
                       />
@@ -681,10 +690,10 @@ export default function Courses() {
                 name="subject"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Matière (optionnel)</FormLabel>
+                    <FormLabel>{t.coursesPage.subject} ({language === 'fr' ? 'optionnel' : 'optional'})</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ex: Mathématiques"
+                        placeholder={t.coursesPage.subjectPlaceholder}
                         {...field}
                         value={field.value || ''}
                         data-testid="input-edit-course-subject"
@@ -699,10 +708,10 @@ export default function Courses() {
                 name="content"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contenu du cours</FormLabel>
+                    <FormLabel>{t.coursesPage.content}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Collez ou tapez le contenu de votre cours ici..."
+                        placeholder={t.coursesPage.contentPlaceholder}
                         className="min-h-[200px]"
                         {...field}
                         data-testid="input-edit-course-content"
@@ -722,14 +731,16 @@ export default function Courses() {
                   }}
                   data-testid="button-cancel-edit"
                 >
-                  Annuler
+                  {t.coursesPage.cancel}
                 </Button>
                 <Button
                   type="submit"
                   disabled={updateMutation.isPending}
                   data-testid="button-submit-edit"
                 >
-                  {updateMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+                  {updateMutation.isPending 
+                    ? (language === 'fr' ? 'Enregistrement...' : 'Saving...') 
+                    : (language === 'fr' ? 'Enregistrer' : 'Save')}
                 </Button>
               </DialogFooter>
             </form>
@@ -741,19 +752,19 @@ export default function Courses() {
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer ce cours ?</AlertDialogTitle>
+            <AlertDialogTitle>{t.coursesPage.deleteConfirm}</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irréversible. Le cours "{selectedCourse?.title}" ainsi que tous ses résumés et quiz associés seront définitivement supprimés.
+              {t.coursesPage.deleteConfirmDesc.replace('{title}', selectedCourse?.title || '')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete">Annuler</AlertDialogCancel>
+            <AlertDialogCancel data-testid="button-cancel-delete">{t.coursesPage.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               data-testid="button-confirm-delete"
             >
-              Supprimer
+              {t.coursesPage.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -769,7 +780,7 @@ export default function Courses() {
             </DialogTitle>
             {selectedCourse?.subject && (
               <DialogDescription>
-                Matière : {selectedCourse.subject}
+                {t.coursesPage.subject} : {selectedCourse.subject}
               </DialogDescription>
             )}
           </DialogHeader>
@@ -784,7 +795,7 @@ export default function Courses() {
               onClick={() => setIsViewOpen(false)}
               data-testid="button-close-view"
             >
-              Fermer
+              {language === 'fr' ? 'Fermer' : 'Close'}
             </Button>
             {selectedCourse && (
               <Button
@@ -795,7 +806,7 @@ export default function Courses() {
                 data-testid="button-edit-from-view"
               >
                 <Edit className="w-4 h-4 mr-2" />
-                Modifier
+                {t.coursesPage.edit}
               </Button>
             )}
           </DialogFooter>
@@ -808,16 +819,16 @@ export default function Courses() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Upload className="w-5 h-5 text-primary" />
-              Importer un fichier
+              {t.coursesPage.uploadTitle}
             </DialogTitle>
             <DialogDescription>
-              Importe un fichier PDF ou Word pour créer automatiquement un cours (max 10 MB)
+              {t.coursesPage.uploadDesc}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="file-upload">
-                Fichier (PDF ou Word .docx)
+                {language === 'fr' ? 'Fichier (PDF ou Word .docx)' : 'File (PDF or Word .docx)'}
               </label>
               <Input
                 id="file-upload"
@@ -828,19 +839,19 @@ export default function Courses() {
               />
               {uploadFile && (
                 <p className="text-sm text-muted-foreground">
-                  Fichier : {uploadFile.name} ({(uploadFile.size / 1024 / 1024).toFixed(2)} MB)
+                  {language === 'fr' ? 'Fichier' : 'File'}: {uploadFile.name} ({(uploadFile.size / 1024 / 1024).toFixed(2)} MB)
                 </p>
               )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="subject-upload">
-                Matière (optionnel)
+                {t.coursesPage.subject} ({language === 'fr' ? 'optionnel' : 'optional'})
               </label>
               <Input
                 id="subject-upload"
                 value={uploadSubject}
                 onChange={(e) => setUploadSubject(e.target.value)}
-                placeholder="Ex: Mathématiques, Physique..."
+                placeholder={t.coursesPage.subjectPlaceholder}
                 data-testid="input-subject-upload"
               />
             </div>
@@ -855,7 +866,7 @@ export default function Courses() {
               }}
               data-testid="button-cancel-upload"
             >
-              Annuler
+              {t.coursesPage.cancel}
             </Button>
             <Button
               onClick={() => {
@@ -866,7 +877,9 @@ export default function Courses() {
               disabled={!uploadFile || uploadFileMutation.isPending}
               data-testid="button-confirm-upload"
             >
-              {uploadFileMutation.isPending ? 'Import en cours...' : 'Importer'}
+              {uploadFileMutation.isPending 
+                ? t.coursesPage.uploading 
+                : (language === 'fr' ? 'Importer' : 'Import')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -878,10 +891,12 @@ export default function Courses() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-primary" />
-              Résumé : {selectedCourse?.title}
+              {t.coursesPage.summary} : {selectedCourse?.title}
             </DialogTitle>
             <DialogDescription>
-              Résumé intelligent généré par Corrige Tes Cours
+              {language === 'fr' 
+                ? 'Résumé intelligent généré par Corrige Tes Cours' 
+                : 'Intelligent summary generated by Corrige Tes Cours'}
             </DialogDescription>
           </DialogHeader>
           <div className="bg-muted/30 rounded-lg p-6 max-w-none" data-testid="text-summary-content">
@@ -897,14 +912,14 @@ export default function Courses() {
               onClick={() => setIsSummaryOpen(false)}
               data-testid="button-close-summary"
             >
-              Fermer
+              {language === 'fr' ? 'Fermer' : 'Close'}
             </Button>
             <Button
               onClick={downloadSummaryAsPdf}
               data-testid="button-download-summary"
             >
               <FileText className="w-4 h-4 mr-2" />
-              Télécharger PDF
+              {t.coursesPage.downloadPdf}
             </Button>
           </DialogFooter>
         </DialogContent>

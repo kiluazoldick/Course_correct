@@ -3,8 +3,11 @@ import AppFooter from '@/components/AppFooter';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function Terms() {
+  const { t } = useLanguage();
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -47,13 +50,13 @@ export default function Terms() {
             >
               <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
                 <FileText className="w-4 h-4" />
-                Conditions d'utilisation
+                {t.termsPage.badge}
               </div>
             </motion.div>
             
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Conditions Générales d'Utilisation</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">{t.termsPage.title}</h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Règles d'utilisation de Corrige Tes Cours
+              {t.termsPage.subtitle}
             </p>
           </motion.div>
 
@@ -72,10 +75,9 @@ export default function Terms() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">1. Acceptation des conditions</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.termsPage.acceptance.title}</h2>
                   <p className="text-muted-foreground">
-                    En accédant et en utilisant Corrige Tes Cours, vous acceptez d'être lié par ces conditions 
-                    générales d'utilisation. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre service.
+                    {t.termsPage.acceptance.description}
                   </p>
                 </CardContent>
               </Card>
@@ -84,17 +86,14 @@ export default function Terms() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">2. Description du service</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.termsPage.service.title}</h2>
                   <p className="text-muted-foreground mb-4">
-                    Corrige Tes Cours est une plateforme d'apprentissage en ligne qui propose :
+                    {t.termsPage.service.intro}
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                    <li>La prise de notes et l'organisation de cours</li>
-                    <li>L'upload de fichiers PDF et Word (2/mois gratuit, illimité en Premium)</li>
-                    <li>La génération automatique de résumés par IA</li>
-                    <li>La création de quiz personnalisés</li>
-                    <li>L'assistance de Tariq IA, votre tuteur personnel</li>
-                    <li>Le suivi de progression académique</li>
+                    {t.termsPage.service.items.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
                   </ul>
                 </CardContent>
               </Card>
@@ -103,15 +102,14 @@ export default function Terms() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">3. Compte utilisateur</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.termsPage.account.title}</h2>
                   <p className="text-muted-foreground mb-4">
-                    Pour utiliser nos services, vous devez :
+                    {t.termsPage.account.intro}
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                    <li>Créer un compte avec des informations exactes et à jour</li>
-                    <li>Maintenir la confidentialité de vos identifiants</li>
-                    <li>Être responsable de toutes les activités effectuées depuis votre compte</li>
-                    <li>Nous informer immédiatement de toute utilisation non autorisée</li>
+                    {t.termsPage.account.items.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
                   </ul>
                 </CardContent>
               </Card>
@@ -120,16 +118,14 @@ export default function Terms() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">4. Utilisation acceptable</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.termsPage.acceptable.title}</h2>
                   <p className="text-muted-foreground mb-4">
-                    Vous vous engagez à ne pas :
+                    {t.termsPage.acceptable.intro}
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                    <li>Utiliser le service à des fins illégales ou non autorisées</li>
-                    <li>Partager votre compte avec d'autres personnes</li>
-                    <li>Tenter d'accéder aux comptes d'autres utilisateurs</li>
-                    <li>Perturber ou interférer avec le bon fonctionnement du service</li>
-                    <li>Copier, reproduire ou distribuer le contenu du service sans autorisation</li>
+                    {t.termsPage.acceptable.items.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
                   </ul>
                 </CardContent>
               </Card>
@@ -138,15 +134,14 @@ export default function Terms() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">5. Propriété du contenu</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.termsPage.content.title}</h2>
                   <p className="text-muted-foreground mb-4">
-                    Vous conservez tous les droits sur le contenu que vous créez (cours, notes). 
-                    En utilisant notre service, vous nous accordez une licence pour :
+                    {t.termsPage.content.intro}
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                    <li>Stocker et traiter votre contenu de manière sécurisée</li>
-                    <li>Générer des résumés et quiz à partir de votre contenu</li>
-                    <li>Améliorer nos services (de manière anonymisée)</li>
+                    {t.termsPage.content.items.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
                   </ul>
                 </CardContent>
               </Card>
@@ -155,15 +150,14 @@ export default function Terms() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">6. Paiements et abonnements</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.termsPage.payment.title}</h2>
                   <p className="text-muted-foreground mb-4">
-                    Pour les plans payants :
+                    {t.termsPage.payment.intro}
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                    <li>Les prix sont indiqués en Francs CFA (XAF) - Premium : 1 500 XAF/mois</li>
-                    <li>Le paiement se fait par Mobile Money (MTN, Orange) ou carte bancaire via Lygos</li>
-                    <li>Vous pouvez annuler votre abonnement à tout moment</li>
-                    <li>Garantie satisfait ou remboursé de 14 jours sur le plan Premium</li>
+                    {t.termsPage.payment.items.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
                   </ul>
                 </CardContent>
               </Card>
@@ -172,11 +166,9 @@ export default function Terms() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">7. Limitation de responsabilité</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.termsPage.liability.title}</h2>
                   <p className="text-muted-foreground">
-                    Corrige Tes Cours est fourni "tel quel". Nous ne garantissons pas que le service sera 
-                    toujours disponible, sécurisé ou exempt d'erreurs. Nous déclinons toute responsabilité 
-                    pour les dommages directs ou indirects résultant de l'utilisation de notre service.
+                    {t.termsPage.liability.description}
                   </p>
                 </CardContent>
               </Card>
@@ -185,11 +177,9 @@ export default function Terms() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">8. Modifications des CGU</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.termsPage.modifications.title}</h2>
                   <p className="text-muted-foreground">
-                    Nous nous réservons le droit de modifier ces conditions à tout moment. 
-                    Les modifications entrent en vigueur dès leur publication sur cette page. 
-                    Votre utilisation continue du service après ces modifications constitue votre acceptation des nouvelles conditions.
+                    {t.termsPage.modifications.description}
                   </p>
                 </CardContent>
               </Card>
@@ -198,9 +188,9 @@ export default function Terms() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">9. Contact</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.termsPage.contact.title}</h2>
                   <p className="text-muted-foreground">
-                    Pour toute question concernant ces conditions, contactez-nous à : <strong>contact@corrigetescours.cm</strong>
+                    {t.termsPage.contact.description} <strong>contact@corrigetescours.cm</strong>
                   </p>
                 </CardContent>
               </Card>

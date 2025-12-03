@@ -366,7 +366,7 @@ export default function Home() {
                   {/* Trustpilot Widget */}
                   <div 
                     className="trustpilot-widget" 
-                    data-locale="fr-FR" 
+                    data-locale={language === 'fr' ? "fr-FR" : "en-US"}
                     data-template-id="56278e9abfbbba0bdcd568bc" 
                     data-businessunit-id="68f27544aad66395e889c381" 
                     data-style-height="52px" 
@@ -374,7 +374,7 @@ export default function Home() {
                     data-token="da1d8c6a-d9fe-4532-8a96-30cdc4b952d8"
                   >
                     <a href="https://fr.trustpilot.com/review/corrigetescours.com" target="_blank" rel="noopener" className="text-primary hover:underline">
-                      Voir nos avis Trustpilot
+                      {t.trustpilot.seeReviews}
                     </a>
                   </div>
                 </div>

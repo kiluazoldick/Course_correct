@@ -3,8 +3,11 @@ import AppFooter from '@/components/AppFooter';
 import { Card, CardContent } from '@/components/ui/card';
 import { Scale } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function LegalNotice() {
+  const { t } = useLanguage();
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -47,13 +50,13 @@ export default function LegalNotice() {
             >
               <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
                 <Scale className="w-4 h-4" />
-                Informations légales
+                {t.legalPage.badge}
               </div>
             </motion.div>
             
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Mentions légales</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">{t.legalPage.title}</h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Informations légales relatives à Corrige Tes Cours
+              {t.legalPage.subtitle}
             </p>
           </motion.div>
 
@@ -72,15 +75,15 @@ export default function LegalNotice() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">Éditeur du site</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.legalPage.editor.title}</h2>
                   <p className="text-muted-foreground mb-2">
-                    <strong>Nom de l'entreprise :</strong> Corrige Tes Cours
+                    <strong>{t.legalPage.editor.company} :</strong> Corrige Tes Cours
                   </p>
                   <p className="text-muted-foreground mb-2">
-                    <strong>Siège social :</strong> Douala, Cameroun
+                    <strong>{t.legalPage.editor.address} :</strong> Douala, Cameroun
                   </p>
                   <p className="text-muted-foreground">
-                    <strong>Email de contact :</strong> contact@corrigetescours.cm
+                    <strong>{t.legalPage.editor.email} :</strong> contact@corrigetescours.cm
                   </p>
                 </CardContent>
               </Card>
@@ -89,9 +92,9 @@ export default function LegalNotice() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">Hébergement</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.legalPage.hosting.title}</h2>
                   <p className="text-muted-foreground mb-2">
-                    Le site web Corrige Tes Cours est hébergé par :
+                    {t.legalPage.hosting.description}
                   </p>
                   <p className="text-muted-foreground">
                     <strong>Replit, Inc.</strong><br />
@@ -104,15 +107,12 @@ export default function LegalNotice() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">Propriété intellectuelle</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.legalPage.intellectual.title}</h2>
                   <p className="text-muted-foreground mb-4">
-                    L'ensemble du contenu de ce site (textes, images, logos, graphiques, interface utilisateur) 
-                    est la propriété exclusive de Corrige Tes Cours et est protégé par les lois en vigueur sur 
-                    la propriété intellectuelle au Cameroun et internationalement.
+                    {t.legalPage.intellectual.p1}
                   </p>
                   <p className="text-muted-foreground">
-                    Toute reproduction, distribution, modification ou utilisation non autorisée de ce contenu 
-                    est strictement interdite et peut faire l'objet de poursuites judiciaires.
+                    {t.legalPage.intellectual.p2}
                   </p>
                 </CardContent>
               </Card>
@@ -121,16 +121,12 @@ export default function LegalNotice() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">Responsabilité</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.legalPage.responsibility.title}</h2>
                   <p className="text-muted-foreground mb-4">
-                    Corrige Tes Cours s'efforce de fournir des informations précises, fiables et à jour. 
-                    Toutefois, nous ne pouvons garantir l'exactitude, la complétude ou l'actualité absolue 
-                    des informations présentes sur ce site.
+                    {t.legalPage.responsibility.p1}
                   </p>
                   <p className="text-muted-foreground">
-                    L'utilisateur reconnaît utiliser ces informations sous sa propre responsabilité. 
-                    Corrige Tes Cours ne saurait être tenu responsable de tout dommage direct ou indirect 
-                    résultant de l'utilisation du site ou de l'impossibilité de l'utiliser.
+                    {t.legalPage.responsibility.p2}
                   </p>
                 </CardContent>
               </Card>
@@ -139,10 +135,9 @@ export default function LegalNotice() {
             <motion.div variants={itemVariants}>
               <Card className="hover-elevate transition-all duration-300">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-4">Contact</h2>
+                  <h2 className="text-2xl font-bold mb-4">{t.legalPage.contact.title}</h2>
                   <p className="text-muted-foreground">
-                    Pour toute question ou demande d'information concernant ces mentions légales, 
-                    vous pouvez nous contacter à l'adresse : <strong>contact@corrigetescours.cm</strong>
+                    {t.legalPage.contact.description} <strong>contact@corrigetescours.cm</strong>
                   </p>
                 </CardContent>
               </Card>

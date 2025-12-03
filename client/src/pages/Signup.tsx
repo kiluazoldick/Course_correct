@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { LanguageToggle } from '@/components/LanguageToggle';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -21,8 +23,8 @@ export default function Signup() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
+  const { t } = useLanguage();
 
-  // Get uploadId from URL query params
   const uploadId = new URLSearchParams(window.location.search).get('uploadId');
 
   useEffect(() => {
@@ -36,8 +38,8 @@ export default function Signup() {
 
     if (password !== confirmPassword) {
       toast({
-        title: 'Erreur',
-        description: 'Les mots de passe ne correspondent pas',
+        title: t.signupPage.error,
+        description: t.signupPage.passwordMismatch,
         variant: 'destructive',
       });
       return;
@@ -45,8 +47,8 @@ export default function Signup() {
 
     if (password.length < 8) {
       toast({
-        title: 'Erreur',
-        description: 'Le mot de passe doit contenir au moins 8 caractères',
+        title: t.signupPage.error,
+        description: t.signupPage.passwordTooShort,
         variant: 'destructive',
       });
       return;
@@ -64,10 +66,9 @@ export default function Signup() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de l\'inscription');
+        throw new Error(data.error || t.signupPage.error);
       }
 
-      // If uploadId is present, migrate the anonymous upload
       if (uploadId) {
         try {
           const migrateResponse = await fetch(`/api/anonymous/${uploadId}/migrate`, {
@@ -77,21 +78,20 @@ export default function Signup() {
 
           if (migrateResponse.ok) {
             toast({
-              title: 'Compte créé avec succès !',
-              description: 'Votre cours a été ajouté à votre dashboard.',
+              title: t.signupPage.success,
+              description: t.signupPage.successWithCourse,
             });
           }
         } catch (migrateError) {
           console.error('Migration error:', migrateError);
-          // Don't block the signup flow if migration fails
         }
       }
 
       window.location.href = '/';
     } catch (error: any) {
       toast({
-        title: 'Erreur d\'inscription',
-        description: error.message || 'Une erreur est survenue',
+        title: t.signupPage.error,
+        description: error.message || t.errors.generic,
         variant: 'destructive',
       });
     } finally {
@@ -105,7 +105,8 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background p-4 relative overflow-hidden">
-      <div className="absolute top-4 right-4 z-20">
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+        <LanguageToggle />
         <ThemeToggle />
       </div>
 
@@ -134,7 +135,7 @@ export default function Signup() {
               Corrige Tes Cours
             </h1>
           </div>
-          <p className="text-muted-foreground">Créez votre compte et commencez à réussir</p>
+          <p className="text-muted-foreground">{t.signupPage.welcome}</p>
         </motion.div>
 
         <motion.div
@@ -144,9 +145,9 @@ export default function Signup() {
         >
           <Card className="backdrop-blur-sm bg-card/50">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Créer un compte</CardTitle>
+            <CardTitle className="text-2xl text-center">{t.signupPage.title}</CardTitle>
             <CardDescription className="text-center">
-              Rejoignez des milliers d'étudiants qui réussissent
+              {t.signupPage.subtitle}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -158,7 +159,7 @@ export default function Signup() {
               data-testid="button-signup-google"
             >
               <SiGoogle className="h-5 w-5 mr-2" />
-              Continuer avec Google
+              {t.signupPage.continueWithGoogle}
             </Button>
 
             <div className="relative">
@@ -166,20 +167,20 @@ export default function Signup() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Ou avec email</span>
+                <span className="bg-background px-2 text-muted-foreground">{t.signupPage.orWithEmail}</span>
               </div>
             </div>
 
             <form onSubmit={handleEmailSignup} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">Prénom</Label>
+                  <Label htmlFor="firstName">{t.signupPage.firstName}</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="firstName"
                       type="text"
-                      placeholder="Jean"
+                      placeholder={t.signupPage.firstNamePlaceholder}
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       className="pl-10"
@@ -190,13 +191,13 @@ export default function Signup() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Nom</Label>
+                  <Label htmlFor="lastName">{t.signupPage.lastName}</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="lastName"
                       type="text"
-                      placeholder="Dupont"
+                      placeholder={t.signupPage.lastNamePlaceholder}
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       className="pl-10"
@@ -208,13 +209,13 @@ export default function Signup() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t.signupPage.email}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="votre@email.com"
+                    placeholder={t.signupPage.emailPlaceholder}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
@@ -225,7 +226,7 @@ export default function Signup() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
+                <Label htmlFor="password">{t.signupPage.password}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -242,7 +243,7 @@ export default function Signup() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+                <Label htmlFor="confirmPassword">{t.signupPage.confirmPassword}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -266,24 +267,24 @@ export default function Signup() {
                 data-testid="button-signup"
               >
                 {isLoading ? (
-                  'Création du compte...'
+                  t.signupPage.submitting
                 ) : (
                   <>
                     <UserPlus className="h-5 w-5 mr-2" />
-                    Créer mon compte
+                    {t.signupPage.submit}
                   </>
                 )}
               </Button>
             </form>
 
             <div className="text-center text-sm pt-4 border-t">
-              <span className="text-muted-foreground">Déjà un compte ? </span>
+              <span className="text-muted-foreground">{t.signupPage.hasAccount} </span>
               <button
                 onClick={() => setLocation('/login')}
                 className="text-primary font-semibold hover:underline bg-transparent border-0 p-0 cursor-pointer"
                 data-testid="link-login"
               >
-                Se connecter
+                {t.signupPage.login}
               </button>
             </div>
           </CardContent>
@@ -291,7 +292,7 @@ export default function Signup() {
         </motion.div>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          En créant un compte, vous acceptez nos conditions d'utilisation
+          {t.signupPage.termsNotice}
         </p>
       </motion.div>
     </div>

@@ -1,9 +1,11 @@
 import { GraduationCap, Mail, MapPin } from 'lucide-react';
 import { Link } from 'wouter';
 import { SiFacebook, SiInstagram, SiX, SiTelegram } from 'react-icons/si';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function AppFooter() {
   const currentYear = new Date().getFullYear();
+  const { t } = useLanguage();
 
   return (
     <footer className="border-t bg-background">
@@ -16,12 +18,12 @@ export default function AppFooter() {
               <span className="text-lg font-bold">Corrige Tes Cours</span>
             </div>
             <p className="text-sm text-muted-foreground max-w-md">
-              Votre plateforme d'apprentissage intelligente pour réussir vos études
+              {t.footer.description}
             </p>
             
             {/* Réseaux Sociaux */}
             <div className="mt-6">
-              <h3 className="font-semibold mb-3 text-sm" data-testid="text-footer-social-title">Suivez-nous</h3>
+              <h3 className="font-semibold mb-3 text-sm" data-testid="text-footer-social-title">{t.footer.followUs}</h3>
               <div className="flex gap-3">
                 <a 
                   href="https://www.facebook.com/share/17ahNC7zbw/?mibextid=wwXIfr" 
@@ -69,21 +71,21 @@ export default function AppFooter() {
 
           {/* Navigation */}
           <div>
-            <h3 className="font-semibold mb-4" data-testid="text-footer-nav-title">Navigation</h3>
+            <h3 className="font-semibold mb-4" data-testid="text-footer-nav-title">{t.footer.navigation}</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/features" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-features">
-                  Fonctionnalités
+                  {t.nav.features}
                 </Link>
               </li>
               <li>
                 <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-pricing">
-                  Tarifs
+                  {t.nav.pricing}
                 </Link>
               </li>
               <li>
                 <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-about">
-                  À propos
+                  {t.nav.about}
                 </Link>
               </li>
             </ul>
@@ -91,7 +93,7 @@ export default function AppFooter() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-semibold mb-4" data-testid="text-footer-contact-title">Contact</h3>
+            <h3 className="font-semibold mb-4" data-testid="text-footer-contact-title">{t.footer.contact}</h3>
             <ul className="space-y-2">
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
@@ -106,21 +108,21 @@ export default function AppFooter() {
           
           {/* Légal */}
           <div>
-            <h3 className="font-semibold mb-4" data-testid="text-footer-legal-title">Légal</h3>
+            <h3 className="font-semibold mb-4" data-testid="text-footer-legal-title">{t.footer.legalSection}</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/legal" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-legal">
-                  Mentions légales
+                  {t.footer.legal}
                 </Link>
               </li>
               <li>
                 <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-privacy">
-                  Confidentialité
+                  {t.footer.privacy}
                 </Link>
               </li>
               <li>
                 <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-terms">
-                  CGU
+                  {t.footer.terms}
                 </Link>
               </li>
             </ul>
@@ -130,7 +132,7 @@ export default function AppFooter() {
         <div className="mt-8 pt-8 border-t">
           <div className="text-center">
             <p className="text-sm text-muted-foreground" data-testid="text-footer-copyright">
-              © {currentYear} Corrige Tes Cours. Tous droits réservés.
+              © {currentYear} Corrige Tes Cours. {t.footer.copyright}.
             </p>
           </div>
         </div>

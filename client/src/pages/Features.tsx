@@ -5,109 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function Features() {
-  const features = [
-    {
-      icon: FileText,
-      title: "Prise de notes intelligente",
-      description: "Créez et organisez vos cours en un seul endroit avec un système de catégorisation simple et efficace.",
-      details: [
-        "Éditeur de texte intuitif",
-        "Organisation par matières",
-        "Recherche instantanée",
-        "Stockage sécurisé"
-      ]
-    },
-    {
-      icon: Brain,
-      title: "Résumés IA",
-      description: "Générez automatiquement des résumés structurés avec les points clés de vos cours.",
-      details: [
-        "Résumés clairs et précis",
-        "Points essentiels identifiés",
-        "Format structuré",
-        "Téléchargement PDF"
-      ]
-    },
-    {
-      icon: Upload,
-      title: "Upload de fichiers",
-      description: "Importez vos cours en PDF ou Word et laissez l'IA extraire le contenu automatiquement.",
-      details: [
-        "Support PDF et Word",
-        "Extraction automatique",
-        "Jusqu'à 10MB par fichier",
-        "2 fichiers/mois (gratuit)"
-      ]
-    },
-    {
-      icon: CheckCircle,
-      title: "Quiz personnalisés",
-      description: "Des quiz adaptés à vos cours : QCM, questions ouvertes ou format mixte selon vos besoins.",
-      details: [
-        "QCM interactifs",
-        "Questions ouvertes",
-        "Format mixte",
-        "Correction automatique"
-      ]
-    },
-    {
-      icon: MessageCircle,
-      title: "Tariq IA - Votre tuteur personnel",
-      description: "Posez vos questions et obtenez des explications claires avec votre assistant IA intelligent.",
-      details: [
-        "Réponses instantanées",
-        "Explications détaillées",
-        "5 messages/session (gratuit)",
-        "Illimité en Premium"
-      ]
-    },
-    {
-      icon: Sparkles,
-      title: "Évaluation automatique",
-      description: "Recevez un feedback détaillé sur vos réponses pour progresser rapidement.",
-      details: [
-        "Correction intelligente",
-        "Feedback personnalisé",
-        "Suggestions d'amélioration",
-        "Score détaillé"
-      ]
-    },
-    {
-      icon: TrendingUp,
-      title: "Suivi de performance",
-      description: "Visualisez votre progression avec des statistiques et graphiques intuitifs.",
-      details: [
-        "Dashboard complet",
-        "Graphiques de progression",
-        "Analyse par matière",
-        "Points à améliorer"
-      ]
-    },
-    {
-      icon: BarChart3,
-      title: "Statistiques avancées",
-      description: "Accédez à des analyses approfondies de vos performances (Premium).",
-      details: [
-        "Tendances d'apprentissage",
-        "Comparaisons temporelles",
-        "Rapports détaillés",
-        "Insights personnalisés"
-      ]
-    },
-    {
-      icon: Target,
-      title: "Révisions optimisées",
-      description: "Concentrez vos révisions sur ce qui compte vraiment grâce à des suggestions personnalisées.",
-      details: [
-        "Révisions ciblées",
-        "Priorisation intelligente",
-        "Planning adapté",
-        "Rappels utiles"
-      ]
-    }
-  ];
+  const { t } = useLanguage();
+
+  const featureIcons = [FileText, Brain, Upload, CheckCircle, MessageCircle, Sparkles, TrendingUp, BarChart3, Target];
+  const featureKeys = ['notes', 'summaries', 'upload', 'quiz', 'tariq', 'evaluation', 'tracking', 'advancedStats', 'revision'] as const;
+  
+  const features = featureKeys.map((key, index) => ({
+    icon: featureIcons[index],
+    title: t.featuresPage.features[key].title,
+    description: t.featuresPage.features[key].description,
+    details: t.featuresPage.features[key].details
+  }));
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -152,15 +63,15 @@ export default function Features() {
             >
               <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
                 <Zap className="w-4 h-4" />
-                Fonctionnalités complètes
+                {t.featuresPage.badge}
               </div>
             </motion.div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6" data-testid="text-features-hero-title">
-              Tout ce dont vous avez besoin pour exceller
+              {t.featuresPage.heroTitle}
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
-              Découvrez comment Corrige Tes Cours transforme votre façon d'apprendre et de réviser avec des outils puissants mais simples
+              {t.featuresPage.heroSubtitle}
             </p>
           </motion.div>
 
@@ -214,14 +125,14 @@ export default function Features() {
             className="max-w-4xl mx-auto text-center"
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Prêt à transformer votre façon d'étudier ?
+              {t.featuresPage.ctaTitle}
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Rejoignez des milliers d'étudiants qui améliorent leurs résultats avec Corrige Tes Cours
+              {t.featuresPage.ctaSubtitle}
             </p>
             <Link href="/signup">
               <Button size="lg" className="text-lg px-8" data-testid="button-signup-cta">
-                Créer un compte gratuit
+                {t.featuresPage.ctaButton}
               </Button>
             </Link>
           </motion.div>

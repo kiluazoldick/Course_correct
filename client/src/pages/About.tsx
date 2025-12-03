@@ -1,40 +1,43 @@
 import Navbar from '@/components/Navbar';
 import AppFooter from '@/components/AppFooter';
-import { Heart, Target, Users, Zap, Sparkles, BookOpen, TrendingUp, Award } from 'lucide-react';
+import { Heart, Target, Users, Zap, BookOpen, TrendingUp, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function About() {
+  const { t } = useLanguage();
+
   const values = [
     {
       icon: Target,
-      title: "Notre mission",
-      description: "Rendre l'apprentissage plus efficace et accessible à tous les étudiants camerounais grâce à l'intelligence artificielle."
+      title: t.aboutPage.values.mission.title,
+      description: t.aboutPage.values.mission.description
     },
     {
       icon: Heart,
-      title: "Notre passion",
-      description: "Aider les étudiants à réussir en leur fournissant des outils simples qui facilitent la compréhension et la mémorisation."
+      title: t.aboutPage.values.passion.title,
+      description: t.aboutPage.values.passion.description
     },
     {
       icon: Zap,
-      title: "Notre approche",
-      description: "Des outils intelligents qui s'adaptent à votre rythme et votre style d'apprentissage pour des révisions ultra-efficaces."
+      title: t.aboutPage.values.approach.title,
+      description: t.aboutPage.values.approach.description
     },
     {
       icon: Users,
-      title: "Notre communauté",
-      description: "Des milliers d'étudiants à Douala et partout au Cameroun nous font confiance pour améliorer leurs résultats académiques."
+      title: t.aboutPage.values.community.title,
+      description: t.aboutPage.values.community.description
     }
   ];
 
   const stats = [
-    { value: "5 000+", label: "Étudiants actifs" },
-    { value: "90%", label: "Taux de satisfaction" },
-    { value: "50 000+", label: "Résumés générés" },
-    { value: "4.8/5", label: "Note moyenne" }
+    { value: "5 000+", label: t.aboutPage.stats.students },
+    { value: "90%", label: t.aboutPage.stats.satisfaction },
+    { value: "50 000+", label: t.aboutPage.stats.summaries },
+    { value: "4.8/5", label: t.aboutPage.stats.rating }
   ];
 
   const containerVariants = {
@@ -80,15 +83,15 @@ export default function About() {
             >
               <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />
-                Notre histoire
+                {t.aboutPage.badge}
               </div>
             </motion.div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6" data-testid="text-about-title">
-              À propos de Corrige Tes Cours
+              {t.aboutPage.heroTitle}
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
-              Nous croyons que chaque étudiant camerounais mérite les meilleurs outils pour réussir ses études
+              {t.aboutPage.heroSubtitle}
             </p>
           </motion.div>
 
@@ -131,19 +134,15 @@ export default function About() {
               transition={{ duration: 0.6 }}
               className="max-w-3xl mx-auto mb-16 text-center"
             >
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">Notre histoire</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">{t.aboutPage.story.title}</h2>
               <p className="text-lg text-muted-foreground mb-4">
-                Corrige Tes Cours est né d'un constat simple : les étudiants camerounais passent trop de temps 
-                à réviser sans vraiment progresser. Face aux longues heures de lecture et aux notes difficiles à retenir, 
-                nous avons voulu créer une solution.
+                {t.aboutPage.story.p1}
               </p>
               <p className="text-lg text-muted-foreground mb-4">
-                Notre plateforme utilise l'intelligence artificielle pour transformer vos cours en résumés clairs, 
-                générer des quiz personnalisés, et vous accompagner avec Tariq IA, votre tuteur personnel disponible 24/7.
+                {t.aboutPage.story.p2}
               </p>
               <p className="text-lg text-muted-foreground">
-                Aujourd'hui, des milliers d'étudiants à Douala et partout au Cameroun améliorent leurs résultats 
-                grâce à Corrige Tes Cours. Et ce n'est que le début !
+                {t.aboutPage.story.p3}
               </p>
             </motion.div>
 
@@ -182,10 +181,9 @@ export default function About() {
               transition={{ duration: 0.6 }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">Notre engagement envers vous</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">{t.aboutPage.commitment.title}</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Nous travaillons chaque jour pour améliorer notre plateforme et vous offrir 
-                la meilleure expérience d'apprentissage possible. Votre réussite est notre priorité absolue.
+                {t.aboutPage.commitment.subtitle}
               </p>
             </motion.div>
 
@@ -202,9 +200,9 @@ export default function About() {
                     <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                       <TrendingUp className="h-6 w-6 text-primary" />
                     </div>
-                    <h3 className="font-semibold mb-2">Innovation continue</h3>
+                    <h3 className="font-semibold mb-2">{t.aboutPage.commitment.innovation.title}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Nous améliorons constamment nos algorithmes IA pour vous offrir les meilleurs résumés et quiz
+                      {t.aboutPage.commitment.innovation.description}
                     </p>
                   </CardContent>
                 </Card>
@@ -216,9 +214,9 @@ export default function About() {
                     <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                       <Heart className="h-6 w-6 text-primary" />
                     </div>
-                    <h3 className="font-semibold mb-2">Écoute active</h3>
+                    <h3 className="font-semibold mb-2">{t.aboutPage.commitment.listening.title}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Vos retours façonnent notre plateforme. Nous sommes à votre écoute pour mieux vous servir
+                      {t.aboutPage.commitment.listening.description}
                     </p>
                   </CardContent>
                 </Card>
@@ -230,9 +228,9 @@ export default function About() {
                     <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                       <Award className="h-6 w-6 text-primary" />
                     </div>
-                    <h3 className="font-semibold mb-2">Excellence académique</h3>
+                    <h3 className="font-semibold mb-2">{t.aboutPage.commitment.excellence.title}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Notre mission est de vous aider à exceller dans vos études et atteindre vos objectifs
+                      {t.aboutPage.commitment.excellence.description}
                     </p>
                   </CardContent>
                 </Card>
@@ -251,14 +249,14 @@ export default function About() {
             className="max-w-4xl mx-auto text-center"
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Rejoignez des milliers d'étudiants qui réussissent
+              {t.aboutPage.cta.title}
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Commencez dès aujourd'hui et transformez votre façon d'apprendre
+              {t.aboutPage.cta.subtitle}
             </p>
             <Link href="/signup">
               <Button size="lg" className="text-lg px-8" data-testid="button-signup-cta">
-                Créer un compte gratuit
+                {t.aboutPage.cta.button}
               </Button>
             </Link>
           </motion.div>

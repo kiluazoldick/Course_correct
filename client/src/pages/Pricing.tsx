@@ -6,43 +6,28 @@ import { Link } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function Pricing() {
+  const { t } = useLanguage();
+
   const plans = [
     {
-      name: "Gratuit",
+      name: t.pricingPage.free.name,
       price: "0",
-      period: "toujours",
-      description: "Pour commencer et découvrir la plateforme",
-      features: [
-        "Saisir ses cours (illimité)",
-        "Upload de fichiers : 2/mois (max 10MB)",
-        "Résumés IA (illimités)",
-        "Téléchargement PDF des résumés",
-        "Quiz personnalisés (illimités)",
-        "Tariq IA : 5 messages/session",
-        "Cooldown de 3h entre sessions",
-        "Statistiques de base"
-      ],
-      cta: "Commencer gratuitement",
+      period: t.pricingPage.free.period,
+      description: t.pricingPage.free.description,
+      features: t.pricingPage.free.features,
+      cta: t.pricingPage.free.cta,
       popular: false
     },
     {
-      name: "Premium",
+      name: t.pricingPage.premium.name,
       price: "1 500",
-      period: "par mois",
-      description: "Tout ce qu'il faut pour exceller dans vos études",
-      features: [
-        "Tout du plan Gratuit",
-        "Upload de fichiers illimité",
-        "Tariq IA illimité (pas de limite)",
-        "Pas de cooldown",
-        "Téléchargement PDF illimité",
-        "Statistiques avancées",
-        "Graphiques de progression détaillés",
-        "Support prioritaire"
-      ],
-      cta: "Passer au Premium",
+      period: t.pricingPage.premium.period,
+      description: t.pricingPage.premium.description,
+      features: t.pricingPage.premium.features,
+      cta: t.pricingPage.premium.cta,
       popular: true
     }
   ];
@@ -50,24 +35,31 @@ export default function Pricing() {
   const benefits = [
     {
       icon: Zap,
-      title: "Résultats rapides",
-      description: "Gagnez du temps et améliorez vos notes dès la première semaine"
+      title: t.pricingPage.benefits.fast.title,
+      description: t.pricingPage.benefits.fast.description
     },
     {
       icon: Shield,
-      title: "Satisfait ou remboursé",
-      description: "Garantie 14 jours sur le plan Premium, sans engagement"
+      title: t.pricingPage.benefits.guarantee.title,
+      description: t.pricingPage.benefits.guarantee.description
     },
     {
       icon: Clock,
-      title: "Assistance 24/7",
-      description: "Tariq IA disponible à tout moment pour répondre à vos questions"
+      title: t.pricingPage.benefits.support.title,
+      description: t.pricingPage.benefits.support.description
     },
     {
       icon: TrendingUp,
-      title: "Progression garantie",
-      description: "90% des étudiants améliorent leurs résultats en 30 jours"
+      title: t.pricingPage.benefits.progress.title,
+      description: t.pricingPage.benefits.progress.description
     }
+  ];
+
+  const faqItems = [
+    { question: t.pricingPage.faq.q1.question, answer: t.pricingPage.faq.q1.answer },
+    { question: t.pricingPage.faq.q2.question, answer: t.pricingPage.faq.q2.answer },
+    { question: t.pricingPage.faq.q3.question, answer: t.pricingPage.faq.q3.answer },
+    { question: t.pricingPage.faq.q4.question, answer: t.pricingPage.faq.q4.answer },
   ];
 
   const containerVariants = {
@@ -113,15 +105,15 @@ export default function Pricing() {
             >
               <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
-                Plans simples et transparents
+                {t.pricingPage.badge}
               </div>
             </motion.div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6" data-testid="text-pricing-title">
-              Choisissez le plan qui vous correspond
+              {t.pricingPage.heroTitle}
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
-              Commencez gratuitement et passez au Premium quand vous êtes prêt. Aucun engagement, annulez quand vous voulez.
+              {t.pricingPage.heroSubtitle}
             </p>
           </motion.div>
 
@@ -150,7 +142,7 @@ export default function Pricing() {
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                         <Badge className="bg-primary" data-testid="badge-popular">
                           <Sparkles className="w-3 h-3 mr-1" />
-                          Le plus populaire
+                          {t.pricingPage.mostPopular}
                         </Badge>
                       </div>
                     )}
@@ -195,7 +187,7 @@ export default function Pricing() {
               transition={{ duration: 0.6 }}
               className="mt-20"
             >
-              <h2 className="text-3xl font-bold mb-12 text-center">Pourquoi choisir Corrige Tes Cours ?</h2>
+              <h2 className="text-3xl font-bold mb-12 text-center">{t.pricingPage.benefits.title}</h2>
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
@@ -227,40 +219,16 @@ export default function Pricing() {
               transition={{ duration: 0.6 }}
               className="mt-20 text-center"
             >
-              <h2 className="text-3xl font-bold mb-12">Questions fréquentes</h2>
+              <h2 className="text-3xl font-bold mb-12">{t.pricingPage.faq.title}</h2>
               <div className="max-w-3xl mx-auto grid gap-8 text-left">
-                <Card className="hover-elevate transition-all duration-300">
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold mb-2">Puis-je changer de plan à tout moment ?</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Oui, vous pouvez passer du plan Gratuit au plan Premium à tout moment. Le changement est immédiat et vous payez au prorata.
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="hover-elevate transition-all duration-300">
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold mb-2">Comment puis-je payer ?</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Nous acceptons les paiements par Mobile Money (MTN, Orange) et carte bancaire via notre partenaire sécurisé Lygos.
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="hover-elevate transition-all duration-300">
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold mb-2">Y a-t-il une garantie ?</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Oui, le plan Premium inclut une garantie satisfait ou remboursé de 14 jours, sans poser de questions.
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="hover-elevate transition-all duration-300">
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold mb-2">Le plan Gratuit est-il vraiment gratuit ?</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Oui, totalement ! Vous pouvez utiliser Corrige Tes Cours gratuitement pour toujours avec des résumés illimités, des quiz, et Tariq IA (avec quelques limites).
-                    </p>
-                  </CardContent>
-                </Card>
+                {faqItems.map((item, index) => (
+                  <Card key={index} className="hover-elevate transition-all duration-300">
+                    <CardContent className="p-6">
+                      <h3 className="font-semibold mb-2">{item.question}</h3>
+                      <p className="text-sm text-muted-foreground">{item.answer}</p>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </motion.div>
           </div>

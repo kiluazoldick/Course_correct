@@ -456,6 +456,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/quizzes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const quiz = await storage.getQuiz(req.params.id);
+      if (!quiz) {
+        return res.status(404).json({ message: "Quiz not found" });
+      }
+      if (quiz.userId !== (req.user as any).id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      await storage.deleteQuiz(req.params.id);
+      res.json({ message: "Quiz deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting quiz:", error);
+      res.status(500).json({ message: "Failed to delete quiz" });
+    }
+  });
+
   // Quiz results routes
   app.get('/api/quiz-results', isAuthenticated, async (req: any, res) => {
     try {

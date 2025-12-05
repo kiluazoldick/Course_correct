@@ -961,6 +961,12 @@ export const translations = {
       cannotEvaluate: "Impossible d'évaluer le quiz.",
       unansweredQuestions: "Questions non répondues",
       unansweredQuestionsDesc: "Il reste {count} question(s) sans réponse.",
+      deleteQuiz: "Supprimer",
+      deleteQuizConfirm: "Supprimer ce quiz ?",
+      deleteQuizConfirmDesc: "Cette action est irréversible. Le quiz sera définitivement supprimé.",
+      quizDeleted: "Quiz supprimé",
+      quizDeletedDesc: "Le quiz a été supprimé avec succès.",
+      cannotDelete: "Impossible de supprimer le quiz.",
     },
     
     // Chat Page (Tariq IA)
@@ -2038,6 +2044,12 @@ export const translations = {
       cannotEvaluate: "Unable to evaluate the quiz.",
       unansweredQuestions: "Unanswered questions",
       unansweredQuestionsDesc: "There are {count} unanswered question(s).",
+      deleteQuiz: "Delete",
+      deleteQuizConfirm: "Delete this quiz?",
+      deleteQuizConfirmDesc: "This action cannot be undone. The quiz will be permanently deleted.",
+      quizDeleted: "Quiz deleted",
+      quizDeletedDesc: "The quiz has been successfully deleted.",
+      cannotDelete: "Unable to delete the quiz.",
     },
     
     // Chat Page (Tariq IA)

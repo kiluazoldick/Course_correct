@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { type Quiz, type Course } from '@shared/schema';
-import { Brain, CheckCircle2, XCircle, PlayCircle, Trophy, BookOpen, Sparkles } from 'lucide-react';
+import { Brain, CheckCircle2, XCircle, PlayCircle, Trophy, BookOpen, Sparkles, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import ReactMarkdown from 'react-markdown';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -39,6 +40,8 @@ export default function Quizzes() {
   const [answers, setAnswers] = useState<string[]>([]);
   const [isResultOpen, setIsResultOpen] = useState(false);
   const [quizResult, setQuizResult] = useState<any>(null);
+  const [quizToDelete, setQuizToDelete] = useState<Quiz | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { data: courses = [] } = useQuery<Course[]>({
     queryKey: ['/api/courses'],
@@ -95,6 +98,41 @@ export default function Quizzes() {
       });
     },
   });
+
+  const deleteQuizMutation = useMutation({
+    mutationFn: async (quizId: string) => {
+      const response = await apiRequest('DELETE', `/api/quizzes/${quizId}`);
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/quizzes'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/quiz-results'] });
+      toast({
+        title: t.quizzesPage.quizDeleted,
+        description: t.quizzesPage.quizDeletedDesc,
+      });
+      setIsDeleteDialogOpen(false);
+      setQuizToDelete(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: t.quizzesPage.error,
+        description: error?.message || t.quizzesPage.cannotDelete,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleDeleteQuiz = (quiz: Quiz) => {
+    setQuizToDelete(quiz);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteQuiz = () => {
+    if (quizToDelete) {
+      deleteQuizMutation.mutate(quizToDelete.id);
+    }
+  };
 
   const handleGenerateQuiz = () => {
     generateQuizMutation.mutate();
@@ -218,11 +256,24 @@ export default function Quizzes() {
             {quizzes.map((quiz) => (
               <Card key={quiz.id} className="hover-elevate" data-testid={`card-quiz-${quiz.id}`}>
                 <CardHeader>
-                  <CardTitle className="text-base" data-testid={`card-title-quiz-${quiz.id}`}>{quiz.title}</CardTitle>
-                  <CardDescription className="flex items-center gap-2" data-testid={`card-description-quiz-${quiz.id}`}>
-                    <BookOpen className="w-4 h-4" />
-                    {(quiz.questions as QuizQuestion[]).length} {t.quizzesPage.questions}
-                  </CardDescription>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <CardTitle className="text-base" data-testid={`card-title-quiz-${quiz.id}`}>{quiz.title}</CardTitle>
+                      <CardDescription className="flex items-center gap-2 mt-1" data-testid={`card-description-quiz-${quiz.id}`}>
+                        <BookOpen className="w-4 h-4" />
+                        {(quiz.questions as QuizQuestion[]).length} {t.quizzesPage.questions}
+                      </CardDescription>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteQuiz(quiz)}
+                      className="text-muted-foreground hover:text-destructive"
+                      data-testid={`button-delete-quiz-${quiz.id}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardFooter>
                   <Button
@@ -405,6 +456,33 @@ export default function Quizzes() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle data-testid="dialog-title-delete-quiz">
+              {t.quizzesPage.deleteQuizConfirm}
+            </AlertDialogTitle>
+            <AlertDialogDescription data-testid="dialog-description-delete-quiz">
+              {t.quizzesPage.deleteQuizConfirmDesc}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete-quiz">
+              {t.cancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteQuiz}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteQuizMutation.isPending}
+              data-testid="button-confirm-delete-quiz"
+            >
+              {deleteQuizMutation.isPending ? t.loading : t.delete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

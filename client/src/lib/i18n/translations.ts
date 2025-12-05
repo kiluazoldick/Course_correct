@@ -23,6 +23,28 @@ export const translations = {
     or: "ou",
     and: "et",
     
+    // User-friendly error messages
+    errors: {
+      generic: "Oups ! Quelque chose n'a pas fonctionné. Réessaie dans un instant.",
+      network: "Problème de connexion. Vérifie ta connexion internet.",
+      notFound: "Cette ressource n'existe plus ou a été déplacée.",
+      forbidden: "Tu n'as pas accès à cette ressource.",
+      unauthorized: "Connecte-toi pour accéder à cette fonctionnalité.",
+      validation: "Certaines informations sont incorrectes. Vérifie et réessaie.",
+      fileTooLarge: "Ce fichier est trop volumineux. Essaie avec un fichier plus petit.",
+      invalidFileType: "Ce type de fichier n'est pas accepté.",
+      uploadFailed: "L'envoi du fichier a échoué. Réessaie.",
+      uploadLimitReached: "Tu as atteint ta limite d'envois ce mois-ci. Passe au Premium pour continuer !",
+      aiUnavailable: "Notre IA est momentanément occupée. Réessaie dans quelques secondes.",
+      quizGenerationFailed: "La génération du quiz a rencontré un problème. Réessaie.",
+      summaryGenerationFailed: "La génération du résumé a rencontré un problème. Réessaie.",
+      chatLimitReached: "Tu as utilisé tous tes messages gratuits. Reviens plus tard ou passe au Premium !",
+      paymentFailed: "Le paiement n'a pas abouti. Vérifie tes informations et réessaie.",
+      sessionExpired: "Ta session a expiré. Reconnecte-toi pour continuer.",
+      tryAgain: "Réessayer",
+      contactSupport: "Si le problème persiste, contacte notre support.",
+    },
+    
     // Navigation
     nav: {
       home: "Accueil",
@@ -1069,15 +1091,6 @@ export const translations = {
       cancelAnytime: "Annule à tout moment",
     },
     
-    // Errors
-    errors: {
-      generic: "Une erreur s'est produite",
-      notFound: "Page non trouvée",
-      unauthorized: "Non autorisé",
-      networkError: "Erreur de connexion",
-      tryAgain: "Réessayer",
-    },
-    
     // Success messages
     success: {
       saved: "Enregistré avec succès",
@@ -1105,6 +1118,28 @@ export const translations = {
     no: "No",
     or: "or",
     and: "and",
+    
+    // User-friendly error messages
+    errors: {
+      generic: "Oops! Something went wrong. Try again in a moment.",
+      network: "Connection problem. Check your internet connection.",
+      notFound: "This resource no longer exists or has been moved.",
+      forbidden: "You don't have access to this resource.",
+      unauthorized: "Please log in to access this feature.",
+      validation: "Some information is incorrect. Please check and try again.",
+      fileTooLarge: "This file is too large. Try a smaller file.",
+      invalidFileType: "This file type is not supported.",
+      uploadFailed: "File upload failed. Please try again.",
+      uploadLimitReached: "You've reached your upload limit this month. Upgrade to Premium to continue!",
+      aiUnavailable: "Our AI is momentarily busy. Try again in a few seconds.",
+      quizGenerationFailed: "Quiz generation encountered a problem. Please try again.",
+      summaryGenerationFailed: "Summary generation encountered a problem. Please try again.",
+      chatLimitReached: "You've used all your free messages. Come back later or upgrade to Premium!",
+      paymentFailed: "Payment was not completed. Check your details and try again.",
+      sessionExpired: "Your session has expired. Please log in again to continue.",
+      tryAgain: "Try again",
+      contactSupport: "If the problem persists, contact our support.",
+    },
     
     // Navigation
     nav: {
@@ -2150,15 +2185,6 @@ export const translations = {
       alreadyPremiumDesc: "Enjoy all features without limits.",
       guarantee: "14-day money-back guarantee",
       cancelAnytime: "Cancel anytime",
-    },
-    
-    // Errors
-    errors: {
-      generic: "An error occurred",
-      notFound: "Page not found",
-      unauthorized: "Unauthorized",
-      networkError: "Connection error",
-      tryAgain: "Try again",
     },
     
     // Success messages

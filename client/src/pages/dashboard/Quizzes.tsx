@@ -6,13 +6,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { type Quiz, type Course } from '@shared/schema';
-import { Brain, CheckCircle2, XCircle, PlayCircle, Trophy, BookOpen, Sparkles, Trash2 } from 'lucide-react';
+import { Brain, CheckCircle2, XCircle, PlayCircle, Trophy, BookOpen, Sparkles, Trash2, Loader2, Star } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import ReactMarkdown from 'react-markdown';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { getErrorMessage } from '@/lib/errorHandler';
 import {
   Select,
   SelectContent,
@@ -31,7 +33,7 @@ interface QuizQuestion {
 
 export default function Quizzes() {
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [quizType, setQuizType] = useState<'mcq' | 'open' | 'mixed'>('mixed');
   const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null);
@@ -71,7 +73,7 @@ export default function Quizzes() {
     onError: (error: any) => {
       toast({
         title: t.quizzesPage.error,
-        description: error?.message || t.quizzesPage.cannotGenerate,
+        description: getErrorMessage(error, language),
         variant: 'destructive',
       });
     },
@@ -93,7 +95,7 @@ export default function Quizzes() {
     onError: (error: any) => {
       toast({
         title: t.quizzesPage.error,
-        description: error?.message || t.quizzesPage.cannotEvaluate,
+        description: getErrorMessage(error, language),
         variant: 'destructive',
       });
     },
@@ -117,7 +119,7 @@ export default function Quizzes() {
     onError: (error: any) => {
       toast({
         title: t.quizzesPage.error,
-        description: error?.message || t.quizzesPage.cannotDelete,
+        description: getErrorMessage(error, language),
         variant: 'destructive',
       });
     },
@@ -311,6 +313,31 @@ export default function Quizzes() {
             </DialogDescription>
           </DialogHeader>
 
+          {/* Progress Bar */}
+          {currentQuiz && (
+            <div className="space-y-2">
+              <Progress 
+                value={((currentQuestionIndex + 1) / (currentQuiz.questions as QuizQuestion[]).length) * 100} 
+                className="h-2"
+              />
+              <div className="flex gap-1 justify-center flex-wrap">
+                {(currentQuiz.questions as QuizQuestion[]).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`w-3 h-3 rounded-full transition-all ${
+                      idx === currentQuestionIndex 
+                        ? 'bg-primary ring-2 ring-primary/30 scale-110' 
+                        : answers[idx] 
+                          ? 'bg-green-500' 
+                          : 'bg-muted'
+                    }`}
+                    data-testid={`progress-dot-${idx}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           {currentQuestion && (
             <div className="space-y-4">
               <div className="prose prose-sm dark:prose-invert">
@@ -322,7 +349,7 @@ export default function Quizzes() {
               {currentQuestion.type === 'mcq' && currentQuestion.options ? (
                 <RadioGroup value={answers[currentQuestionIndex]} onValueChange={handleAnswerChange}>
                   {currentQuestion.options.map((option, index) => (
-                    <div key={index} className="flex items-center space-x-2" data-testid={`radio-option-${index}`}>
+                    <div key={index} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted/50 transition-colors" data-testid={`radio-option-${index}`}>
                       <RadioGroupItem value={option} id={`option-${index}`} data-testid={`radio-item-option-${index}`} />
                       <Label htmlFor={`option-${index}`} className="cursor-pointer flex-1" data-testid={`label-option-${index}`}>
                         {option}
@@ -362,7 +389,12 @@ export default function Quizzes() {
                   disabled={evaluateQuizMutation.isPending}
                   data-testid="button-submit-quiz"
                 >
-                  {evaluateQuizMutation.isPending ? t.quizzesPage.submitting : t.quizzesPage.submit}
+                  {evaluateQuizMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {t.quizzesPage.submitting}
+                    </>
+                  ) : t.quizzesPage.submit}
                 </Button>
               )}
             </div>

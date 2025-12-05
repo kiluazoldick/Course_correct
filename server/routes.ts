@@ -7,7 +7,9 @@ import { generateCourseSummary, generateQuiz, evaluateOpenAnswer, chatWithAI } f
 import multer from "multer";
 import { processUploadedFile } from "./fileProcessor";
 import { drizzle } from "drizzle-orm/neon-serverless";
+import { eq } from "drizzle-orm";
 import { Pool } from "@neondatabase/serverless";
+import { lygosService } from "./lygos";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
@@ -846,7 +848,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/payment/initiate', isAuthenticated, async (req: any, res) => {
     try {
       const userId = (req.user as any).id;
-      const { lygosService } = await import('./lygos');
 
       const DOMAIN = process.env.CUSTOM_DOMAIN || process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000';
       const protocol = DOMAIN.includes('localhost') ? 'http' : 'https';
@@ -910,7 +911,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (payment.lygosProductId) {
-        const { lygosService } = await import('./lygos');
         const status = await lygosService.getPaymentStatus(payment.lygosProductId);
 
         if (status.status === 'success' && payment.status !== 'completed') {
@@ -984,30 +984,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderId = order_id as string;
       const urlStatus = status as string;
 
-      console.log('=== Lygos Return URL ===');
-      console.log('Order ID:', orderId);
-      console.log('Status from URL:', urlStatus);
-      console.log('Full URL:', req.originalUrl);
-
       if (!orderId) {
-        console.error('No order ID in return URL');
         return res.redirect('/dashboard/subscription?error=no_order_id');
       }
 
-      // Find payment by order ID (stored in lygosTransactionId)
-      const allPayments = await db.select().from(payments);
-      const payment = allPayments.find((p: Payment) => p.lygosTransactionId === orderId);
+      // Find payment by order ID (stored in lygosTransactionId) - optimized direct query
+      const [payment] = await db.select().from(payments).where(eq(payments.lygosTransactionId, orderId)).limit(1);
 
       if (!payment) {
-        console.error('Payment not found for order:', orderId);
         return res.redirect('/dashboard/subscription?error=payment_not_found');
       }
 
-      console.log('Found payment:', payment.id, 'Status:', payment.status, 'User:', payment.userId);
-
       // Skip if already completed
       if (payment.status === 'completed') {
-        console.log('Payment already completed:', orderId);
         return res.redirect('/dashboard/subscription?success=true');
       }
 
@@ -1016,8 +1005,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isFailed = urlStatus === 'failed';
 
       if (isSuccess) {
-        console.log('✅ Payment SUCCESS - Activating Premium for user:', payment.userId);
-        
         // Update payment status
         const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
           ? { ...payment.metadata as object, returnStatus: 'success', returnedAt: new Date().toISOString() }
@@ -1044,7 +1031,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             amount: 1500,
             transactionId: orderId,
           });
-          console.log('✅ Subscription UPDATED to Premium for user:', payment.userId);
         } else {
           const newSub = await storage.createSubscription({
             userId: payment.userId,
@@ -1059,15 +1045,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.updatePayment(payment.id, {
             subscriptionId: newSub.id,
           });
-          console.log('✅ NEW Premium subscription created for user:', payment.userId);
         }
 
-        console.log('✅ Premium activated successfully for order:', orderId);
         return res.redirect('/dashboard/subscription?success=true');
         
       } else if (isFailed) {
-        console.log('❌ Payment FAILED for order:', orderId);
-        
         const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
           ? { ...payment.metadata as object, returnStatus: 'failed', returnedAt: new Date().toISOString() }
           : { returnStatus: 'failed', returnedAt: new Date().toISOString() };
@@ -1081,8 +1063,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Unknown status - but if user was redirected here, treat as success
         // because Lygos should only redirect to success_url after payment
-        console.log('⚠️ Unknown status but redirected here, treating as success:', urlStatus);
-        
         const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
           ? { ...payment.metadata as object, returnStatus: urlStatus || 'unknown', returnedAt: new Date().toISOString() }
           : { returnStatus: urlStatus || 'unknown', returnedAt: new Date().toISOString() };
@@ -1121,11 +1101,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.updatePayment(payment.id, { subscriptionId: newSub.id });
         }
 
-        console.log('✅ Premium activated (fallback) for order:', orderId);
         return res.redirect('/dashboard/subscription?success=true');
       }
     } catch (error) {
-      console.error('❌ Error in Lygos return handler:', error);
       return res.redirect('/dashboard/subscription?error=server_error');
     }
   });

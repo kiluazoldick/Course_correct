@@ -4,9 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     
-    <!-- Favicons & Icons -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/logo-192.png" />
+    <!-- Favicons & Icons - Multiple formats for cross-browser compatibility -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="canonical" href="https://corrigetescours.com/" />
     
     <!-- Primary Meta Tags -->
     <title>Corrige Tes Cours - Plateforme IA pour Révisions & Réussite Universitaire au Cameroun</title>
@@ -50,16 +54,23 @@
     <!-- Trustpilot Script - deferred loading -->
     <script type="text/javascript" src="//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js" defer></script>
     
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data (JSON-LD) - Organization -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "EducationalOrganization",
       "name": "Corrige Tes Cours",
-      "alternateName": "CTC",
+      "alternateName": ["CTC", "CorrigeTes Cours", "corrigetescours"],
       "url": "https://corrigetescours.com",
-      "logo": "https://corrigetescours.com/og-image.png",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://corrigetescours.com/logo-512.png",
+        "width": 512,
+        "height": 512
+      },
+      "image": "https://corrigetescours.com/og-image.png",
       "description": "Plateforme d'apprentissage intelligente utilisant l'IA pour aider les étudiants universitaires camerounais à réviser efficacement avec des résumés automatiques, des quiz personnalisés et un chatbot éducatif.",
+      "slogan": "Révise intelligemment avec l'IA",
       "areaServed": {
         "@type": "Country",
         "name": "Cameroun"
@@ -70,6 +81,7 @@
       },
       "offers": {
         "@type": "Offer",
+        "name": "Premium",
         "price": "1500",
         "priceCurrency": "XAF",
         "priceSpecification": {
@@ -83,7 +95,45 @@
       "contactPoint": {
         "@type": "ContactPoint",
         "contactType": "customer service",
-        "availableLanguage": "French"
+        "availableLanguage": ["French", "English"]
+      },
+      "sameAs": []
+    }
+    </script>
+    
+    <!-- Structured Data (JSON-LD) - WebSite for Sitelinks Search Box -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Corrige Tes Cours",
+      "alternateName": "CTC",
+      "url": "https://corrigetescours.com",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://corrigetescours.com/dashboard?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    
+    <!-- Structured Data (JSON-LD) - Software Application -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Corrige Tes Cours",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "XAF"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "150"
       }
     }
     </script>

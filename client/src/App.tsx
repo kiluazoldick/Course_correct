@@ -1,23 +1,33 @@
 import { Switch, Route } from "wouter";
+import { Suspense, lazy } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
-import LandingPage from "@/pages/Home";
-import Features from "@/pages/Features";
-import Pricing from "@/pages/Pricing";
-import About from "@/pages/About";
-import Login from "@/pages/Login";
-import Signup from "@/pages/Signup";
-import LegalNotice from "@/pages/LegalNotice";
-import Privacy from "@/pages/Privacy";
-import Terms from "@/pages/Terms";
-import TryDemo from "@/pages/TryDemo";
-import Dashboard from "@/pages/Dashboard";
-import NotFound from "@/pages/not-found";
 import type { Language } from "@/lib/i18n/translations";
+
+const LandingPage = lazy(() => import("@/pages/Home"));
+const Features = lazy(() => import("@/pages/Features"));
+const Pricing = lazy(() => import("@/pages/Pricing"));
+const About = lazy(() => import("@/pages/About"));
+const Login = lazy(() => import("@/pages/Login"));
+const Signup = lazy(() => import("@/pages/Signup"));
+const LegalNotice = lazy(() => import("@/pages/LegalNotice"));
+const Privacy = lazy(() => import("@/pages/Privacy"));
+const Terms = lazy(() => import("@/pages/Terms"));
+const TryDemo = lazy(() => import("@/pages/TryDemo"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-pulse text-muted-foreground">Chargement...</div>
+    </div>
+  );
+}
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -76,7 +86,9 @@ function AppWithLanguage() {
   return (
     <LanguageProvider initialLanguage={userLanguage}>
       <Toaster />
-      <Router />
+      <Suspense fallback={<PageLoader />}>
+        <Router />
+      </Suspense>
     </LanguageProvider>
   );
 }

@@ -4,12 +4,14 @@ import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, CheckCircle2, XCircle, Crown, Smartphone, CreditCard } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Crown, Smartphone, CreditCard, Sparkles, Zap, Infinity } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { PremiumBadge, PremiumCard } from '@/components/PremiumBadge';
+import { getErrorMessage } from '@/lib/errorHandler';
 
 interface SubscriptionData {
   status: string;
@@ -112,7 +114,7 @@ export default function Subscription() {
     onError: (error: any) => {
       toast({
         title: language === 'fr' ? "Erreur" : "Error",
-        description: error.message || (language === 'fr' ? "Impossible d'initier le paiement" : "Unable to initiate payment"),
+        description: getErrorMessage(error, language),
         variant: "destructive",
       });
     },
@@ -161,16 +163,13 @@ export default function Subscription() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>{t.subscriptionPage.currentPlan}</CardTitle>
-              <Badge variant={isPremium ? "default" : "secondary"} data-testid="badge-plan-status">
-                {isPremium ? (
-                  <>
-                    <Crown className="w-3 h-3 mr-1" />
-                    {t.subscriptionPage.premium}
-                  </>
-                ) : (
-                  t.subscriptionPage.free
-                )}
-              </Badge>
+              {isPremium ? (
+                <PremiumBadge size="md" />
+              ) : (
+                <Badge variant="secondary" data-testid="badge-plan-status">
+                  {t.subscriptionPage.free}
+                </Badge>
+              )}
             </div>
             <CardDescription>
               {isPremium
@@ -223,10 +222,12 @@ export default function Subscription() {
           </CardContent>
         </Card>
 
-        <Card data-testid="card-premium-features">
+        <PremiumCard className="p-0" data-testid="card-premium-features">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Crown className="w-5 h-5 text-yellow-500" />
+              <div className="p-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
               <CardTitle>{t.subscriptionPage.features.title}</CardTitle>
             </div>
             <CardDescription>
@@ -266,7 +267,7 @@ export default function Subscription() {
 
               {!isPremium && (
                 <Button
-                  className="w-full"
+                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white border-0 shadow-lg shadow-amber-500/25"
                   size="lg"
                   onClick={() => initiateMutation.mutate()}
                   disabled={initiateMutation.isPending || !!paymentId}
@@ -281,7 +282,7 @@ export default function Subscription() {
                     </>
                   ) : (
                     <>
-                      <Crown className="w-4 h-4 mr-2" />
+                      <Zap className="w-4 h-4 mr-2" />
                       {t.subscriptionPage.subscribe}
                     </>
                   )}
@@ -289,7 +290,7 @@ export default function Subscription() {
               )}
             </div>
           </CardContent>
-        </Card>
+        </PremiumCard>
       </div>
 
       <div className="max-w-7xl mx-auto">

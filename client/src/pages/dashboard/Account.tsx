@@ -9,7 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Camera, Check, X, Crown, Globe, Sun, Moon } from 'lucide-react';
+import { Camera, Check, X, Globe, Sun, Moon } from 'lucide-react';
+import { PremiumBadge } from '@/components/PremiumBadge';
+import { getErrorMessage } from '@/lib/errorHandler';
 import { updateUserProfileSchema, type UpdateUserProfile } from '@shared/schema';
 import { useTranslation } from '@/lib/i18n/LanguageContext';
 import type { Language } from '@/lib/i18n/translations';
@@ -64,7 +66,7 @@ export default function Account() {
     onError: (error: any) => {
       toast({
         title: t.errors.generic,
-        description: error.message || (language === 'fr' ? "Impossible de mettre à jour le profil" : "Unable to update profile"),
+        description: getErrorMessage(error, language),
         variant: "destructive",
       });
     },
@@ -198,11 +200,7 @@ export default function Account() {
           <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">{t.account.subtitle}</p>
         </div>
         {plan === 'premium' && (
-          <Badge variant="default" className="gap-1" data-testid="badge-premium">
-            <Crown className="w-3 h-3" />
-            <span className="hidden sm:inline">Premium</span>
-            <span className="sm:hidden">Pro</span>
-          </Badge>
+          <PremiumBadge size="md" />
         )}
       </div>
 

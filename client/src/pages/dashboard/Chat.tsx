@@ -3,12 +3,14 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Trash2, Crown, Loader2, GraduationCap } from 'lucide-react';
+import { Send, Trash2, Loader2, GraduationCap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'wouter';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { PremiumBadge, UnlimitedBadge } from '@/components/PremiumBadge';
+import { getErrorMessage } from '@/lib/errorHandler';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -29,7 +31,7 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -65,7 +67,7 @@ export default function Chat() {
       } else {
         toast({
           title: t.chatPage.error,
-          description: t.chatPage.cannotSend,
+          description: getErrorMessage(error, language),
           variant: "destructive",
         });
       }
@@ -146,10 +148,10 @@ export default function Chat() {
             </Badge>
           )}
           {isPremium && (
-            <Badge variant="default" className="gap-1" data-testid="badge-premium">
-              <Crown className="w-3 h-3" />
-              <span className="hidden md:inline">{t.chatPage.premiumBadge}</span>
-            </Badge>
+            <div className="flex items-center gap-2">
+              <PremiumBadge size="sm" />
+              <UnlimitedBadge />
+            </div>
           )}
           {messages.length > 0 && (
             <Button
@@ -277,10 +279,9 @@ export default function Chat() {
                     }
                   </p>
                 </div>
-                <Link href="/subscription">
-                  <Button size="sm" className="w-full md:w-auto" data-testid="button-upgrade-from-limit">
-                    <Crown className="w-3 h-3 mr-1" />
-                    {t.chatPage.premiumBadge}
+                <Link href="/dashboard/subscription">
+                  <Button size="sm" className="w-full md:w-auto bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white border-0" data-testid="button-upgrade-from-limit">
+                    {t.subscriptionPage.upgradeToPremium}
                   </Button>
                 </Link>
               </div>

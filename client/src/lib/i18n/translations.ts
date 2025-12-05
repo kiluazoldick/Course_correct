@@ -414,6 +414,9 @@ export const translations = {
       perMonth: "/mois",
       subscribe: "Passer au Premium",
       subscribing: "Initialisation...",
+      unlimited: "Illimité",
+      upgradeToPremium: "Passer au Premium",
+      unlockAllFeatures: "Débloque toutes les fonctionnalités",
       paymentMethods: "Moyens de paiement",
       paymentMethodsDesc: "Paye facilement avec Mobile Money ou carte bancaire",
       mtn: "MTN Mobile Money",
@@ -1089,6 +1092,9 @@ export const translations = {
       alreadyPremiumDesc: "Profite de toutes les fonctionnalités sans limite.",
       guarantee: "Garantie satisfait ou remboursé de 14 jours",
       cancelAnytime: "Annule à tout moment",
+      unlimited: "Illimité",
+      upgradeToPremium: "Passer au Premium",
+      unlockAllFeatures: "Débloque toutes les fonctionnalités",
     },
     
     // Success messages
@@ -1510,6 +1516,9 @@ export const translations = {
       perMonth: "/month",
       subscribe: "Upgrade to Premium",
       subscribing: "Initializing...",
+      unlimited: "Unlimited",
+      upgradeToPremium: "Upgrade to Premium",
+      unlockAllFeatures: "Unlock all features",
       paymentMethods: "Payment methods",
       paymentMethodsDesc: "Pay easily with Mobile Money or credit card",
       mtn: "MTN Mobile Money",
@@ -2185,6 +2194,9 @@ export const translations = {
       alreadyPremiumDesc: "Enjoy all features without limits.",
       guarantee: "14-day money-back guarantee",
       cancelAnytime: "Cancel anytime",
+      unlimited: "Unlimited",
+      upgradeToPremium: "Upgrade to Premium",
+      unlockAllFeatures: "Unlock all features",
     },
     
     // Success messages

@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar';
 import AppFooter from '@/components/AppFooter';
 import TryNowSection from '@/components/TryNowSection';
+import SEO from '@/components/SEO';
 import { Brain, TrendingUp, BookOpen, Award, Sparkles, Zap, Target, ChevronRight, Upload, MessageCircle, BarChart3, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
@@ -127,6 +128,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        url="https://corrigetescours.com/"
+      />
       <Navbar />
 
       <main className="flex-1">

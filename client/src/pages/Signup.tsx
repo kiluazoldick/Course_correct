@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import SEO from '@/components/SEO';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -105,6 +106,11 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background p-4 relative overflow-hidden">
+      <SEO 
+        title={t.signupPage.title}
+        description={t.signupPage.subtitle}
+        url="https://corrigetescours.com/signup"
+      />
       <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
         <LanguageToggle />
         <ThemeToggle />

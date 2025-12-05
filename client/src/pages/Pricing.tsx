@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import AppFooter from '@/components/AppFooter';
+import SEO from '@/components/SEO';
 import { Check, Sparkles, Zap, Shield, Clock, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
@@ -86,6 +87,11 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title={t.pricingPage.heroTitle}
+        description={t.pricingPage.heroSubtitle}
+        url="https://corrigetescours.com/pricing"
+      />
       <Navbar />
 
       <main className="flex-1">

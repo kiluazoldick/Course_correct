@@ -1,0 +1,28 @@
+# Robots.txt pour Corrige Tes Cours
+# https://corrigetescours.com
+
+User-agent: *
+Allow: /
+
+# Pages publiques autorisées
+Allow: /
+Allow: /features
+Allow: /pricing
+Allow: /about
+Allow: /login
+Allow: /signup
+Allow: /terms
+Allow: /privacy
+Allow: /legal
+
+# Pages privées (dashboard) - Désactiver l'indexation
+Disallow: /dashboard
+Disallow: /dashboard/*
+Disallow: /api/
+Disallow: /try-demo
+
+# Sitemap
+Sitemap: https://corrigetescours.com/sitemap.xml
+
+# Crawl-delay pour être respectueux des ressources serveur
+Crawl-delay: 1

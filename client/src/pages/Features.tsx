@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import AppFooter from '@/components/AppFooter';
+import SEO from '@/components/SEO';
 import { FileText, Brain, CheckCircle, TrendingUp, Sparkles, Target, Upload, MessageCircle, BarChart3, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
@@ -44,6 +45,11 @@ export default function Features() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title={t.featuresPage.heroTitle}
+        description={t.featuresPage.heroSubtitle}
+        url="https://corrigetescours.com/features"
+      />
       <Navbar />
 
       <main className="flex-1">

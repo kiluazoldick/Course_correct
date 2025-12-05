@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import AppFooter from '@/components/AppFooter';
+import SEO from '@/components/SEO';
 import { Heart, Target, Users, Zap, BookOpen, TrendingUp, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
@@ -64,6 +65,11 @@ export default function About() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title={t.aboutPage.heroTitle}
+        description={t.aboutPage.heroSubtitle}
+        url="https://corrigetescours.com/about"
+      />
       <Navbar />
 
       <main className="flex-1">

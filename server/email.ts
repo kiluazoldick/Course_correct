@@ -404,3 +404,139 @@ export async function sendBulkWeeklyEmails(
   
   return results;
 }
+
+// ==================== RESEND CONTACTS MANAGEMENT ====================
+// These functions sync users to Resend's contact list for marketing emails
+// You can then send marketing emails directly from Resend's dashboard
+
+// Add a contact to Resend (for marketing emails from Resend dashboard)
+export async function addContactToResend(
+  email: string,
+  firstName: string,
+  lastName?: string,
+  unsubscribed: boolean = false
+): Promise<{ success: boolean; contactId?: string; error?: string }> {
+  try {
+    const { client } = await getResendClient();
+    
+    const { data, error } = await client.contacts.create({
+      email,
+      firstName,
+      lastName: lastName || '',
+      unsubscribed,
+    });
+
+    if (error) {
+      console.error('Resend contact create error:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log('Contact added to Resend:', data?.id, email);
+    return { success: true, contactId: data?.id };
+  } catch (error) {
+    console.error('Failed to add contact to Resend:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// Update a contact's subscription status in Resend
+export async function updateResendContact(
+  email: string,
+  unsubscribed: boolean
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { client } = await getResendClient();
+    
+    const { error } = await client.contacts.update({
+      email,
+      unsubscribed,
+    });
+
+    if (error) {
+      console.error('Resend contact update error:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log('Contact updated in Resend:', email, 'unsubscribed:', unsubscribed);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update Resend contact:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// Remove a contact from Resend
+export async function removeContactFromResend(
+  email: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { client } = await getResendClient();
+    
+    // First get the contact by email to get their ID
+    const { data: contacts } = await client.contacts.list();
+    const contact = contacts?.data?.find((c: any) => c.email === email);
+    
+    if (!contact) {
+      console.log('Contact not found in Resend:', email);
+      return { success: true }; // Already removed or never existed
+    }
+
+    const { error } = await client.contacts.remove({ id: contact.id });
+
+    if (error) {
+      console.error('Resend contact remove error:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log('Contact removed from Resend:', email);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to remove Resend contact:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// Sync all opted-in users to Resend (for initial setup or periodic sync)
+export async function syncAllUsersToResend(
+  users: Array<{ email: string; firstName: string; lastName?: string; emailMarketing: string }>
+): Promise<{ added: number; updated: number; skipped: number; errors: string[] }> {
+  const results = { added: 0, updated: 0, skipped: 0, errors: [] as string[] };
+  
+  for (const user of users) {
+    try {
+      // Skip users who opted out
+      if (user.emailMarketing === 'no') {
+        // Update as unsubscribed if they exist in Resend
+        await updateResendContact(user.email, true);
+        results.skipped++;
+        continue;
+      }
+      
+      // Try to add the contact
+      const result = await addContactToResend(
+        user.email,
+        user.firstName,
+        user.lastName,
+        false // subscribed
+      );
+      
+      if (result.success) {
+        results.added++;
+      } else if (result.error?.includes('already exists')) {
+        // Contact exists, update subscription status
+        await updateResendContact(user.email, false);
+        results.updated++;
+      } else {
+        results.errors.push(`${user.email}: ${result.error}`);
+      }
+      
+      // Small delay to respect rate limits (2 req/sec)
+      await new Promise(resolve => setTimeout(resolve, 600));
+    } catch (error) {
+      results.errors.push(`${user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+  
+  console.log(`Resend sync complete: added=${results.added}, updated=${results.updated}, skipped=${results.skipped}`);
+  return results;
+}

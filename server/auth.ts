@@ -109,13 +109,27 @@ export function setupAuth(app: Express) {
                 user = await storage.linkGoogleAccount(existingUser.id, profile.id);
               } else {
                 // Create new user
+                const email = profile.emails?.[0]?.value || '';
+                const firstName = profile.name?.givenName || 'Utilisateur';
+                const lastName = profile.name?.familyName || 'Google';
+                
                 user = await storage.createGoogleUser({
-                  email: profile.emails?.[0]?.value || '',
+                  email,
                   googleId: profile.id,
-                  firstName: profile.name?.givenName || 'Utilisateur',
-                  lastName: profile.name?.familyName || 'Google',
+                  firstName,
+                  lastName,
                   profileImageUrl: profile.photos?.[0]?.value,
                 });
+
+                // Add user to Resend contacts for marketing emails (non-blocking)
+                try {
+                  const { addContactToResend } = await import('./email');
+                  addContactToResend(email, firstName, lastName, false).catch(err => {
+                    console.error('Failed to add Google contact to Resend:', err);
+                  });
+                } catch (emailError) {
+                  console.error('Resend import error for Google user:', emailError);
+                }
               }
             }
 
@@ -185,6 +199,16 @@ export function setupAuth(app: Express) {
         lastName,
         password: hashedPassword,
       });
+
+      // Add user to Resend contacts for marketing emails (non-blocking)
+      try {
+        const { addContactToResend } = await import('./email');
+        addContactToResend(email, firstName, lastName, false).catch(err => {
+          console.error('Failed to add contact to Resend (non-blocking):', err);
+        });
+      } catch (emailError) {
+        console.error('Resend import error (non-blocking):', emailError);
+      }
 
       // Auto-login after registration
       req.logIn(user, (err) => {

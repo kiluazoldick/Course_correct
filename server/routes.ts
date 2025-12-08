@@ -1442,7 +1442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update email preferences
+  // Update email preferences (also syncs to Resend)
   app.patch('/api/user/email-preferences', isAuthenticated, async (req: any, res) => {
     try {
       const userId = (req.user as any).id;
@@ -1453,6 +1453,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const updatedUser = await storage.updateUser(userId, { emailMarketing });
+      
+      // Sync to Resend - update subscription status
+      if (updatedUser) {
+        const { updateResendContact } = await import('./email');
+        await updateResendContact(updatedUser.email, emailMarketing === 'no');
+      }
+
       res.json({ 
         message: emailMarketing === 'yes' ? "Emails marketing activés" : "Emails marketing désactivés",
         emailMarketing: updatedUser?.emailMarketing 
@@ -1460,6 +1467,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating email preferences:", error);
       res.status(500).json({ message: "Failed to update preferences" });
+    }
+  });
+
+  // Sync all users to Resend (admin only - run once or periodically)
+  app.post('/api/admin/sync-users-to-resend', async (req, res) => {
+    try {
+      const adminKey = req.headers['x-admin-key'];
+      const expectedKey = `admin-${process.env.SESSION_SECRET}`;
+      
+      if (!adminKey || adminKey !== expectedKey) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { syncAllUsersToResend } = await import('./email');
+      const allUsers = await storage.getAllUsers();
+      
+      console.log(`Syncing ${allUsers.length} users to Resend...`);
+      
+      const results = await syncAllUsersToResend(
+        allUsers.map(u => ({
+          email: u.email,
+          firstName: u.firstName,
+          lastName: u.lastName || undefined,
+          emailMarketing: u.emailMarketing || 'yes'
+        }))
+      );
+
+      res.json({
+        message: "Sync complete",
+        added: results.added,
+        updated: results.updated,
+        skipped: results.skipped,
+        errors: results.errors.slice(0, 10)
+      });
+    } catch (error) {
+      console.error("Error syncing users to Resend:", error);
+      res.status(500).json({ message: "Failed to sync users" });
     }
   });
 

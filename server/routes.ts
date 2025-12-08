@@ -10,7 +10,7 @@ import { drizzle } from "drizzle-orm/neon-serverless";
 import { eq } from "drizzle-orm";
 import { Pool } from "@neondatabase/serverless";
 import { lygosService } from "./lygos";
-import { sendWelcomeEmail, sendWeeklyMotivationEmail, sendBulkWeeklyEmails } from "./email";
+import { sendWelcomeEmail, sendWeeklyMotivationEmail, sendBulkWeeklyEmails, sendPremiumCongratsEmail, sendReminderEmail } from "./email";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
@@ -1094,6 +1094,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
+        // Send Premium congratulations email
+        const user = await storage.getUser(payment.userId);
+        if (user) {
+          sendPremiumCongratsEmail(user.email, user.firstName, (user.language as 'fr' | 'en') || 'fr')
+            .catch(err => console.error('Failed to send premium email:', err));
+        }
+
         return res.redirect('/dashboard/subscription?success=true');
         
       } else if (isFailed) {
@@ -1146,6 +1153,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             transactionId: orderId,
           });
           await storage.updatePayment(payment.id, { subscriptionId: newSub.id });
+        }
+
+        // Send Premium congratulations email
+        const userForEmail = await storage.getUser(payment.userId);
+        if (userForEmail) {
+          sendPremiumCongratsEmail(userForEmail.email, userForEmail.firstName, (userForEmail.language as 'fr' | 'en') || 'fr')
+            .catch(err => console.error('Failed to send premium email:', err));
         }
 
         return res.redirect('/dashboard/subscription?success=true');

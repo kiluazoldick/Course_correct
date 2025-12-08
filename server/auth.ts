@@ -121,14 +121,19 @@ export function setupAuth(app: Express) {
                   profileImageUrl: profile.photos?.[0]?.value,
                 });
 
-                // Add user to Resend contacts for marketing emails (non-blocking)
+                // Add user to Resend contacts and send welcome email (non-blocking)
                 try {
-                  const { addContactToResend } = await import('./email');
+                  const { addContactToResend, sendWelcomeEmail } = await import('./email');
+                  // Add to Resend contacts
                   addContactToResend(email, firstName, lastName, false).catch(err => {
                     console.error('Failed to add Google contact to Resend:', err);
                   });
+                  // Send welcome email
+                  sendWelcomeEmail(email, firstName, 'fr', 'yes').catch(err => {
+                    console.error('Failed to send welcome email to Google user:', err);
+                  });
                 } catch (emailError) {
-                  console.error('Resend import error for Google user:', emailError);
+                  console.error('Email service error for Google user:', emailError);
                 }
               }
             }
@@ -200,14 +205,19 @@ export function setupAuth(app: Express) {
         password: hashedPassword,
       });
 
-      // Add user to Resend contacts for marketing emails (non-blocking)
+      // Add user to Resend contacts and send welcome email (non-blocking)
       try {
-        const { addContactToResend } = await import('./email');
+        const { addContactToResend, sendWelcomeEmail } = await import('./email');
+        // Add to Resend contacts
         addContactToResend(email, firstName, lastName, false).catch(err => {
           console.error('Failed to add contact to Resend (non-blocking):', err);
         });
+        // Send welcome email
+        sendWelcomeEmail(email, firstName, 'fr', 'yes').catch(err => {
+          console.error('Failed to send welcome email (non-blocking):', err);
+        });
       } catch (emailError) {
-        console.error('Resend import error (non-blocking):', emailError);
+        console.error('Email service error (non-blocking):', emailError);
       }
 
       // Auto-login after registration

@@ -301,6 +301,226 @@ const emailTemplates = {
 </body>
 </html>`
     }
+  },
+
+  // Premium subscription congratulations email
+  premiumCongrats: {
+    fr: {
+      subject: 'Bienvenue dans Premium ! Tu as fait le bon choix',
+      html: (firstName: string) => `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 12px; margin-top: 20px;">
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h1 style="color: #1a1a1a; font-size: 28px; margin: 0;">Corrige Tes Cours</h1>
+      <div style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #1a1a1a; padding: 8px 20px; border-radius: 20px; display: inline-block; margin-top: 10px; font-weight: bold;">
+        PREMIUM
+      </div>
+    </div>
+    
+    <h2 style="color: #1a1a1a; font-size: 24px; text-align: center;">Felicitations ${firstName} !</h2>
+    
+    <p style="color: #333; font-size: 16px; line-height: 1.6; text-align: center;">
+      Tu viens de debloquer tout le potentiel de Corrige Tes Cours. Tu as fait un excellent investissement pour ta reussite !
+    </p>
+    
+    <div style="background: linear-gradient(135deg, #1a1a1a 0%, #333 100%); border-radius: 12px; padding: 25px; margin: 25px 0; color: white;">
+      <h3 style="margin: 0 0 15px 0; font-size: 18px; text-align: center;">Tes avantages Premium</h3>
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Uploads de cours illimites</li>
+        <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Resumes IA jusqu'a 150 000 caracteres</li>
+        <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Quiz illimites</li>
+        <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Tariq IA sans limites de messages</li>
+        <li style="padding: 8px 0;">Support prioritaire</li>
+      </ul>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="https://corrigetescours.com/dashboard" style="display: inline-block; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #1a1a1a; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+        Profiter de Premium
+      </a>
+    </div>
+    
+    <p style="color: #666; font-size: 14px; line-height: 1.6; text-align: center;">
+      Merci de ta confiance. On est la pour t'accompagner vers la reussite !
+    </p>
+    
+    <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center;">
+      <p style="color: #999; font-size: 12px; margin: 0;">
+        Corrige Tes Cours - L'IA au service de ta reussite
+      </p>
+    </div>
+  </div>
+</body>
+</html>`
+    },
+    en: {
+      subject: 'Welcome to Premium! You made the right choice',
+      html: (firstName: string) => `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 12px; margin-top: 20px;">
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h1 style="color: #1a1a1a; font-size: 28px; margin: 0;">Corrige Tes Cours</h1>
+      <div style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #1a1a1a; padding: 8px 20px; border-radius: 20px; display: inline-block; margin-top: 10px; font-weight: bold;">
+        PREMIUM
+      </div>
+    </div>
+    
+    <h2 style="color: #1a1a1a; font-size: 24px; text-align: center;">Congratulations ${firstName}!</h2>
+    
+    <p style="color: #333; font-size: 16px; line-height: 1.6; text-align: center;">
+      You've just unlocked the full potential of Corrige Tes Cours. You made an excellent investment in your success!
+    </p>
+    
+    <div style="background: linear-gradient(135deg, #1a1a1a 0%, #333 100%); border-radius: 12px; padding: 25px; margin: 25px 0; color: white;">
+      <h3 style="margin: 0 0 15px 0; font-size: 18px; text-align: center;">Your Premium Benefits</h3>
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Unlimited course uploads</li>
+        <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">AI summaries up to 150,000 characters</li>
+        <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Unlimited quizzes</li>
+        <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Tariq AI with no message limits</li>
+        <li style="padding: 8px 0;">Priority support</li>
+      </ul>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="https://corrigetescours.com/dashboard" style="display: inline-block; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #1a1a1a; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+        Enjoy Premium
+      </a>
+    </div>
+    
+    <p style="color: #666; font-size: 14px; line-height: 1.6; text-align: center;">
+      Thank you for your trust. We're here to support your success!
+    </p>
+    
+    <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center;">
+      <p style="color: #999; font-size: 12px; margin: 0;">
+        Corrige Tes Cours - AI for your success
+      </p>
+    </div>
+  </div>
+</body>
+</html>`
+    }
+  },
+
+  // Reminder email - encourage users to come back
+  reminder: {
+    fr: {
+      subject: 'Tu nous manques ! Tes cours t\'attendent',
+      html: (firstName: string) => `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 12px; margin-top: 20px;">
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h1 style="color: #1a1a1a; font-size: 28px; margin: 0;">Corrige Tes Cours</h1>
+    </div>
+    
+    <h2 style="color: #1a1a1a; font-size: 24px; text-align: center;">Hey ${firstName}, ca fait un moment !</h2>
+    
+    <p style="color: #333; font-size: 16px; line-height: 1.6; text-align: center;">
+      On a remarque que tu n'es pas passe depuis quelques jours. Tes cours et tes quiz t'attendent !
+    </p>
+    
+    <div style="background-color: #f8f9fa; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
+      <p style="color: #333; font-size: 18px; margin: 0 0 15px 0; font-weight: 600;">
+        Savais-tu que...
+      </p>
+      <p style="color: #666; font-size: 16px; line-height: 1.6; margin: 0;">
+        Les etudiants qui revisent regulierement avec des quiz ont <strong style="color: #1a1a1a;">40% de meilleures notes</strong> aux examens !
+      </p>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="https://corrigetescours.com/dashboard" style="display: inline-block; background-color: #1a1a1a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+        Reprendre mes revisions
+      </a>
+    </div>
+    
+    <p style="color: #666; font-size: 14px; line-height: 1.6; text-align: center;">
+      Pas le temps aujourd'hui ? Pas de souci, on sera la quand tu seras pret !
+    </p>
+    
+    <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center;">
+      <p style="color: #999; font-size: 12px; margin: 0;">
+        Corrige Tes Cours - L'IA au service de ta reussite
+      </p>
+      <p style="color: #999; font-size: 12px; margin-top: 5px;">
+        <a href="https://corrigetescours.com/unsubscribe" style="color: #999;">Se desabonner</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`
+    },
+    en: {
+      subject: 'We miss you! Your courses are waiting',
+      html: (firstName: string) => `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 12px; margin-top: 20px;">
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h1 style="color: #1a1a1a; font-size: 28px; margin: 0;">Corrige Tes Cours</h1>
+    </div>
+    
+    <h2 style="color: #1a1a1a; font-size: 24px; text-align: center;">Hey ${firstName}, it's been a while!</h2>
+    
+    <p style="color: #333; font-size: 16px; line-height: 1.6; text-align: center;">
+      We noticed you haven't visited in a few days. Your courses and quizzes are waiting for you!
+    </p>
+    
+    <div style="background-color: #f8f9fa; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
+      <p style="color: #333; font-size: 18px; margin: 0 0 15px 0; font-weight: 600;">
+        Did you know...
+      </p>
+      <p style="color: #666; font-size: 16px; line-height: 1.6; margin: 0;">
+        Students who regularly review with quizzes score <strong style="color: #1a1a1a;">40% better</strong> on exams!
+      </p>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="https://corrigetescours.com/dashboard" style="display: inline-block; background-color: #1a1a1a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+        Resume my studies
+      </a>
+    </div>
+    
+    <p style="color: #666; font-size: 14px; line-height: 1.6; text-align: center;">
+      No time today? No worries, we'll be here when you're ready!
+    </p>
+    
+    <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center;">
+      <p style="color: #999; font-size: 12px; margin: 0;">
+        Corrige Tes Cours - AI for your success
+      </p>
+      <p style="color: #999; font-size: 12px; margin-top: 5px;">
+        <a href="https://corrigetescours.com/unsubscribe" style="color: #999;">Unsubscribe</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`
+    }
   }
 };
 
@@ -371,6 +591,66 @@ export async function sendWeeklyMotivationEmail(
     return { success: true, messageId: data?.id };
   } catch (error) {
     console.error('Failed to send weekly email:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// Send Premium subscription congratulations email
+export async function sendPremiumCongratsEmail(
+  to: string, 
+  firstName: string, 
+  language: Language = 'fr'
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const { client, fromEmail } = await getResendClient();
+    const template = emailTemplates.premiumCongrats[language];
+    
+    const { data, error } = await client.emails.send({
+      from: `Corrige Tes Cours <${fromEmail}>`,
+      to: [to],
+      subject: template.subject,
+      html: template.html(firstName),
+    });
+
+    if (error) {
+      console.error('Resend error:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log('Premium congrats email sent:', data?.id);
+    return { success: true, messageId: data?.id };
+  } catch (error) {
+    console.error('Failed to send premium congrats email:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// Send reminder email to inactive users
+export async function sendReminderEmail(
+  to: string, 
+  firstName: string, 
+  language: Language = 'fr'
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const { client, fromEmail } = await getResendClient();
+    const template = emailTemplates.reminder[language];
+    
+    const { data, error } = await client.emails.send({
+      from: `Corrige Tes Cours <${fromEmail}>`,
+      to: [to],
+      subject: template.subject,
+      html: template.html(firstName),
+    });
+
+    if (error) {
+      console.error('Resend error:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log('Reminder email sent:', data?.id);
+    return { success: true, messageId: data?.id };
+  } catch (error) {
+    console.error('Failed to send reminder email:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }

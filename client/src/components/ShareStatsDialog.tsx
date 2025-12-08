@@ -5,9 +5,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { ShareableStatsCard } from './ShareableStatsCard';
+import { ShareableStatsCardExport } from './ShareableStatsCardExport';
 import { Share2, Download, Copy, Check, Crown, Link2 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import type { Subscription, SharedStats } from '@shared/schema';
 
 interface ShareStatsDialogProps {
@@ -26,6 +27,7 @@ export function ShareStatsDialog({ open, onOpenChange, stats, userName }: ShareS
   const { t, language } = useLanguage();
   const { toast } = useToast();
   const cardRef = useRef<HTMLDivElement>(null);
+  const exportCardRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -88,20 +90,19 @@ export function ShareStatsDialog({ open, onOpenChange, stats, userName }: ShareS
   }, [shareUrl, toast, language]);
 
   const handleDownloadImage = async () => {
-    if (!cardRef.current) return;
+    if (!exportCardRef.current) return;
     
     setIsGenerating(true);
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: null,
-        scale: 2,
-        useCORS: true,
-        logging: false,
+      const dataUrl = await toPng(exportCardRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+        quality: 1,
       });
 
       const link = document.createElement('a');
       link.download = `corrigetescours-stats-${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = dataUrl;
       link.click();
 
       toast({
@@ -111,6 +112,7 @@ export function ShareStatsDialog({ open, onOpenChange, stats, userName }: ShareS
           : 'Share it on your social media',
       });
     } catch (error) {
+      console.error('Image generation error:', error);
       toast({
         title: language === 'fr' ? 'Erreur' : 'Error',
         description: language === 'fr' 
@@ -147,6 +149,18 @@ export function ShareStatsDialog({ open, onOpenChange, stats, userName }: ShareS
               averageScore={stats.averageScore}
               bestScore={stats.bestScore}
               userName={userName}
+            />
+          </div>
+          
+          <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+            <ShareableStatsCardExport
+              ref={exportCardRef}
+              totalQuizzes={stats.totalQuizzes}
+              totalCourses={stats.totalCourses}
+              averageScore={stats.averageScore}
+              bestScore={stats.bestScore}
+              userName={userName}
+              language={language as 'fr' | 'en'}
             />
           </div>
 

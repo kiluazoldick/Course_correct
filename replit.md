@@ -68,14 +68,20 @@ The backend uses Express.js with Node.js and TypeScript. It features a dual auth
 
 ### Email Service
 - **Resend**: Transactional and marketing email service via Replit integration
-- **Resend Contacts Sync**: Users automatically added to Resend Audience on registration for dashboard-based marketing
-- **Email Templates**: HTML templates for welcome emails and weekly motivation (bilingual FR/EN)
-- **Email Preferences**: Users can opt-in/opt-out of marketing emails via profile settings (synced to Resend)
+- **Global Contacts API**: Uses Resend's November 2024 global contacts model (no audienceId required)
+- **Automated Email System** (Dec 2025):
+  - **Welcome Email**: Sent automatically on registration (both local and Google OAuth)
+  - **Premium Congratulations Email**: Sent automatically after successful CinetPay payment
+  - **Reminder Email**: Template available for admin use
+  - **Weekly Motivation Email**: Template for bulk sends
+- **Contact Sync**: New users automatically synced to Resend contacts on registration
+- **Email Templates**: Beautiful HTML templates with French/English bilingual support
+- **Email Preferences**: Users can opt-in/opt-out of marketing emails via profile settings
 - **Admin Routes**: 
   - POST `/api/admin/send-weekly-emails` for bulk sends (requires `x-admin-key: admin-{SESSION_SECRET}`)
-  - POST `/api/admin/sync-users-to-resend` for initial bulk sync of all users to Resend Audience
+  - POST `/api/admin/sync-users-to-resend` for initial bulk sync of all users to Resend contacts
 - **Test Route**: POST `/api/email/test-weekly` for sending test emails to logged-in users
-- **Environment**: Requires `RESEND_AUDIENCE_ID` secret for Contacts API integration
+- **Non-blocking**: All email operations are non-blocking - registration/payment flows continue even if email fails
 
 ### Utilities
 - **date-fns**: For date manipulation.

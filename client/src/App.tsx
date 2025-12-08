@@ -2,6 +2,7 @@ import { Switch, Route } from "wouter";
 import { Suspense, lazy } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
@@ -18,6 +19,7 @@ const LegalNotice = lazy(() => import("@/pages/LegalNotice"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const TryDemo = lazy(() => import("@/pages/TryDemo"));
+const SharedStats = lazy(() => import("@/pages/SharedStats"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
@@ -44,6 +46,7 @@ function Router() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/try/:uploadId" component={TryDemo} />
+      <Route path="/share/:token" component={SharedStats} />
       
       {/* Conditional routes based on auth */}
       {isLoading ? (
@@ -95,11 +98,13 @@ function AppWithLanguage() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light">
-        <AppWithLanguage />
-      </ThemeProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="light">
+          <AppWithLanguage />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }
 

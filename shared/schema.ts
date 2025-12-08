@@ -233,3 +233,25 @@ export const insertAnonymousUploadSchema = createInsertSchema(anonymousUploads).
 
 export type InsertAnonymousUpload = z.infer<typeof insertAnonymousUploadSchema>;
 export type AnonymousUpload = typeof anonymousUploads.$inferSelect;
+
+// Shared stats for social sharing
+export const sharedStats = pgTable("shared_stats", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  shareToken: varchar("share_token").notNull().unique(), // Unique token for sharing
+  totalQuizzes: integer("total_quizzes").notNull().default(0),
+  totalCourses: integer("total_courses").notNull().default(0),
+  averageScore: integer("average_score").notNull().default(0),
+  bestScore: integer("best_score").notNull().default(0),
+  userName: varchar("user_name"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at"), // Optional expiration
+});
+
+export const insertSharedStatsSchema = createInsertSchema(sharedStats).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSharedStats = z.infer<typeof insertSharedStatsSchema>;
+export type SharedStats = typeof sharedStats.$inferSelect;

@@ -1125,6 +1125,163 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== Shared Stats Routes =====
+
+  // Generate share token and create/update shared stats
+  app.post('/api/share-stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const user = await storage.getUser(userId);
+      
+      // Get user's stats
+      const quizResults = await storage.getQuizResultsByUserId(userId);
+      const courses = await storage.getCoursesByUserId(userId);
+      
+      const totalQuizzes = quizResults.length;
+      const totalCourses = courses.length;
+      const averageScore = totalQuizzes > 0
+        ? Math.round(quizResults.reduce((sum, r) => sum + r.score, 0) / totalQuizzes)
+        : 0;
+      const bestScore = totalQuizzes > 0
+        ? Math.max(...quizResults.map(r => r.score))
+        : 0;
+
+      // Check if user already has a share token
+      let sharedStats = await storage.getSharedStatsByUserId(userId);
+      
+      const userName = user ? `${user.firstName} ${user.lastName}` : undefined;
+
+      if (sharedStats) {
+        // Update existing stats
+        sharedStats = await storage.updateSharedStats(sharedStats.id, {
+          totalQuizzes,
+          totalCourses,
+          averageScore,
+          bestScore,
+          userName,
+        });
+      } else {
+        // Generate unique share token
+        const shareToken = `${userId.substring(0, 8)}-${Date.now().toString(36)}`;
+        
+        sharedStats = await storage.createSharedStats({
+          userId,
+          shareToken,
+          totalQuizzes,
+          totalCourses,
+          averageScore,
+          bestScore,
+          userName,
+        });
+      }
+
+      res.json(sharedStats);
+    } catch (error) {
+      console.error("Error creating share stats:", error);
+      res.status(500).json({ message: "Failed to create share link" });
+    }
+  });
+
+  // Get shared stats by token (public route)
+  app.get('/api/shared/:token', async (req, res) => {
+    try {
+      const { token } = req.params;
+      const sharedStats = await storage.getSharedStatsByToken(token);
+      
+      if (!sharedStats) {
+        return res.status(404).json({ message: "Stats not found" });
+      }
+
+      res.json(sharedStats);
+    } catch (error) {
+      console.error("Error fetching shared stats:", error);
+      res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
+  // Get current user's share stats
+  app.get('/api/share-stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const sharedStats = await storage.getSharedStatsByUserId(userId);
+      res.json(sharedStats || null);
+    } catch (error) {
+      console.error("Error fetching share stats:", error);
+      res.status(500).json({ message: "Failed to fetch share stats" });
+    }
+  });
+
+  // Server-side OG meta tags for social media sharing
+  // This route serves proper HTML with OG tags that social media crawlers can read
+  app.get('/share/:token', async (req, res, next) => {
+    const userAgent = req.headers['user-agent'] || '';
+    
+    // Check if this is a social media crawler (Facebook, Twitter, WhatsApp, etc.)
+    const isCrawler = /facebookexternalhit|twitterbot|whatsapp|linkedin|telegram|slackbot|discord|pinterest/i.test(userAgent);
+    
+    if (!isCrawler) {
+      // For regular users, let the SPA handle it
+      return next();
+    }
+
+    try {
+      const { token } = req.params;
+      const sharedStats = await storage.getSharedStatsByToken(token);
+      
+      const baseUrl = process.env.CUSTOM_DOMAIN ? `https://${process.env.CUSTOM_DOMAIN}` : `https://${req.headers.host}`;
+      
+      if (!sharedStats) {
+        // Return basic OG tags for not found
+        res.send(`<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Stats non trouvées | Corrige Tes Cours</title>
+  <meta property="og:title" content="Stats non trouvées | Corrige Tes Cours" />
+  <meta property="og:description" content="Ce lien de partage n'existe plus. Découvre Corrige Tes Cours !" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="${baseUrl}/share/${token}" />
+  <meta name="twitter:card" content="summary" />
+</head>
+<body></body>
+</html>`);
+        return;
+      }
+
+      const userName = sharedStats.userName || 'Un étudiant';
+      const title = `${userName} - Performances | Corrige Tes Cours`;
+      const description = `${userName} a passé ${sharedStats.totalQuizzes} quiz avec une moyenne de ${sharedStats.averageScore}% et un meilleur score de ${sharedStats.bestScore}%. Découvre Corrige Tes Cours !`;
+
+      res.send(`<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>${title}</title>
+  <meta name="description" content="${description}" />
+  <meta property="og:title" content="${title}" />
+  <meta property="og:description" content="${description}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="${baseUrl}/share/${token}" />
+  <meta property="og:site_name" content="Corrige Tes Cours" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${title}" />
+  <meta name="twitter:description" content="${description}" />
+</head>
+<body>
+  <h1>${title}</h1>
+  <p>${description}</p>
+  <p>Quiz passés: ${sharedStats.totalQuizzes}</p>
+  <p>Cours actifs: ${sharedStats.totalCourses}</p>
+  <p>Moyenne: ${sharedStats.averageScore}%</p>
+  <p>Meilleur score: ${sharedStats.bestScore}%</p>
+</body>
+</html>`);
+    } catch (error) {
+      console.error("Error serving OG tags:", error);
+      next();
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -23,6 +23,8 @@ import {
   type InsertPayment,
   type AnonymousUpload,
   type InsertAnonymousUpload,
+  type SharedStats,
+  type InsertSharedStats,
   users,
   courses,
   summaries,
@@ -32,6 +34,7 @@ import {
   chatSessions,
   payments,
   anonymousUploads,
+  sharedStats,
 } from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
@@ -106,6 +109,13 @@ export interface IStorage {
   deleteAnonymousUpload(id: string): Promise<void>;
   deleteExpiredAnonymousUploads(): Promise<number>;
   migrateAnonymousUploadToUser(uploadId: string, userId: string): Promise<Course>;
+
+  // Shared Stats (for social sharing)
+  getSharedStatsByToken(shareToken: string): Promise<SharedStats | undefined>;
+  getSharedStatsByUserId(userId: string): Promise<SharedStats | undefined>;
+  createSharedStats(stats: InsertSharedStats): Promise<SharedStats>;
+  updateSharedStats(id: string, stats: Partial<InsertSharedStats>): Promise<SharedStats | undefined>;
+  deleteSharedStats(id: string): Promise<void>;
 }
 
 export class DbStorage implements IStorage {
@@ -400,6 +410,31 @@ export class DbStorage implements IStorage {
     await this.deleteAnonymousUpload(uploadId);
 
     return course;
+  }
+
+  // Shared Stats
+  async getSharedStatsByToken(shareToken: string): Promise<SharedStats | undefined> {
+    const result = await db.select().from(sharedStats).where(eq(sharedStats.shareToken, shareToken)).limit(1);
+    return result[0];
+  }
+
+  async getSharedStatsByUserId(userId: string): Promise<SharedStats | undefined> {
+    const result = await db.select().from(sharedStats).where(eq(sharedStats.userId, userId)).limit(1);
+    return result[0];
+  }
+
+  async createSharedStats(stats: InsertSharedStats): Promise<SharedStats> {
+    const result = await db.insert(sharedStats).values(stats).returning();
+    return result[0];
+  }
+
+  async updateSharedStats(id: string, stats: Partial<InsertSharedStats>): Promise<SharedStats | undefined> {
+    const result = await db.update(sharedStats).set(stats).where(eq(sharedStats.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteSharedStats(id: string): Promise<void> {
+    await db.delete(sharedStats).where(eq(sharedStats.id, id));
   }
 }
 

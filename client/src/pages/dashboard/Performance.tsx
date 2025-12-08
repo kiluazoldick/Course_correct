@@ -1,12 +1,16 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { type QuizResult, type Quiz, type Course } from '@shared/schema';
-import { TrendingUp, Award, Target, BookOpen } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { type QuizResult, type Quiz, type Course, type User } from '@shared/schema';
+import { TrendingUp, Award, Target, BookOpen, Share2 } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { ShareStatsDialog } from '@/components/ShareStatsDialog';
 
 export default function Performance() {
   const { t, language } = useLanguage();
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   
   const { data: quizResults = [] } = useQuery<QuizResult[]>({
     queryKey: ['/api/quiz-results'],
@@ -18,6 +22,10 @@ export default function Performance() {
 
   const { data: courses = [] } = useQuery<Course[]>({
     queryKey: ['/api/courses'],
+  });
+
+  const { data: user } = useQuery<User>({
+    queryKey: ['/api/auth/user'],
   });
 
   // Calculate statistics
@@ -66,11 +74,24 @@ export default function Performance() {
     return 'text-red-600 dark:text-red-400';
   };
 
+  const userName = user ? `${user.firstName} ${user.lastName}` : undefined;
+
   return (
     <div className="space-y-4 md:space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold" data-testid="text-performance-title">{t.performancePage.title}</h1>
-        <p className="text-muted-foreground mt-1 text-sm md:text-base">{t.performancePage.subtitle}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold" data-testid="text-performance-title">{t.performancePage.title}</h1>
+          <p className="text-muted-foreground mt-1 text-sm md:text-base">{t.performancePage.subtitle}</p>
+        </div>
+        <Button
+          onClick={() => setShareDialogOpen(true)}
+          variant="outline"
+          className="gap-2 w-full sm:w-auto"
+          data-testid="button-share-stats"
+        >
+          <Share2 className="w-4 h-4" />
+          {language === 'fr' ? 'Partager' : 'Share'}
+        </Button>
       </div>
 
       {/* Statistics Cards */}
@@ -294,6 +315,18 @@ export default function Performance() {
           </Card>
         </>
       )}
+
+      <ShareStatsDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        stats={{
+          totalQuizzes,
+          totalCourses,
+          averageScore,
+          bestScore: highestScore,
+        }}
+        userName={userName}
+      />
     </div>
   );
 }

@@ -415,18 +415,9 @@ export async function sendBulkWeeklyEmails(
 }
 
 // ==================== RESEND CONTACTS MANAGEMENT ====================
-// These functions sync users to Resend's contact list for marketing emails
+// These functions sync users to Resend's global contact list for marketing emails
 // You can then send marketing emails directly from Resend's dashboard
-
-// Get the Resend Audience ID from environment (returns null if not configured)
-function getAudienceId(): string | null {
-  const audienceId = process.env.RESEND_AUDIENCE_ID;
-  if (!audienceId) {
-    console.warn('RESEND_AUDIENCE_ID not configured - contact sync disabled');
-    return null;
-  }
-  return audienceId;
-}
+// Note: As of Nov 2024, Resend uses global contacts (no audience_id required)
 
 // Add a contact to Resend (for marketing emails from Resend dashboard)
 export async function addContactToResend(
@@ -436,15 +427,10 @@ export async function addContactToResend(
   unsubscribed: boolean = false
 ): Promise<{ success: boolean; contactId?: string; error?: string; skipped?: boolean }> {
   try {
-    const audienceId = getAudienceId();
-    if (!audienceId) {
-      return { success: true, skipped: true }; // Gracefully skip if not configured
-    }
-    
     const { client } = await getResendClient();
     
+    // New Resend API (Nov 2024): Contacts are global, no audienceId needed
     const { data, error } = await client.contacts.create({
-      audienceId,
       email,
       firstName,
       lastName: lastName || '',
@@ -470,16 +456,10 @@ export async function updateResendContact(
   unsubscribed: boolean
 ): Promise<{ success: boolean; error?: string; skipped?: boolean }> {
   try {
-    const audienceId = getAudienceId();
-    if (!audienceId) {
-      return { success: true, skipped: true }; // Gracefully skip if not configured
-    }
-    
     const { client } = await getResendClient();
     
-    // Use email-based update (SDK 6.5+ supports this)
+    // New Resend API: Update by email (global contacts)
     const { error } = await client.contacts.update({
-      audienceId,
       email,
       unsubscribed,
     });
@@ -507,16 +487,10 @@ export async function removeContactFromResend(
   email: string
 ): Promise<{ success: boolean; error?: string; skipped?: boolean }> {
   try {
-    const audienceId = getAudienceId();
-    if (!audienceId) {
-      return { success: true, skipped: true }; // Gracefully skip if not configured
-    }
-    
     const { client } = await getResendClient();
     
-    // Use email-based remove (SDK 6.5+ supports this)
+    // New Resend API: Remove by email (global contacts)
     const { error } = await client.contacts.remove({ 
-      audienceId, 
       email 
     });
 
@@ -543,12 +517,6 @@ export async function syncAllUsersToResend(
   users: Array<{ email: string; firstName: string; lastName?: string; emailMarketing: string }>
 ): Promise<{ added: number; updated: number; skipped: number; errors: string[] }> {
   const results = { added: 0, updated: 0, skipped: 0, errors: [] as string[] };
-  
-  // Check if audienceId is configured
-  const audienceId = getAudienceId();
-  if (!audienceId) {
-    return { added: 0, updated: 0, skipped: users.length, errors: ['RESEND_AUDIENCE_ID not configured'] };
-  }
   
   for (const user of users) {
     try {

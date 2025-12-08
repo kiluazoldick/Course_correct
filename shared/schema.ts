@@ -33,6 +33,7 @@ export const users = pgTable("users", {
   phone: varchar("phone"), // Phone number for payments
   language: varchar("language").notNull().default("fr"), // User's preferred language (fr or en)
   profileImageUrl: varchar("profile_image_url"),
+  emailMarketing: varchar("email_marketing").notNull().default("yes"), // yes/no for marketing emails
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -70,6 +71,7 @@ export const updateUserProfileSchema = z.object({
   lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères").optional(),
   phone: z.string().regex(/^\+?[0-9]{9,15}$/, "Numéro de téléphone invalide (ex: +237670000000)").optional().or(z.literal("")),
   profileImageUrl: z.string().url().optional().or(z.literal("")),
+  emailMarketing: z.enum(["yes", "no"]).optional(),
 });
 
 export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;

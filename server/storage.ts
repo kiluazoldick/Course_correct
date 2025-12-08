@@ -48,6 +48,7 @@ export interface IStorage {
   getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByGoogleId(googleId: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   upsertUser(user: UpsertUser): Promise<User>;
   createLocalUser(user: InsertLocalUser): Promise<User>;
   createGoogleUser(user: InsertGoogleUser): Promise<User>;
@@ -181,6 +182,10 @@ export class DbStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
   }
 
   // Courses

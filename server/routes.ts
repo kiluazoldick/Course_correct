@@ -10,6 +10,7 @@ import { drizzle } from "drizzle-orm/neon-serverless";
 import { eq } from "drizzle-orm";
 import { Pool } from "@neondatabase/serverless";
 import { lygosService } from "./lygos";
+import { sendWelcomeEmail, sendWeeklyMotivationEmail, sendBulkWeeklyEmails } from "./email";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
@@ -1308,6 +1309,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error serving OG tags:", error);
       next();
+    }
+  });
+
+  // ==================== EMAIL MARKETING ROUTES ====================
+  
+  // Rate limiting for admin email endpoint
+  let lastBulkEmailTime = 0;
+  const BULK_EMAIL_COOLDOWN = 60 * 60 * 1000; // 1 hour minimum between bulk sends
+  
+  // Send weekly motivation emails to all opted-in users (admin only - for cron job or manual trigger)
+  app.post('/api/admin/send-weekly-emails', async (req, res) => {
+    try {
+      // Admin authentication - require both correct key AND valid session secret
+      const adminKey = req.headers['x-admin-key'];
+      const expectedKey = `admin-${process.env.SESSION_SECRET}`;
+      
+      if (!adminKey || adminKey !== expectedKey) {
+        console.warn('Unauthorized admin email attempt');
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Rate limiting - prevent abuse
+      const now = Date.now();
+      if (now - lastBulkEmailTime < BULK_EMAIL_COOLDOWN) {
+        const remainingMins = Math.ceil((BULK_EMAIL_COOLDOWN - (now - lastBulkEmailTime)) / 60000);
+        return res.status(429).json({ 
+          message: `Too many requests. Please wait ${remainingMins} minutes before sending again.` 
+        });
+      }
+      lastBulkEmailTime = now;
+
+      // Get ONLY opted-in users (filter at storage level for efficiency)
+      const allUsers = await storage.getAllUsers();
+      const optedInUsers = allUsers.filter(u => u.emailMarketing === 'yes');
+
+      console.log(`Sending weekly emails to ${optedInUsers.length} opted-in users`);
+
+      // Prepare users with their stats in batches to avoid overwhelming the DB
+      const BATCH_SIZE = 10;
+      const usersWithStats: Array<{
+        email: string;
+        firstName: string;
+        language: 'fr' | 'en';
+        stats: { coursesCount: number; quizzesCount: number; avgScore: number };
+      }> = [];
+
+      for (let i = 0; i < optedInUsers.length; i += BATCH_SIZE) {
+        const batch = optedInUsers.slice(i, i + BATCH_SIZE);
+        const batchStats = await Promise.all(
+          batch.map(async (user) => {
+            const courses = await storage.getCoursesByUserId(user.id);
+            const quizResults = await storage.getQuizResultsByUserId(user.id);
+            
+            const avgScore = quizResults.length > 0 
+              ? Math.round(quizResults.reduce((sum, r) => sum + r.score, 0) / quizResults.length)
+              : 0;
+
+            return {
+              email: user.email,
+              firstName: user.firstName,
+              language: (user.language || 'fr') as 'fr' | 'en',
+              stats: {
+                coursesCount: courses.length,
+                quizzesCount: quizResults.length,
+                avgScore
+              }
+            };
+          })
+        );
+        usersWithStats.push(...batchStats);
+      }
+
+      // Send emails in bulk
+      const results = await sendBulkWeeklyEmails(usersWithStats);
+
+      // Log results for audit
+      console.log(`Weekly email results: sent=${results.sent}, failed=${results.failed}`);
+
+      res.json({
+        message: `Weekly emails sent`,
+        sent: results.sent,
+        failed: results.failed,
+        totalOptedIn: optedInUsers.length,
+        errors: results.errors.slice(0, 10) // Only show first 10 errors
+      });
+    } catch (error) {
+      console.error("Error sending weekly emails:", error);
+      res.status(500).json({ message: "Failed to send weekly emails" });
+    }
+  });
+
+  // Send test email to the current user
+  app.post('/api/email/test-weekly', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const user = await storage.getUserById(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user stats
+      const courses = await storage.getCoursesByUserId(userId);
+      const quizResults = await storage.getQuizResultsByUserId(userId);
+      
+      const avgScore = quizResults.length > 0 
+        ? Math.round(quizResults.reduce((sum, r) => sum + r.score, 0) / quizResults.length)
+        : 0;
+
+      const stats = {
+        coursesCount: courses.length,
+        quizzesCount: quizResults.length,
+        avgScore
+      };
+
+      const result = await sendWeeklyMotivationEmail(
+        user.email,
+        user.firstName,
+        stats,
+        (user.language || 'fr') as 'fr' | 'en'
+      );
+
+      if (result.success) {
+        res.json({ message: "Email de test envoyé!", messageId: result.messageId });
+      } else {
+        res.status(500).json({ message: result.error || "Échec de l'envoi" });
+      }
+    } catch (error) {
+      console.error("Error sending test email:", error);
+      res.status(500).json({ message: "Failed to send test email" });
+    }
+  });
+
+  // Update email preferences
+  app.patch('/api/user/email-preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { emailMarketing } = req.body;
+
+      if (!['yes', 'no'].includes(emailMarketing)) {
+        return res.status(400).json({ message: "Invalid value. Use 'yes' or 'no'" });
+      }
+
+      const updatedUser = await storage.updateUser(userId, { emailMarketing });
+      res.json({ 
+        message: emailMarketing === 'yes' ? "Emails marketing activés" : "Emails marketing désactivés",
+        emailMarketing: updatedUser?.emailMarketing 
+      });
+    } catch (error) {
+      console.error("Error updating email preferences:", error);
+      res.status(500).json({ message: "Failed to update preferences" });
     }
   });
 

@@ -68,10 +68,14 @@ The backend uses Express.js with Node.js and TypeScript. It features a dual auth
 
 ### Email Service
 - **Resend**: Transactional and marketing email service via Replit integration
+- **Resend Contacts Sync**: Users automatically added to Resend Audience on registration for dashboard-based marketing
 - **Email Templates**: HTML templates for welcome emails and weekly motivation (bilingual FR/EN)
-- **Email Preferences**: Users can opt-in/opt-out of marketing emails via profile settings
-- **Admin Routes**: POST `/api/admin/send-weekly-emails` for bulk sends (requires `x-admin-key: admin-{SESSION_SECRET}`)
+- **Email Preferences**: Users can opt-in/opt-out of marketing emails via profile settings (synced to Resend)
+- **Admin Routes**: 
+  - POST `/api/admin/send-weekly-emails` for bulk sends (requires `x-admin-key: admin-{SESSION_SECRET}`)
+  - POST `/api/admin/sync-users-to-resend` for initial bulk sync of all users to Resend Audience
 - **Test Route**: POST `/api/email/test-weekly` for sending test emails to logged-in users
+- **Environment**: Requires `RESEND_AUDIENCE_ID` secret for Contacts API integration
 
 ### Utilities
 - **date-fns**: For date manipulation.

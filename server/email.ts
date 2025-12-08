@@ -409,17 +409,33 @@ export async function sendBulkWeeklyEmails(
 // These functions sync users to Resend's contact list for marketing emails
 // You can then send marketing emails directly from Resend's dashboard
 
+// Get the Resend Audience ID from environment (returns null if not configured)
+function getAudienceId(): string | null {
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+  if (!audienceId) {
+    console.warn('RESEND_AUDIENCE_ID not configured - contact sync disabled');
+    return null;
+  }
+  return audienceId;
+}
+
 // Add a contact to Resend (for marketing emails from Resend dashboard)
 export async function addContactToResend(
   email: string,
   firstName: string,
   lastName?: string,
   unsubscribed: boolean = false
-): Promise<{ success: boolean; contactId?: string; error?: string }> {
+): Promise<{ success: boolean; contactId?: string; error?: string; skipped?: boolean }> {
   try {
+    const audienceId = getAudienceId();
+    if (!audienceId) {
+      return { success: true, skipped: true }; // Gracefully skip if not configured
+    }
+    
     const { client } = await getResendClient();
     
     const { data, error } = await client.contacts.create({
+      audienceId,
       email,
       firstName,
       lastName: lastName || '',
@@ -443,16 +459,28 @@ export async function addContactToResend(
 export async function updateResendContact(
   email: string,
   unsubscribed: boolean
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; skipped?: boolean }> {
   try {
+    const audienceId = getAudienceId();
+    if (!audienceId) {
+      return { success: true, skipped: true }; // Gracefully skip if not configured
+    }
+    
     const { client } = await getResendClient();
     
+    // Use email-based update (SDK 6.5+ supports this)
     const { error } = await client.contacts.update({
+      audienceId,
       email,
       unsubscribed,
     });
 
     if (error) {
+      // If contact not found, that's ok - skip gracefully
+      if (error.message?.includes('not found')) {
+        console.log('Contact not found in Resend for update:', email);
+        return { success: true };
+      }
       console.error('Resend contact update error:', error);
       return { success: false, error: error.message };
     }
@@ -468,22 +496,27 @@ export async function updateResendContact(
 // Remove a contact from Resend
 export async function removeContactFromResend(
   email: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; skipped?: boolean }> {
   try {
+    const audienceId = getAudienceId();
+    if (!audienceId) {
+      return { success: true, skipped: true }; // Gracefully skip if not configured
+    }
+    
     const { client } = await getResendClient();
     
-    // First get the contact by email to get their ID
-    const { data: contacts } = await client.contacts.list();
-    const contact = contacts?.data?.find((c: any) => c.email === email);
-    
-    if (!contact) {
-      console.log('Contact not found in Resend:', email);
-      return { success: true }; // Already removed or never existed
-    }
-
-    const { error } = await client.contacts.remove({ id: contact.id });
+    // Use email-based remove (SDK 6.5+ supports this)
+    const { error } = await client.contacts.remove({ 
+      audienceId, 
+      email 
+    });
 
     if (error) {
+      // If contact not found, that's ok - already removed
+      if (error.message?.includes('not found')) {
+        console.log('Contact not found in Resend:', email);
+        return { success: true };
+      }
       console.error('Resend contact remove error:', error);
       return { success: false, error: error.message };
     }
@@ -501,6 +534,12 @@ export async function syncAllUsersToResend(
   users: Array<{ email: string; firstName: string; lastName?: string; emailMarketing: string }>
 ): Promise<{ added: number; updated: number; skipped: number; errors: string[] }> {
   const results = { added: 0, updated: 0, skipped: 0, errors: [] as string[] };
+  
+  // Check if audienceId is configured
+  const audienceId = getAudienceId();
+  if (!audienceId) {
+    return { added: 0, updated: 0, skipped: users.length, errors: ['RESEND_AUDIENCE_ID not configured'] };
+  }
   
   for (const user of users) {
     try {
@@ -520,23 +559,32 @@ export async function syncAllUsersToResend(
         false // subscribed
       );
       
-      if (result.success) {
+      if (result.success && !result.skipped) {
         results.added++;
-      } else if (result.error?.includes('already exists')) {
+      } else if (result.error?.includes('already exists') || result.error?.includes('Contact already')) {
         // Contact exists, update subscription status
         await updateResendContact(user.email, false);
         results.updated++;
+      } else if (result.skipped) {
+        results.skipped++;
       } else {
         results.errors.push(`${user.email}: ${result.error}`);
       }
       
-      // Small delay to respect rate limits (2 req/sec)
+      // Rate limit handling: delay between requests
       await new Promise(resolve => setTimeout(resolve, 600));
     } catch (error) {
-      results.errors.push(`${user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      results.errors.push(`${user.email}: ${errorMsg}`);
+      
+      // If rate limited, wait longer before continuing
+      if (errorMsg.includes('429') || errorMsg.includes('rate limit')) {
+        console.log('Rate limited - waiting 5 seconds before continuing...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
     }
   }
   
-  console.log(`Resend sync complete: added=${results.added}, updated=${results.updated}, skipped=${results.skipped}`);
+  console.log(`Resend sync complete: added=${results.added}, updated=${results.updated}, skipped=${results.skipped}, errors=${results.errors.length}`);
   return results;
 }

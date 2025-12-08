@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { Home, BookOpen, MessageSquare, BarChart3, User } from 'lucide-react';
+import { BookOpen, Brain, MessageSquare, BarChart3, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function BottomNav() {
@@ -7,16 +7,16 @@ export function BottomNav() {
 
   const navItems = [
     {
-      path: '/',
-      icon: Home,
-      label: 'Accueil',
-      testId: 'nav-home'
-    },
-    {
       path: '/courses',
       icon: BookOpen,
       label: 'Cours',
       testId: 'nav-courses'
+    },
+    {
+      path: '/quizzes',
+      icon: Brain,
+      label: 'Quiz',
+      testId: 'nav-quizzes'
     },
     {
       path: '/chat',
@@ -39,9 +39,6 @@ export function BottomNav() {
   ];
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      return location === '/';
-    }
     return location.startsWith(path);
   };
 

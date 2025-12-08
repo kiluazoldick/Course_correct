@@ -66,6 +66,13 @@ The backend uses Express.js with Node.js and TypeScript. It features a dual auth
 - **Zod**: For schema validation.
 - **@hookform/resolvers**: For integrating Zod with React Hook Form.
 
+### Email Service
+- **Resend**: Transactional and marketing email service via Replit integration
+- **Email Templates**: HTML templates for welcome emails and weekly motivation (bilingual FR/EN)
+- **Email Preferences**: Users can opt-in/opt-out of marketing emails via profile settings
+- **Admin Routes**: POST `/api/admin/send-weekly-emails` for bulk sends (requires `x-admin-key: admin-{SESSION_SECRET}`)
+- **Test Route**: POST `/api/email/test-weekly` for sending test emails to logged-in users
+
 ### Utilities
 - **date-fns**: For date manipulation.
 - **memoizee**: For function memoization.

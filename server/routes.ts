@@ -181,16 +181,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Upload introuvable" });
       }
 
-      // Generate AI summary in selected language
-      const summary = await generateCourseSummary(upload.content, upload.title, language);
+      // Generate AI summary in selected language (anonymous users get free tier limits)
+      const result = await generateCourseSummary(upload.content, upload.title, language, false);
 
       // Update the upload with the summary
-      await storage.updateAnonymousUpload(uploadId, { summary });
+      await storage.updateAnonymousUpload(uploadId, { summary: result.summary });
 
-      res.json({ summary });
+      res.json({ 
+        summary: result.summary,
+        wasTruncated: result.wasTruncated,
+        message: result.wasTruncated 
+          ? (language === 'fr' 
+              ? `Le document était très long. Le résumé couvre les premières parties. Créez un compte Premium pour traiter des documents plus longs.`
+              : `The document was very long. The summary covers the first portions. Create a Premium account to process longer documents.`)
+          : undefined
+      });
     } catch (error) {
       console.error("Error generating anonymous summary:", error);
-      res.status(500).json({ message: "Échec de la génération du résumé" });
+      const errorMessage = error instanceof Error ? error.message : 'Échec de la génération du résumé';
+      res.status(500).json({ message: errorMessage });
     }
   });
 
@@ -541,27 +550,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUserById(userId);
       
       if (!course) {
-        return res.status(404).json({ message: "Course not found" });
+        const msg = user?.language === 'en' ? "Course not found" : "Cours introuvable";
+        return res.status(404).json({ message: msg });
       }
       
       if (course.userId !== userId) {
-        return res.status(403).json({ message: "Forbidden" });
+        const msg = user?.language === 'en' ? "Access denied" : "Accès refusé";
+        return res.status(403).json({ message: msg });
       }
 
       // Use user's language preference for AI generation
       const language = (user?.language || 'fr') as 'fr' | 'en';
-      const summaryContent = await generateCourseSummary(course.content, course.title, language);
+      
+      // Check if user is premium to apply appropriate limits
+      const subscription = await storage.getSubscriptionByUserId(userId);
+      const isPremium = subscription?.status === 'premium' && 
+                        (!subscription.endDate || new Date(subscription.endDate) > new Date());
+      
+      const result = await generateCourseSummary(course.content, course.title, language, isPremium);
       
       const summary = await storage.createSummary({
         courseId: course.id,
         userId,
-        content: summaryContent,
+        content: result.summary,
       });
 
-      res.json(summary);
+      // Include truncation info in response for user feedback
+      res.json({
+        ...summary,
+        wasTruncated: result.wasTruncated,
+        originalLength: result.originalLength,
+        message: result.wasTruncated 
+          ? (language === 'fr' 
+              ? `Le document était très long (${Math.round(result.originalLength / 1000)}k caractères). Le résumé couvre les premières parties.${!isPremium ? ' Passez en Premium pour traiter des documents plus longs.' : ''}`
+              : `The document was very long (${Math.round(result.originalLength / 1000)}k characters). The summary covers the first portions.${!isPremium ? ' Upgrade to Premium to process longer documents.' : ''}`)
+          : undefined
+      });
     } catch (error) {
       console.error("Error generating summary:", error);
-      res.status(500).json({ message: "Failed to generate summary", error: error instanceof Error ? error.message : 'Unknown error' });
+      // Return the user-friendly error message directly
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur inattendue s\'est produite';
+      res.status(500).json({ message: errorMessage });
     }
   });
 

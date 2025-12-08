@@ -289,46 +289,158 @@ Guidelines:
   }
 };
 
-export async function generateCourseSummary(courseContent: string, courseTitle: string, language: Language = 'fr'): Promise<string> {
-  const instructions = languageInstructions[language].summary;
-  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://corrigetescours.com',
-      'X-Title': 'Corrige Tes Cours',
+// Content length limits (in characters) - Premium users get more generous limits
+const CONTENT_LIMITS = {
+  free: {
+    maxChars: 50000,      // ~12,500 tokens for free users
+    maxTokensOutput: 2000
+  },
+  premium: {
+    maxChars: 150000,     // ~37,500 tokens for premium users  
+    maxTokensOutput: 4000
+  }
+};
+
+// Truncate content intelligently - try to keep complete sentences
+function truncateContent(content: string, maxChars: number, language: Language): { content: string; wasTruncated: boolean; originalLength: number } {
+  const originalLength = content.length;
+  
+  if (content.length <= maxChars) {
+    return { content, wasTruncated: false, originalLength };
+  }
+  
+  // Find the last complete sentence within the limit
+  let truncated = content.substring(0, maxChars);
+  const lastPeriod = Math.max(
+    truncated.lastIndexOf('. '),
+    truncated.lastIndexOf('.\n'),
+    truncated.lastIndexOf('? '),
+    truncated.lastIndexOf('! ')
+  );
+  
+  if (lastPeriod > maxChars * 0.8) {
+    truncated = truncated.substring(0, lastPeriod + 1);
+  }
+  
+  // Add truncation notice
+  const notice = language === 'fr' 
+    ? '\n\n[... Contenu tronqué pour respecter les limites. Le résumé couvre les parties analysées.]'
+    : '\n\n[... Content truncated to respect limits. Summary covers analyzed portions.]';
+  
+  return { 
+    content: truncated + notice, 
+    wasTruncated: true, 
+    originalLength 
+  };
+}
+
+// Parse OpenRouter errors and return user-friendly messages
+function parseOpenRouterError(status: number, errorText: string, language: Language): string {
+  const errors = {
+    fr: {
+      rateLimit: 'Trop de requêtes. Veuillez patienter quelques minutes avant de réessayer.',
+      contextTooLong: 'Le document est trop long pour être traité. Essayez avec un document plus court ou divisez-le en plusieurs parties.',
+      serverError: 'Le service IA est temporairement indisponible. Veuillez réessayer dans quelques instants.',
+      authError: 'Erreur d\'authentification avec le service IA. Contactez le support.',
+      timeout: 'Le traitement a pris trop de temps. Essayez avec un document plus court.',
+      unknown: 'Une erreur inattendue s\'est produite. Veuillez réessayer.'
     },
-    body: JSON.stringify({
-      model: 'deepseek/deepseek-r1',
-      messages: [
-        {
-          role: 'system',
-          content: instructions.system
-        },
-        {
-          role: 'user',
-          content: instructions.user(courseTitle, courseContent)
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`OpenRouter API error: ${response.status} - ${error}`);
+    en: {
+      rateLimit: 'Too many requests. Please wait a few minutes before trying again.',
+      contextTooLong: 'The document is too long to process. Try with a shorter document or split it into multiple parts.',
+      serverError: 'The AI service is temporarily unavailable. Please try again shortly.',
+      authError: 'Authentication error with AI service. Contact support.',
+      timeout: 'Processing took too long. Try with a shorter document.',
+      unknown: 'An unexpected error occurred. Please try again.'
+    }
+  };
+  
+  const msgs = errors[language];
+  
+  // Check for specific error patterns
+  if (status === 429 || errorText.toLowerCase().includes('rate limit')) {
+    return msgs.rateLimit;
   }
-
-  const data = await response.json();
-  const summary = data.choices?.[0]?.message?.content;
-
-  if (!summary) {
-    throw new Error('No summary generated from OpenRouter API');
+  if (status === 413 || errorText.toLowerCase().includes('context') || errorText.toLowerCase().includes('too long') || errorText.toLowerCase().includes('token')) {
+    return msgs.contextTooLong;
   }
+  if (status === 401 || status === 403) {
+    return msgs.authError;
+  }
+  if (status >= 500 || errorText.toLowerCase().includes('timeout')) {
+    return msgs.serverError;
+  }
+  
+  return msgs.unknown;
+}
 
-  return summary.trim();
+export async function generateCourseSummary(
+  courseContent: string, 
+  courseTitle: string, 
+  language: Language = 'fr',
+  isPremium: boolean = false
+): Promise<{ summary: string; wasTruncated: boolean; originalLength: number }> {
+  const limits = isPremium ? CONTENT_LIMITS.premium : CONTENT_LIMITS.free;
+  const { content: truncatedContent, wasTruncated, originalLength } = truncateContent(courseContent, limits.maxChars, language);
+  
+  const instructions = languageInstructions[language].summary;
+  
+  try {
+    const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://corrigetescours.com',
+        'X-Title': 'Corrige Tes Cours',
+      },
+      body: JSON.stringify({
+        model: 'deepseek/deepseek-r1',
+        messages: [
+          {
+            role: 'system',
+            content: instructions.system
+          },
+          {
+            role: 'user',
+            content: instructions.user(courseTitle, truncatedContent)
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: limits.maxTokensOutput,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenRouter API error:', response.status, errorText);
+      const userMessage = parseOpenRouterError(response.status, errorText, language);
+      throw new Error(userMessage);
+    }
+
+    const data = await response.json();
+    const summary = data.choices?.[0]?.message?.content;
+
+    if (!summary) {
+      const errorMsg = language === 'fr' 
+        ? 'Aucun résumé n\'a pu être généré. Veuillez réessayer.'
+        : 'No summary could be generated. Please try again.';
+      throw new Error(errorMsg);
+    }
+
+    return { summary: summary.trim(), wasTruncated, originalLength };
+  } catch (error) {
+    // Re-throw if it's already a user-friendly error
+    if (error instanceof Error && !error.message.includes('fetch')) {
+      throw error;
+    }
+    
+    // Network or other errors
+    const errorMsg = language === 'fr'
+      ? 'Impossible de contacter le service IA. Vérifiez votre connexion et réessayez.'
+      : 'Unable to reach AI service. Check your connection and try again.';
+    throw new Error(errorMsg);
+  }
 }
 
 export async function generateQuiz(courseContent: string, courseTitle: string, quizType: 'mcq' | 'open' | 'mixed' = 'mixed', language: Language = 'fr'): Promise<any> {

@@ -1285,7 +1285,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   <meta property="og:description" content="Ce lien de partage n'existe plus. Découvre Corrige Tes Cours !" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="${baseUrl}/share/${token}" />
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:image" content="${baseUrl}/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="${baseUrl}/og-image.png" />
 </head>
 <body></body>
 </html>`);
@@ -1296,6 +1300,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const title = `${userName} - Performances | Corrige Tes Cours`;
       const description = `${userName} a passé ${sharedStats.totalQuizzes} quiz avec une moyenne de ${sharedStats.averageScore}% et un meilleur score de ${sharedStats.bestScore}%. Découvre Corrige Tes Cours !`;
 
+      const ogImage = `${baseUrl}/og-image.png`;
+      
       res.send(`<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -1306,10 +1312,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   <meta property="og:description" content="${description}" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="${baseUrl}/share/${token}" />
+  <meta property="og:image" content="${ogImage}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:site_name" content="Corrige Tes Cours" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${title}" />
   <meta name="twitter:description" content="${description}" />
+  <meta name="twitter:image" content="${ogImage}" />
 </head>
 <body>
   <h1>${title}</h1>

@@ -73,10 +73,15 @@ export default function SharedStatsPage() {
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={`${window.location.origin}/share/${token}`} />
+        <meta property="og:url" content={`https://corrigetescours.com/share/${token}`} />
+        <meta property="og:image" content="https://corrigetescours.com/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:site_name" content="Corrige Tes Cours" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content="https://corrigetescours.com/og-image.png" />
       </Helmet>
       
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex flex-col items-center justify-center p-4">

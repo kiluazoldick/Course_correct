@@ -91,7 +91,7 @@ const emailTemplates = {
     </ul>
     
     <div style="text-align: center; margin: 30px 0;">
-      <a href="https://corrigetescours.com/dashboard" style="display: inline-block; background-color: #1a1a1a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+      <a href="https://corrigetescours.com/" style="display: inline-block; background-color: #1a1a1a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
         Commencer maintenant
       </a>
     </div>

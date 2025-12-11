@@ -7,6 +7,12 @@ import session from 'express-session';
 import connectPg from 'connect-pg-simple';
 import { storage } from './storage';
 import { User } from '@shared/schema';
+import { nanoid } from 'nanoid';
+
+// Generate a unique referral code (6 characters, uppercase alphanumeric)
+export function generateReferralCode(): string {
+  return nanoid(6).toUpperCase();
+}
 
 // Configure session middleware
 export function getSession() {
@@ -108,10 +114,11 @@ export function setupAuth(app: Express) {
                 // Link Google account to existing user
                 user = await storage.linkGoogleAccount(existingUser.id, profile.id);
               } else {
-                // Create new user
+                // Create new user with referral code
                 const email = profile.emails?.[0]?.value || '';
                 const firstName = profile.name?.givenName || 'Utilisateur';
                 const lastName = profile.name?.familyName || 'Google';
+                const newUserReferralCode = generateReferralCode();
                 
                 user = await storage.createGoogleUser({
                   email,
@@ -119,6 +126,7 @@ export function setupAuth(app: Express) {
                   firstName,
                   lastName,
                   profileImageUrl: profile.photos?.[0]?.value,
+                  referralCode: newUserReferralCode,
                 });
 
                 // Add user to Resend contacts and send welcome email (non-blocking)
@@ -186,7 +194,7 @@ export function setupAuth(app: Express) {
   // Local registration
   app.post('/api/auth/register', async (req, res) => {
     try {
-      const { email, firstName, lastName, password } = req.body;
+      const { email, firstName, lastName, password, referralCode } = req.body;
 
       // Check if user exists
       const existingUser = await storage.getUserByEmail(email);
@@ -197,13 +205,62 @@ export function setupAuth(app: Express) {
       // Hash password
       const hashedPassword = await hashPassword(password);
 
-      // Create user
+      // Generate unique referral code for the new user
+      const newUserReferralCode = generateReferralCode();
+
+      // Create user with referral info
       const user = await storage.createLocalUser({
         email,
         firstName,
         lastName,
         password: hashedPassword,
+        referralCode: newUserReferralCode,
+        referredBy: referralCode || null,
       });
+
+      // If user was referred, process the referral reward
+      if (referralCode) {
+        const referrer = await storage.getUserByReferralCode(referralCode);
+        if (referrer) {
+          // Create referral record
+          const rewardExpiresAt = new Date();
+          rewardExpiresAt.setDate(rewardExpiresAt.getDate() + 14); // 14 days from now
+
+          await storage.createReferral({
+            referrerId: referrer.id,
+            referredId: user.id,
+            referralCode,
+            rewardGranted: 1,
+            rewardDays: 14,
+            rewardExpiresAt,
+          });
+
+          // Grant 14 days free premium to the referrer
+          const subscription = await storage.getSubscriptionByUserId(referrer.id);
+          if (subscription) {
+            // Extend existing subscription or set to premium
+            const currentEndDate = subscription.endDate && new Date(subscription.endDate) > new Date() 
+              ? new Date(subscription.endDate) 
+              : new Date();
+            currentEndDate.setDate(currentEndDate.getDate() + 14);
+            
+            await storage.updateSubscription(subscription.id, {
+              status: 'premium',
+              endDate: currentEndDate,
+            });
+          } else {
+            // Create new premium subscription
+            await storage.createSubscription({
+              userId: referrer.id,
+              status: 'premium',
+              startDate: new Date(),
+              endDate: rewardExpiresAt,
+              paymentMethod: 'referral',
+              amount: 0,
+            });
+          }
+        }
+      }
 
       // Add user to Resend contacts and send welcome email (non-blocking)
       try {

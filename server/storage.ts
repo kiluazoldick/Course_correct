@@ -25,6 +25,8 @@ import {
   type InsertAnonymousUpload,
   type SharedStats,
   type InsertSharedStats,
+  type Referral,
+  type InsertReferral,
   users,
   courses,
   summaries,
@@ -35,6 +37,7 @@ import {
   payments,
   anonymousUploads,
   sharedStats,
+  referrals,
 } from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
@@ -117,6 +120,12 @@ export interface IStorage {
   createSharedStats(stats: InsertSharedStats): Promise<SharedStats>;
   updateSharedStats(id: string, stats: Partial<InsertSharedStats>): Promise<SharedStats | undefined>;
   deleteSharedStats(id: string): Promise<void>;
+
+  // Referrals
+  getUserByReferralCode(referralCode: string): Promise<User | undefined>;
+  getReferralsByReferrerId(referrerId: string): Promise<Referral[]>;
+  createReferral(referral: InsertReferral): Promise<Referral>;
+  updateReferral(id: string, updates: Partial<InsertReferral>): Promise<Referral | undefined>;
 }
 
 export class DbStorage implements IStorage {
@@ -440,6 +449,26 @@ export class DbStorage implements IStorage {
 
   async deleteSharedStats(id: string): Promise<void> {
     await db.delete(sharedStats).where(eq(sharedStats.id, id));
+  }
+
+  // Referrals
+  async getUserByReferralCode(referralCode: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.referralCode, referralCode)).limit(1);
+    return result[0];
+  }
+
+  async getReferralsByReferrerId(referrerId: string): Promise<Referral[]> {
+    return await db.select().from(referrals).where(eq(referrals.referrerId, referrerId)).orderBy(desc(referrals.createdAt));
+  }
+
+  async createReferral(referral: InsertReferral): Promise<Referral> {
+    const result = await db.insert(referrals).values(referral).returning();
+    return result[0];
+  }
+
+  async updateReferral(id: string, updates: Partial<InsertReferral>): Promise<Referral | undefined> {
+    const result = await db.update(referrals).set(updates).where(eq(referrals.id, id)).returning();
+    return result[0];
   }
 }
 

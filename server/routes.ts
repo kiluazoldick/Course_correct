@@ -1336,6 +1336,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== REFERRAL ROUTES ====================
+
+  // Get user's referral info (code and stats)
+  app.get('/api/referral', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      let user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Generate referral code if user doesn't have one
+      if (!user.referralCode) {
+        const { generateReferralCode } = await import('./auth');
+        const referralCode = generateReferralCode();
+        user = await storage.updateUser(userId, { referralCode });
+      }
+
+      // Get user's referrals
+      const referrals = await storage.getReferralsByReferrerId(userId);
+      
+      // Get referred user names
+      const referralsWithNames = await Promise.all(
+        referrals.map(async (ref) => {
+          const referredUser = await storage.getUser(ref.referredId);
+          return {
+            ...ref,
+            referredName: referredUser ? `${referredUser.firstName} ${referredUser.lastName}` : 'Utilisateur',
+          };
+        })
+      );
+
+      const domain = process.env.CUSTOM_DOMAIN || 'corrigetescours.com';
+      const referralLink = `https://${domain}/signup?ref=${user?.referralCode}`;
+
+      res.json({
+        referralCode: user?.referralCode,
+        referralLink,
+        referralsCount: referrals.length,
+        referrals: referralsWithNames,
+      });
+    } catch (error) {
+      console.error("Error fetching referral info:", error);
+      res.status(500).json({ message: "Failed to fetch referral info" });
+    }
+  });
+
+  // Validate a referral code (for signup page)
+  app.get('/api/referral/validate/:code', async (req, res) => {
+    try {
+      const { code } = req.params;
+      const referrer = await storage.getUserByReferralCode(code.toUpperCase());
+      
+      if (referrer) {
+        res.json({ 
+          valid: true, 
+          referrerName: referrer.firstName 
+        });
+      } else {
+        res.json({ valid: false });
+      }
+    } catch (error) {
+      console.error("Error validating referral code:", error);
+      res.status(500).json({ message: "Failed to validate referral code" });
+    }
+  });
+
   // ==================== EMAIL MARKETING ROUTES ====================
   
   // Rate limiting for admin email endpoint

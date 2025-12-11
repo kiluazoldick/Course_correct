@@ -34,6 +34,8 @@ export const users = pgTable("users", {
   language: varchar("language").notNull().default("fr"), // User's preferred language (fr or en)
   profileImageUrl: varchar("profile_image_url"),
   emailMarketing: varchar("email_marketing").notNull().default("yes"), // yes/no for marketing emails
+  referralCode: varchar("referral_code").unique(), // User's unique referral code
+  referredBy: varchar("referred_by"), // Referral code of the person who referred this user
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -257,3 +259,23 @@ export const insertSharedStatsSchema = createInsertSchema(sharedStats).omit({
 
 export type InsertSharedStats = z.infer<typeof insertSharedStatsSchema>;
 export type SharedStats = typeof sharedStats.$inferSelect;
+
+// Referrals table for tracking referral rewards
+export const referrals = pgTable("referrals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referrerId: varchar("referrer_id").notNull().references(() => users.id, { onDelete: 'cascade' }), // The user who referred
+  referredId: varchar("referred_id").notNull().references(() => users.id, { onDelete: 'cascade' }), // The new user who signed up
+  referralCode: varchar("referral_code").notNull(), // The code used
+  rewardGranted: integer("reward_granted").notNull().default(0), // 1 if reward was granted, 0 otherwise
+  rewardDays: integer("reward_days").notNull().default(14), // Number of free trial days granted
+  rewardExpiresAt: timestamp("reward_expires_at"), // When the free trial expires
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertReferralSchema = createInsertSchema(referrals).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertReferral = z.infer<typeof insertReferralSchema>;
+export type Referral = typeof referrals.$inferSelect;

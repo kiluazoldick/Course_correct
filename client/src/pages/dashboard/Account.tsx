@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Camera, Check, X, Globe, Sun, Moon } from 'lucide-react';
+import { Camera, Check, X, Globe, Sun, Moon, Users, Copy, Gift, CheckCircle } from 'lucide-react';
 import { PremiumBadge } from '@/components/PremiumBadge';
 import { getErrorMessage } from '@/lib/errorHandler';
 import { updateUserProfileSchema, type UpdateUserProfile } from '@shared/schema';
@@ -30,6 +30,18 @@ interface ProfileResponse {
   subscription: any;
 }
 
+interface ReferralResponse {
+  referralCode: string;
+  referralLink: string;
+  referralsCount: number;
+  referrals: Array<{
+    id: string;
+    referredName: string;
+    status: string;
+    createdAt: string;
+  }>;
+}
+
 export default function Account() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -40,13 +52,33 @@ export default function Account() {
   const [isEditing, setIsEditing] = useState(false);
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
+  const [copied, setCopied] = useState(false);
 
   // Fetch profile with plan information
   const { data: profileData } = useQuery<ProfileResponse>({
     queryKey: ['/api/user/profile'],
   });
 
+  // Fetch referral info
+  const { data: referralData, isLoading: referralLoading } = useQuery<ReferralResponse>({
+    queryKey: ['/api/referral'],
+  });
+
   const plan = profileData?.plan || 'free';
+
+  const handleCopyLink = () => {
+    if (referralData?.referralLink) {
+      navigator.clipboard.writeText(referralData.referralLink);
+      setCopied(true);
+      toast({
+        title: language === 'fr' ? 'Lien copié !' : 'Link copied!',
+        description: language === 'fr' 
+          ? 'Partage-le avec tes amis pour gagner 14 jours Premium gratuits !'
+          : 'Share it with your friends to earn 14 free Premium days!',
+      });
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
@@ -429,6 +461,114 @@ export default function Account() {
               </Button>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Referral Card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" />
+            <CardTitle>{language === 'fr' ? 'Parrainage' : 'Referrals'}</CardTitle>
+          </div>
+          <CardDescription>
+            {language === 'fr' 
+              ? 'Invite tes amis et gagne 14 jours Premium gratuits par parrainage !'
+              : 'Invite your friends and earn 14 free Premium days per referral!'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {referralLoading ? (
+            <div className="flex justify-center py-4">
+              <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+            </div>
+          ) : referralData ? (
+            <>
+              {/* Referral Link */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Gift className="w-4 h-4 text-primary" />
+                  {language === 'fr' ? 'Ton lien de parrainage' : 'Your referral link'}
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    readOnly
+                    value={referralData.referralLink}
+                    className="font-mono text-sm"
+                    data-testid="input-referral-link"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleCopyLink}
+                    data-testid="button-copy-referral"
+                  >
+                    {copied ? <CheckCircle className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'fr'
+                    ? `Code: ${referralData.referralCode}`
+                    : `Code: ${referralData.referralCode}`}
+                </p>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-primary/5 rounded-lg p-4 text-center">
+                  <p className="text-3xl font-bold text-primary" data-testid="text-referral-count">
+                    {referralData.referralsCount}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {language === 'fr' ? 'Parrainages' : 'Referrals'}
+                  </p>
+                </div>
+                <div className="bg-green-500/10 rounded-lg p-4 text-center">
+                  <p className="text-3xl font-bold text-green-600 dark:text-green-400" data-testid="text-days-earned">
+                    {referralData.referralsCount * 14}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {language === 'fr' ? 'Jours gagnés' : 'Days earned'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Recent Referrals */}
+              {referralData.referrals.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    {language === 'fr' ? 'Tes filleuls récents' : 'Your recent referrals'}
+                  </label>
+                  <div className="space-y-2">
+                    {referralData.referrals.slice(0, 5).map((ref) => (
+                      <div 
+                        key={ref.id} 
+                        className="flex items-center justify-between py-2 px-3 bg-muted/50 rounded-lg"
+                        data-testid={`referral-item-${ref.id}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">{ref.referredName}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            +14 {language === 'fr' ? 'jours' : 'days'}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(ref.createdAt).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US')}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-center text-muted-foreground py-4">
+              {language === 'fr' ? 'Impossible de charger les données de parrainage' : 'Unable to load referral data'}
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

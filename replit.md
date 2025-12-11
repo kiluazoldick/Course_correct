@@ -34,7 +34,13 @@ The backend uses Express.js with Node.js and TypeScript. It features a dual auth
 - **Content Management**: Users can create, edit, and organize course notes, upload PDF/Word documents (with automatic text extraction), and view course content in a read-only mode.
 - **AI Chatbot ("Tariq IA")**: An educational chatbot with a confident, motivating personality, offering smart suggestion prompts and managing message limits based on subscription tier.
 - **Subscription Management**: Automated downgrade to the Free tier upon Premium subscription expiration, with real-time status checks.
-- **Anonymous Onboarding Flow** (NEW): Conversion-focused system allowing visitors to test the app without account creation. Users upload a file, get AI summary generated, then create account with automatic migration of their test course. Features 48-hour expiration, sessionId tracking via localStorage, and hourly automated cleanup of expired uploads.
+- **Anonymous Onboarding Flow**: Conversion-focused system allowing visitors to test the app without account creation. Users upload a file, get AI summary generated, then create account with automatic migration of their test course. Features 48-hour expiration, sessionId tracking via localStorage, and hourly automated cleanup of expired uploads.
+- **Referral System** (Dec 2025): Users can invite friends to earn 14 days of free Premium. Each user gets a unique referral code (8 alphanumeric characters). When a new user signs up via a referral link (/signup?ref=CODE), the referrer receives 14 days added to their Premium subscription. The system is fully bilingual (FR/EN) and includes:
+  - Database schema: `referrals` table tracking referrer, referred user, reward status, and expiration
+  - User fields: `referralCode` (unique), `referredBy` (stores the code used during signup)
+  - API routes: `GET /api/referral` (user's referral info), `GET /api/referral/validate/:code` (validates a code)
+  - Account page: Displays referral link, copy button, stats (total referrals, days earned), and recent referral list
+  - Signup page: Shows green banner when valid referral code is detected in URL
 
 ## External Dependencies
 

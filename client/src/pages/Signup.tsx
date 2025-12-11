@@ -21,12 +21,31 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referrerName, setReferrerName] = useState<string | null>(null);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
-  const uploadId = new URLSearchParams(window.location.search).get('uploadId');
+  const searchParams = new URLSearchParams(window.location.search);
+  const uploadId = searchParams.get('uploadId');
+  const refCode = searchParams.get('ref');
+
+  // Validate referral code on mount
+  useEffect(() => {
+    if (refCode) {
+      fetch(`/api/referral/validate/${refCode}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.valid) {
+            setReferralCode(refCode.toUpperCase());
+            setReferrerName(data.referrerName);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [refCode]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -61,7 +80,7 @@ export default function Signup() {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, firstName, lastName, password }),
+        body: JSON.stringify({ email, firstName, lastName, password, referralCode }),
       });
 
       const data = await response.json();
@@ -150,6 +169,15 @@ export default function Signup() {
           transition={{ delay: 0.2, duration: 0.5 }}
         >
           <Card className="backdrop-blur-sm bg-card/50">
+          {referrerName && (
+            <div className="bg-green-500/10 border-b border-green-500/20 p-3 text-center">
+              <p className="text-sm text-green-700 dark:text-green-400">
+                {language === 'fr' 
+                  ? `Tu as été invité par ${referrerName}. Inscris-toi pour lui offrir 14 jours Premium gratuits !`
+                  : `You were invited by ${referrerName}. Sign up to give them 14 free Premium days!`}
+              </p>
+            </div>
+          )}
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">{t.signupPage.title}</CardTitle>
             <CardDescription className="text-center">

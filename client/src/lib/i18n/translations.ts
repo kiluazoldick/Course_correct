@@ -119,7 +119,7 @@ export const translations = {
         },
         premium: {
           title: "Premium",
-          price: "1 500 XAF",
+          price: "500 XAF",
           period: "/mois",
           features: [
             "Tout du plan Gratuit",
@@ -409,7 +409,7 @@ export const translations = {
       premiumFeatures: "Fonctionnalités Premium",
       unlockAll: "Débloquez tout le potentiel de Corrige Tes Cours",
       expiresOn: "Date d'expiration",
-      price: "1 500",
+      price: "500",
       currency: "XAF",
       perMonth: "/mois",
       subscribe: "Passer au Premium",
@@ -833,7 +833,7 @@ export const translations = {
         title: "6. Paiements et abonnements",
         intro: "Pour les plans payants :",
         items: [
-          "Les prix sont indiqués en Francs CFA (XAF) - Premium : 1 500 XAF/mois",
+          "Les prix sont indiqués en Francs CFA (XAF) - Premium : 500 XAF/mois",
           "Le paiement se fait par Mobile Money (MTN, Orange) ou carte bancaire via CinetPay",
           "Vous pouvez annuler votre abonnement à tout moment",
           "Garantie satisfait ou remboursé de 14 jours sur le plan Premium"
@@ -1074,7 +1074,7 @@ export const translations = {
         prioritySupport: "Support prioritaire",
         noAds: "Sans publicité",
       },
-      price: "1 500 XAF",
+      price: "500 XAF",
       perMonth: "/mois",
       subscribe: "S'abonner maintenant",
       subscribing: "Traitement...",
@@ -1221,7 +1221,7 @@ export const translations = {
         },
         premium: {
           title: "Premium",
-          price: "1,500 XAF",
+          price: "500 XAF",
           period: "/month",
           features: [
             "Everything in Free plan",
@@ -1511,7 +1511,7 @@ export const translations = {
       premiumFeatures: "Premium Features",
       unlockAll: "Unlock the full potential of Corrige Tes Cours",
       expiresOn: "Expiration date",
-      price: "1,500",
+      price: "500",
       currency: "XAF",
       perMonth: "/month",
       subscribe: "Upgrade to Premium",
@@ -1935,7 +1935,7 @@ export const translations = {
         title: "6. Payments and Subscriptions",
         intro: "For paid plans:",
         items: [
-          "Prices are in CFA Francs (XAF) - Premium: 1,500 XAF/month",
+          "Prices are in CFA Francs (XAF) - Premium: 500 XAF/month",
           "Payment is via Mobile Money (MTN, Orange) or credit card via CinetPay",
           "You can cancel your subscription at any time",
           "14-day money-back guarantee on Premium plan"
@@ -2176,7 +2176,7 @@ export const translations = {
         prioritySupport: "Priority support",
         noAds: "Ad-free",
       },
-      price: "1,500 XAF",
+      price: "500 XAF",
       perMonth: "/month",
       subscribe: "Subscribe now",
       subscribing: "Processing...",

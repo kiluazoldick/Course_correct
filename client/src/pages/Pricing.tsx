@@ -24,7 +24,7 @@ export default function Pricing() {
     },
     {
       name: t.pricingPage.premium.name,
-      price: "1 500",
+      price: "500",
       period: t.pricingPage.premium.period,
       description: t.pricingPage.premium.description,
       features: t.pricingPage.premium.features,

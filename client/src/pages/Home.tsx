@@ -400,17 +400,17 @@ export default function Home() {
                 <CardContent className="p-8 md:p-12">
                   <div className="grid md:grid-cols-2 gap-8 items-center">
                     <div>
-                      <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-4">
+                      <div className="inline-flex items-center gap-2 bg-red-500/10 text-red-500 px-3 py-1 rounded-full text-sm font-medium mb-4">
                         <Zap className="w-4 h-4" />
-                        {language === 'fr' ? "Offre de lancement" : "Launch offer"}
+                        {language === 'fr' ? "Promo Noël - 67% de réduction !" : "Christmas Promo - 67% off!"}
                       </div>
                       <h2 className="text-3xl md:text-4xl font-bold mb-4">
                         {language === 'fr' ? "Passez au Premium" : "Upgrade to Premium"}
                       </h2>
                       <p className="text-muted-foreground mb-6">
                         {language === 'fr' 
-                          ? "Uploads illimités, Tariq IA sans limite, statistiques avancées et support prioritaire pour seulement 1 500 XAF/mois"
-                          : "Unlimited uploads, unlimited Tariq AI, advanced statistics and priority support for only 1,500 XAF/month"}
+                          ? "Uploads illimités, Tariq IA sans limite, statistiques avancées et support prioritaire pour seulement 500 XAF/mois"
+                          : "Unlimited uploads, unlimited Tariq AI, advanced statistics and priority support for only 500 XAF/month"}
                       </p>
                       <div className="space-y-2 mb-6">
                         <div className="flex items-center gap-2">
@@ -433,12 +433,16 @@ export default function Home() {
                       </Link>
                     </div>
                     <div className="flex justify-center">
-                      <div className="text-center p-8 bg-background rounded-2xl border">
-                        <div className="text-5xl font-bold mb-2">1 500</div>
-                        <div className="text-muted-foreground mb-4">XAF / mois</div>
-                        <div className="inline-flex items-center gap-2 text-sm text-primary">
+                      <div className="text-center p-8 bg-background rounded-2xl border relative">
+                        <div className="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                          -67%
+                        </div>
+                        <div className="text-sm text-muted-foreground line-through mb-1">1 500 XAF</div>
+                        <div className="text-5xl font-bold mb-2 text-primary">500</div>
+                        <div className="text-muted-foreground mb-4">XAF / {language === 'fr' ? 'mois' : 'month'}</div>
+                        <div className="inline-flex items-center gap-2 text-sm text-red-500 font-medium">
                           <Target className="w-4 h-4" />
-                          {language === 'fr' ? "Essai gratuit disponible" : "Free trial available"}
+                          {language === 'fr' ? "Offre limitée !" : "Limited offer!"}
                         </div>
                       </div>
                     </div>

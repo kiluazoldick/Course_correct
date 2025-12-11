@@ -903,7 +903,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderId = `CTC-${Date.now()}-${userId.slice(0, 8)}`;
 
       const paymentResponse = await lygosService.createPayment({
-        amount: 1500,
+        amount: 500,
         shopName: 'Corrige Tes Cours',
         message: 'Abonnement Premium 1 mois - Accès illimité',
         successUrl: `${baseUrl}/api/payment/return/lygos?status=success&order_id=${orderId}`,
@@ -920,7 +920,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const payment = await storage.createPayment({
         userId,
         subscriptionId: null,
-        amount: 1500,
+        amount: 500,
         currency: 'XAF',
         status: 'pending',
         paymentMethod: 'mobile_money',
@@ -981,7 +981,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               startDate,
               endDate,
               paymentMethod: status.paymentMethod || 'mobile_money',
-              amount: 1500,
+              amount: 500,
               transactionId: status.transactionId || payment.lygosTransactionId,
             });
 
@@ -998,7 +998,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               startDate,
               endDate,
               paymentMethod: status.paymentMethod || 'mobile_money',
-              amount: 1500,
+              amount: 500,
               transactionId: status.transactionId || payment.lygosTransactionId,
             });
 
@@ -1075,7 +1075,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             startDate,
             endDate,
             paymentMethod: 'mobile_money',
-            amount: 1500,
+            amount: 500,
             transactionId: orderId,
           });
         } else {
@@ -1085,7 +1085,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             startDate,
             endDate,
             paymentMethod: 'mobile_money',
-            amount: 1500,
+            amount: 500,
             transactionId: orderId,
           });
 
@@ -1139,7 +1139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             startDate,
             endDate,
             paymentMethod: 'mobile_money',
-            amount: 1500,
+            amount: 500,
             transactionId: orderId,
           });
         } else {
@@ -1149,7 +1149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             startDate,
             endDate,
             paymentMethod: 'mobile_money',
-            amount: 1500,
+            amount: 500,
             transactionId: orderId,
           });
           await storage.updatePayment(payment.id, { subscriptionId: newSub.id });

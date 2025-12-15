@@ -1,10 +1,15 @@
 # Corrige Tes Cours - Technical Documentation
 
 ## Overview
-Corrige Tes Cours is an AI-powered educational platform for French-speaking university students in Cameroon. It aims to enhance studying efficiency through automated course summaries, personalized quizzes, and performance tracking. The platform features a sales-focused landing page, an anonymous onboarding flow for conversion optimization, and a comprehensive user dashboard. It operates on a freemium model, offering both a free tier and a Premium subscription (500 XAF/month - Christmas Promo) with advanced features. Payment is processed via Mobile Money (MTN, Orange) and credit cards through CinetPay. The business vision is to provide accessible, AI-driven educational tools to improve student outcomes in Cameroon.
+Corrige Tes Cours is an AI-powered educational platform for French-speaking university students in Cameroon. It aims to enhance studying efficiency through automated course summaries, personalized quizzes, and performance tracking. The platform features a sales-focused landing page, an anonymous onboarding flow for conversion optimization, and a comprehensive user dashboard. It operates on a freemium model, offering both a free tier and a Premium subscription (500 XAF/month or $1 USD/month) with advanced features. Payment is processed via Mobile Money (MTN, Orange) and credit cards through Flutterwave. The business vision is to provide accessible, AI-driven educational tools to improve student outcomes in Cameroon.
 
-**Latest Update (Oct 2025):**
-- **CinetPay Integration**: Migrated payment system from Lygos to CinetPay for better reliability. Supports MTN Mobile Money, Orange Money, and credit cards (Visa/Mastercard). Implements webhook-based payment verification following CinetPay security best practices (never trusting webhook data directly, always verifying via API to prevent man-in-the-middle attacks).
+**Latest Update (Dec 2025):**
+- **Flutterwave Integration**: Migrated payment system from CinetPay to Flutterwave for broader international support. Supports dual currency pricing:
+  - **XAF (500 XAF/month)**: For Cameroon users via MTN Mobile Money, Orange Money, or cards
+  - **USD ($1/month)**: For international users via Visa/Mastercard
+  - Implements webhook-based payment verification with signature validation (verif-hash header)
+  - Always verifies payments via Flutterwave API (never trusting webhook data directly)
+  - Payment flow: user selects currency → redirected to Flutterwave checkout → callback verifies payment → Premium activated
 - Implemented anonymous onboarding system allowing users to test the app (upload 1 course + generate summary) before creating an account, with seamless migration upon signup to maximize conversion rates.
 - **Mobile-First UX**: Complete mobile optimization with WhatsApp-style bottom navigation bar. Sidebar hidden on mobile (<768px), replaced by fixed bottom nav with 5 items (Home, Cours, Chat, Stats, Profile). All dashboard pages optimized with responsive text sizes, compact spacing, and mobile-first layouts while desktop design remains unchanged.
 - **Chat Page Redesign**: Complete UI/UX overhaul inspired by ChatGPT for minimalist, clean aesthetic. Replaced flashy gradient avatars with simple bordered icons (GraduationCap for Tariq, "Tu" badge for user). Implemented ChatGPT-style layout with centered messages (max-w-3xl), fixed input at bottom with backdrop blur, generous spacing, and responsive design. Header streamlined to h-14 with minimal branding. Mobile-optimized with hidden badge text, compact buttons, and smaller avatars.
@@ -29,7 +34,7 @@ The backend uses Express.js with Node.js and TypeScript. It features a dual auth
 ### System Design Choices
 - **Freemium Model**: Implemented with clear distinctions between free and premium features, including file upload limits (2/month for free, unlimited for premium) and AI chatbot message limits (5 messages/session for free, unlimited for premium).
 - **AI Integration**: Central to the platform, using OpenRouter API with DeepSeek R1 for intelligent course summarization, quiz generation (MCQ and open-ended), and AI-powered evaluation of open-ended answers with feedback.
-- **Payment System**: Integrated CinetPay for Mobile Money (MTN, Orange) and credit card payments (Visa/Mastercard), enabling automatic Premium subscription activation and management. Payment flow: user initiates payment → redirected to CinetPay checkout → completes payment → CinetPay webhook notifies backend → backend verifies payment via API → activates Premium subscription.
+- **Payment System**: Integrated Flutterwave for Mobile Money (MTN, Orange) and credit card payments (Visa/Mastercard), supporting dual currency pricing (500 XAF for Cameroon, $1 USD for international). Payment flow: user selects currency → redirected to Flutterwave checkout → completes payment → callback verifies payment via Flutterwave API → activates Premium subscription. Webhook endpoint with signature validation provides additional verification layer.
 - **Profile Management**: Users can edit personal information (firstName, lastName) and upload profile photos.
 - **Content Management**: Users can create, edit, and organize course notes, upload PDF/Word documents (with automatic text extraction), and view course content in a read-only mode.
 - **AI Chatbot ("Tariq IA")**: An educational chatbot with a confident, motivating personality, offering smart suggestion prompts and managing message limits based on subscription tier.

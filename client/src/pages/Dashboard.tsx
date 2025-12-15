@@ -8,6 +8,7 @@ import Quizzes from './dashboard/Quizzes';
 import Chat from './dashboard/Chat';
 import Performance from './dashboard/Performance';
 import Subscription from './dashboard/Subscription';
+import PaymentMethod from './dashboard/PaymentMethod';
 import Account from './dashboard/Account';
 
 function DashboardContent() {
@@ -43,9 +44,11 @@ function DashboardContent() {
             <Route path="/chat" component={Chat} />
             <Route path="/performance" component={Performance} />
             <Route path="/subscription" component={Subscription} />
+            <Route path="/payment-method" component={PaymentMethod} />
             <Route path="/account" component={Account} />
             {/* Dashboard prefixed routes for payment redirects */}
             <Route path="/dashboard/subscription" component={Subscription} />
+            <Route path="/dashboard/payment-method" component={PaymentMethod} />
             <Route path="/dashboard/courses" component={Courses} />
             <Route path="/dashboard/quizzes" component={Quizzes} />
             <Route path="/dashboard/chat" component={Chat} />

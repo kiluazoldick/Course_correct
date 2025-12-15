@@ -1,17 +1,16 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, CheckCircle2, XCircle, Crown, Smartphone, CreditCard, Sparkles, Zap, Infinity, Globe } from 'lucide-react';
-import { queryClient, apiRequest } from '@/lib/queryClient';
+import { Loader2, CheckCircle2, XCircle, Smartphone, CreditCard, Sparkles, Zap } from 'lucide-react';
+import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { PremiumBadge, PremiumCard } from '@/components/PremiumBadge';
-import { getErrorMessage } from '@/lib/errorHandler';
 
 interface SubscriptionData {
   status: string;
@@ -21,24 +20,10 @@ interface SubscriptionData {
   paymentMethod?: string;
 }
 
-interface PaymentResponse {
-  paymentId: string;
-  checkoutUrl: string;
-  transactionId: string;
-}
-
-interface PaymentStatusData {
-  status: 'pending' | 'completed' | 'failed';
-  payment?: any;
-  subscription?: any;
-}
-
 export default function Subscription() {
   const { toast } = useToast();
   const { t, language } = useLanguage();
   const [, setLocation] = useLocation();
-  const [paymentId, setPaymentId] = useState<string | null>(null);
-  const [selectedCurrency, setSelectedCurrency] = useState<'XAF' | 'USD'>('XAF');
 
   // Check URL params for payment result (from return URL)
   useEffect(() => {
@@ -90,54 +75,6 @@ export default function Subscription() {
   const { data: subscription, isLoading: subLoading } = useQuery<SubscriptionData>({
     queryKey: ['/api/subscription'],
   });
-
-  const { data: paymentStatus, isLoading: statusLoading } = useQuery<PaymentStatusData>({
-    queryKey: ['/api/payment/status', paymentId],
-    enabled: !!paymentId,
-    refetchInterval: (query) => {
-      const data = query.state.data;
-      if (!data || data.status === 'pending') return 3000;
-      return false;
-    },
-  });
-
-  const initiateMutation = useMutation({
-    mutationFn: async (currency: 'XAF' | 'USD') => {
-      const res = await apiRequest('POST', '/api/payment/flutterwave/initiate', { currency });
-      return await res.json();
-    },
-    onSuccess: (data: PaymentResponse) => {
-      setPaymentId(data.paymentId);
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      }
-    },
-    onError: (error: any) => {
-      toast({
-        title: language === 'fr' ? "Erreur" : "Error",
-        description: getErrorMessage(error, language),
-        variant: "destructive",
-      });
-    },
-  });
-
-  useEffect(() => {
-    if (paymentStatus?.status === 'completed') {
-      queryClient.invalidateQueries({ queryKey: ['/api/subscription'] });
-      toast({
-        title: t.subscriptionPage.paymentSuccess,
-        description: t.subscriptionPage.paymentSuccessDesc,
-      });
-      setPaymentId(null);
-    } else if (paymentStatus?.status === 'failed') {
-      toast({
-        title: t.subscriptionPage.paymentFailed,
-        description: t.subscriptionPage.paymentFailedDesc,
-        variant: "destructive",
-      });
-      setPaymentId(null);
-    }
-  }, [paymentStatus, toast, t]);
 
   if (subLoading) {
     return (
@@ -262,56 +199,19 @@ export default function Subscription() {
             </div>
 
             <div className="pt-4 mt-4 border-t">
-              {!isPremium && (
-                <div className="flex gap-2 mb-4">
-                  <Button
-                    variant={selectedCurrency === 'XAF' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSelectedCurrency('XAF')}
-                    className="flex-1"
-                    data-testid="button-currency-xaf"
-                  >
-                    <Smartphone className="w-4 h-4 mr-2" />
-                    500 XAF
-                  </Button>
-                  <Button
-                    variant={selectedCurrency === 'USD' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSelectedCurrency('USD')}
-                    className="flex-1"
-                    data-testid="button-currency-usd"
-                  >
-                    <Globe className="w-4 h-4 mr-2" />
-                    $1 USD
-                  </Button>
-                </div>
-              )}
-
               <div className="text-3xl font-bold mb-2" data-testid="text-price">
-                {selectedCurrency === 'XAF' ? '500 XAF' : '$1 USD'} <span className="text-lg font-normal text-muted-foreground">{t.subscriptionPage.perMonth}</span>
+                500 XAF / $1 USD <span className="text-lg font-normal text-muted-foreground">{t.subscriptionPage.perMonth}</span>
               </div>
 
               {!isPremium && (
                 <Button
                   className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white border-0 shadow-lg shadow-amber-500/25"
                   size="lg"
-                  onClick={() => initiateMutation.mutate(selectedCurrency)}
-                  disabled={initiateMutation.isPending || !!paymentId}
+                  onClick={() => setLocation('/payment-method')}
                   data-testid="button-subscribe-premium"
                 >
-                  {initiateMutation.isPending || (paymentId && statusLoading) ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {paymentId 
-                        ? (language === 'fr' ? "Vérification du paiement..." : "Verifying payment...") 
-                        : t.subscriptionPage.subscribing}
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="w-4 h-4 mr-2" />
-                      {t.subscriptionPage.subscribe}
-                    </>
-                  )}
+                  <Zap className="w-4 h-4 mr-2" />
+                  {t.subscriptionPage.subscribe}
                 </Button>
               )}
             </div>
@@ -363,39 +263,14 @@ export default function Subscription() {
           <div className="mt-4 p-4 bg-muted/50 rounded-md">
             <p className="text-sm text-muted-foreground">
               {language === 'fr' 
-                ? <>Tes paiements sont sécurisés par <span className="font-medium">Flutterwave</span>, la solution de paiement de confiance en Afrique.</>
-                : <>Your payments are secured by <span className="font-medium">Flutterwave</span>, the trusted payment solution in Africa.</>
+                ? <>Tes paiements sont sécurisés par <span className="font-medium">Lygos</span> et <span className="font-medium">Flutterwave</span>.</>
+                : <>Your payments are secured by <span className="font-medium">Lygos</span> and <span className="font-medium">Flutterwave</span>.</>
               }
             </p>
           </div>
         </CardContent>
         </Card>
       </div>
-
-      {paymentId && (
-        <div className="max-w-7xl mx-auto">
-          <Card className="border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20" data-testid="card-payment-pending">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              {language === 'fr' ? 'Paiement en cours' : 'Payment in progress'}
-            </CardTitle>
-            <CardDescription>
-              {language === 'fr' 
-                ? 'Nous attendons la confirmation de ton paiement...'
-                : 'Waiting for payment confirmation...'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">
-              {language === 'fr' 
-                ? "Si tu as fermé la fenêtre de paiement, tu peux la rouvrir ou attendre que nous détections automatiquement ton paiement."
-                : "If you closed the payment window, you can reopen it or wait for us to automatically detect your payment."}
-            </p>
-          </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }

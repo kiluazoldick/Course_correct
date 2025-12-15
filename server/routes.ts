@@ -10,6 +10,7 @@ import { drizzle } from "drizzle-orm/neon-serverless";
 import { eq } from "drizzle-orm";
 import { Pool } from "@neondatabase/serverless";
 import { lygosService } from "./lygos";
+import { flutterwaveService } from "./flutterwave";
 import { sendWelcomeEmail, sendWeeklyMotivationEmail, sendBulkWeeklyEmails, sendPremiumCongratsEmail, sendReminderEmail } from "./email";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -1596,6 +1597,249 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error syncing users to Resend:", error);
       res.status(500).json({ message: "Failed to sync users" });
+    }
+  });
+
+  // ===== Flutterwave Payment Routes =====
+
+  // Initialize Flutterwave payment
+  app.post('/api/payment/flutterwave/initiate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const user = await storage.getUserById(userId);
+      const { currency = 'XAF' } = req.body;
+
+      if (!user) {
+        return res.status(404).json({ message: "Utilisateur introuvable" });
+      }
+
+      const DOMAIN = process.env.CUSTOM_DOMAIN || process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000';
+      const protocol = DOMAIN.includes('localhost') ? 'http' : 'https';
+      const baseUrl = `${protocol}://${DOMAIN}`;
+
+      const txRef = flutterwaveService.generateTxRef(userId);
+      
+      // Amount based on currency: 500 XAF or 1 USD
+      const amount = currency === 'USD' ? 1 : 500;
+
+      const paymentResponse = await flutterwaveService.initializePayment({
+        amount,
+        currency: currency as 'XAF' | 'USD',
+        email: user.email,
+        phone_number: user.phone || undefined,
+        name: `${user.firstName} ${user.lastName || ''}`.trim(),
+        tx_ref: txRef,
+        redirect_url: `${baseUrl}/api/payment/flutterwave/callback`,
+        meta: {
+          userId,
+          subscriptionType: 'premium',
+        },
+      });
+
+      if (paymentResponse.status !== 'success' || !paymentResponse.data?.link) {
+        return res.status(400).json({ 
+          message: paymentResponse.message || 'Échec de création du paiement' 
+        });
+      }
+
+      // Create payment record
+      const payment = await storage.createPayment({
+        userId,
+        subscriptionId: null,
+        amount,
+        currency,
+        status: 'pending',
+        paymentMethod: currency === 'XAF' ? 'mobile_money' : 'card',
+        lygosProductId: null,
+        lygosTransactionId: txRef,
+        metadata: { 
+          provider: 'flutterwave',
+          checkoutUrl: paymentResponse.data.link,
+          txRef,
+        },
+      });
+
+      res.json({
+        paymentId: payment.id,
+        checkoutUrl: paymentResponse.data.link,
+        txRef,
+      });
+    } catch (error) {
+      console.error("Error initiating Flutterwave payment:", error);
+      res.status(500).json({ message: "Échec d'initialisation du paiement" });
+    }
+  });
+
+  // Flutterwave callback - user returns from payment page
+  app.get('/api/payment/flutterwave/callback', async (req: any, res) => {
+    try {
+      const { status, tx_ref, transaction_id } = req.query;
+      const txRef = tx_ref as string;
+      const transactionId = transaction_id as string;
+      const paymentStatus = status as string;
+
+      if (!txRef) {
+        return res.redirect('/dashboard/subscription?error=no_tx_ref');
+      }
+
+      // Find payment by tx_ref
+      const [payment] = await db.select().from(payments).where(eq(payments.lygosTransactionId, txRef)).limit(1);
+
+      if (!payment) {
+        return res.redirect('/dashboard/subscription?error=payment_not_found');
+      }
+
+      // Skip if already completed
+      if (payment.status === 'completed') {
+        return res.redirect('/dashboard/subscription?success=true');
+      }
+
+      // Verify payment with Flutterwave API
+      if (paymentStatus === 'successful' && transactionId) {
+        const verification = await flutterwaveService.verifyTransaction(transactionId);
+
+        if (verification.status === 'success' && verification.data?.status === 'successful') {
+          // Payment confirmed - update status
+          const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
+            ? { ...payment.metadata as object, flw_ref: verification.data.flw_ref, verifiedAt: new Date().toISOString() }
+            : { flw_ref: verification.data.flw_ref, verifiedAt: new Date().toISOString() };
+
+          await storage.updatePayment(payment.id, {
+            status: 'completed',
+            paymentMethod: verification.data.payment_type || 'card',
+            metadata: metadataUpdate,
+          });
+
+          // Activate Premium subscription
+          const startDate = new Date();
+          const endDate = new Date();
+          endDate.setMonth(endDate.getMonth() + 1);
+
+          let subscription = await storage.getSubscriptionByUserId(payment.userId);
+          if (subscription) {
+            await storage.updateSubscription(subscription.id, {
+              status: 'premium',
+              startDate,
+              endDate,
+              paymentMethod: verification.data.payment_type || 'card',
+              amount: verification.data.amount,
+              transactionId: verification.data.flw_ref,
+            });
+          } else {
+            const newSub = await storage.createSubscription({
+              userId: payment.userId,
+              status: 'premium',
+              startDate,
+              endDate,
+              paymentMethod: verification.data.payment_type || 'card',
+              amount: verification.data.amount,
+              transactionId: verification.data.flw_ref,
+            });
+            await storage.updatePayment(payment.id, { subscriptionId: newSub.id });
+          }
+
+          // Send Premium congratulations email
+          const user = await storage.getUser(payment.userId);
+          if (user) {
+            sendPremiumCongratsEmail(user.email, user.firstName, (user.language as 'fr' | 'en') || 'fr')
+              .catch(err => console.error('Failed to send premium email:', err));
+          }
+
+          return res.redirect('/dashboard/subscription?success=true');
+        }
+      }
+
+      // Payment failed or cancelled
+      if (paymentStatus === 'cancelled' || paymentStatus === 'failed') {
+        await storage.updatePayment(payment.id, { status: 'failed' });
+        return res.redirect('/dashboard/subscription?error=payment_failed');
+      }
+
+      // Unknown status - redirect with error
+      return res.redirect('/dashboard/subscription?error=verification_failed');
+    } catch (error) {
+      console.error("Error in Flutterwave callback:", error);
+      return res.redirect('/dashboard/subscription?error=server_error');
+    }
+  });
+
+  // Flutterwave webhook - for real-time payment notifications
+  app.post('/api/payment/flutterwave/webhook', async (req: any, res) => {
+    try {
+      const signature = req.headers['verif-hash'] as string;
+      const secretHash = process.env.FLW_SECRET_HASH || process.env.FLW_SECRET_KEY;
+
+      // Verify webhook signature
+      if (!signature || signature !== secretHash) {
+        console.warn('Invalid Flutterwave webhook signature');
+        return res.status(401).json({ message: 'Invalid signature' });
+      }
+
+      const { event, data } = req.body;
+
+      if (event === 'charge.completed' && data.status === 'successful') {
+        const txRef = data.tx_ref;
+        
+        // Find payment by tx_ref
+        const [payment] = await db.select().from(payments).where(eq(payments.lygosTransactionId, txRef)).limit(1);
+
+        if (payment && payment.status !== 'completed') {
+          // Verify with Flutterwave API (never trust webhook data directly)
+          const verification = await flutterwaveService.verifyTransaction(data.id);
+
+          if (verification.status === 'success' && verification.data?.status === 'successful') {
+            const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
+              ? { ...payment.metadata as object, webhookVerified: true, flw_ref: data.flw_ref }
+              : { webhookVerified: true, flw_ref: data.flw_ref };
+
+            await storage.updatePayment(payment.id, {
+              status: 'completed',
+              paymentMethod: data.payment_type || 'card',
+              metadata: metadataUpdate,
+            });
+
+            // Activate Premium
+            const startDate = new Date();
+            const endDate = new Date();
+            endDate.setMonth(endDate.getMonth() + 1);
+
+            let subscription = await storage.getSubscriptionByUserId(payment.userId);
+            if (subscription) {
+              await storage.updateSubscription(subscription.id, {
+                status: 'premium',
+                startDate,
+                endDate,
+                paymentMethod: data.payment_type || 'card',
+                amount: data.amount,
+                transactionId: data.flw_ref,
+              });
+            } else {
+              const newSub = await storage.createSubscription({
+                userId: payment.userId,
+                status: 'premium',
+                startDate,
+                endDate,
+                paymentMethod: data.payment_type || 'card',
+                amount: data.amount,
+                transactionId: data.flw_ref,
+              });
+              await storage.updatePayment(payment.id, { subscriptionId: newSub.id });
+            }
+
+            // Send Premium email
+            const user = await storage.getUser(payment.userId);
+            if (user) {
+              sendPremiumCongratsEmail(user.email, user.firstName, (user.language as 'fr' | 'en') || 'fr')
+                .catch(err => console.error('Failed to send premium email:', err));
+            }
+          }
+        }
+      }
+
+      res.json({ status: 'ok' });
+    } catch (error) {
+      console.error("Error processing Flutterwave webhook:", error);
+      res.status(500).json({ message: 'Webhook processing failed' });
     }
   });
 

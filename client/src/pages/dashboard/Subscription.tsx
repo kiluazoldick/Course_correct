@@ -4,7 +4,7 @@ import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, CheckCircle2, XCircle, Crown, Smartphone, CreditCard, Sparkles, Zap, Infinity } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Crown, Smartphone, CreditCard, Sparkles, Zap, Infinity, Globe } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -38,6 +38,7 @@ export default function Subscription() {
   const { t, language } = useLanguage();
   const [, setLocation] = useLocation();
   const [paymentId, setPaymentId] = useState<string | null>(null);
+  const [selectedCurrency, setSelectedCurrency] = useState<'XAF' | 'USD'>('XAF');
 
   // Check URL params for payment result (from return URL)
   useEffect(() => {
@@ -101,8 +102,8 @@ export default function Subscription() {
   });
 
   const initiateMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest('POST', '/api/payment/initiate');
+    mutationFn: async (currency: 'XAF' | 'USD') => {
+      const res = await apiRequest('POST', '/api/payment/flutterwave/initiate', { currency });
       return await res.json();
     },
     onSuccess: (data: PaymentResponse) => {
@@ -261,15 +262,40 @@ export default function Subscription() {
             </div>
 
             <div className="pt-4 mt-4 border-t">
+              {!isPremium && (
+                <div className="flex gap-2 mb-4">
+                  <Button
+                    variant={selectedCurrency === 'XAF' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedCurrency('XAF')}
+                    className="flex-1"
+                    data-testid="button-currency-xaf"
+                  >
+                    <Smartphone className="w-4 h-4 mr-2" />
+                    500 XAF
+                  </Button>
+                  <Button
+                    variant={selectedCurrency === 'USD' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedCurrency('USD')}
+                    className="flex-1"
+                    data-testid="button-currency-usd"
+                  >
+                    <Globe className="w-4 h-4 mr-2" />
+                    $1 USD
+                  </Button>
+                </div>
+              )}
+
               <div className="text-3xl font-bold mb-2" data-testid="text-price">
-                {t.subscriptionPage.price} <span className="text-lg font-normal text-muted-foreground">{t.subscriptionPage.perMonth}</span>
+                {selectedCurrency === 'XAF' ? '500 XAF' : '$1 USD'} <span className="text-lg font-normal text-muted-foreground">{t.subscriptionPage.perMonth}</span>
               </div>
 
               {!isPremium && (
                 <Button
                   className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white border-0 shadow-lg shadow-amber-500/25"
                   size="lg"
-                  onClick={() => initiateMutation.mutate()}
+                  onClick={() => initiateMutation.mutate(selectedCurrency)}
                   disabled={initiateMutation.isPending || !!paymentId}
                   data-testid="button-subscribe-premium"
                 >
@@ -337,8 +363,8 @@ export default function Subscription() {
           <div className="mt-4 p-4 bg-muted/50 rounded-md">
             <p className="text-sm text-muted-foreground">
               {language === 'fr' 
-                ? <>Tes paiements sont sécurisés par <span className="font-medium">CinetPay</span>, la solution de paiement de confiance en Afrique.</>
-                : <>Your payments are secured by <span className="font-medium">CinetPay</span>, the trusted payment solution in Africa.</>
+                ? <>Tes paiements sont sécurisés par <span className="font-medium">Flutterwave</span>, la solution de paiement de confiance en Afrique.</>
+                : <>Your payments are secured by <span className="font-medium">Flutterwave</span>, the trusted payment solution in Africa.</>
               }
             </p>
           </div>

@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function Pricing() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const plans = [
     {
@@ -156,8 +156,22 @@ export default function Pricing() {
                       <CardTitle className="text-2xl">{plan.name}</CardTitle>
                       <CardDescription>{plan.description}</CardDescription>
                       <div className="mt-4">
-                        <span className="text-5xl font-bold">{plan.price}</span>
-                        <span className="text-muted-foreground ml-2">XAF /{plan.period}</span>
+                        {plan.popular ? (
+                          <div className="space-y-1">
+                            <div>
+                              <span className="text-5xl font-bold">500</span>
+                              <span className="text-muted-foreground ml-2">XAF /{plan.period}</span>
+                            </div>
+                            <div className="text-lg text-muted-foreground">
+                              {language === 'en' ? 'or' : 'ou'} <span className="font-semibold text-foreground">$1 USD</span> /{plan.period}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <span className="text-5xl font-bold">{plan.price}</span>
+                            <span className="text-muted-foreground ml-2">XAF /{plan.period}</span>
+                          </div>
+                        )}
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-6">

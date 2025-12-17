@@ -10,7 +10,7 @@ async function getCredentials() {
   if (process.env.RESEND_API_KEY) {
     return {
       apiKey: process.env.RESEND_API_KEY,
-      fromEmail: 'contact@corrigetescours.com'
+      fromEmail: 'no-replied@corrigetescours.com'
     };
   }
 
@@ -41,7 +41,7 @@ async function getCredentials() {
   }
   return { 
     apiKey: connectionSettings.settings.api_key, 
-    fromEmail: connectionSettings.settings.from_email || 'contact@corrigetescours.com'
+    fromEmail: connectionSettings.settings.from_email || 'no-replied@corrigetescours.com'
   };
 }
 

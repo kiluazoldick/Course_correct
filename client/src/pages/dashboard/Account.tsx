@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Camera, Check, X, Globe, Sun, Moon, Users, Copy, Gift, CheckCircle } from 'lucide-react';
+import { Camera, Check, X, Globe, Sun, Moon, Users, Copy, Gift, CheckCircle, Crown, Sparkles } from 'lucide-react';
+import { Link } from 'wouter';
 import { PremiumBadge } from '@/components/PremiumBadge';
 import { getErrorMessage } from '@/lib/errorHandler';
 import { updateUserProfileSchema, type UpdateUserProfile } from '@shared/schema';
@@ -382,6 +383,88 @@ export default function Account() {
               {t.nav.logout}
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Subscription Card - Important for mobile users */}
+      <Card className="border-primary/20">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Crown className="w-5 h-5 text-yellow-500" />
+            <CardTitle>{language === 'fr' ? 'Abonnement' : 'Subscription'}</CardTitle>
+          </div>
+          <CardDescription>
+            {language === 'fr' 
+              ? 'Gérez votre forfait et passez à Premium' 
+              : 'Manage your plan and upgrade to Premium'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+            <div className="flex items-center gap-3">
+              {plan === 'premium' ? (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+                  <Crown className="w-5 h-5 text-white" />
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-muted-foreground" />
+                </div>
+              )}
+              <div>
+                <p className="font-semibold" data-testid="text-current-plan">
+                  {plan === 'premium' 
+                    ? (language === 'fr' ? 'Forfait Premium' : 'Premium Plan')
+                    : (language === 'fr' ? 'Forfait Gratuit' : 'Free Plan')}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {plan === 'premium'
+                    ? (language === 'fr' ? 'Accès illimité à toutes les fonctionnalités' : 'Unlimited access to all features')
+                    : (language === 'fr' ? '2 cours/mois, fonctionnalités limitées' : '2 courses/month, limited features')}
+                </p>
+              </div>
+            </div>
+            {plan === 'premium' && <PremiumBadge size="sm" />}
+          </div>
+
+          {plan === 'free' ? (
+            <div className="space-y-3">
+              <div className="text-center py-2">
+                <p className="text-2xl font-bold text-primary">500 XAF / 1 USD</p>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'fr' ? 'par mois' : 'per month'}
+                </p>
+              </div>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  {language === 'fr' ? 'Cours illimités' : 'Unlimited courses'}
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  {language === 'fr' ? 'Résumés IA jusqu\'à 150 000 caractères' : 'AI summaries up to 150,000 characters'}
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  {language === 'fr' ? 'Tariq IA sans limites' : 'Unlimited Tariq AI'}
+                </li>
+              </ul>
+              <Link href="/subscription">
+                <Button className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white" data-testid="button-upgrade-premium">
+                  <Crown className="w-4 h-4 mr-2" />
+                  {language === 'fr' ? 'Passer à Premium' : 'Upgrade to Premium'}
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="text-center py-2">
+              <p className="text-sm text-muted-foreground">
+                {language === 'fr' 
+                  ? 'Merci de soutenir Corrige Tes Cours !' 
+                  : 'Thank you for supporting Corrige Tes Cours!'}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -283,13 +283,13 @@ export default function Account() {
                 data-testid="input-photo-upload"
               />
             </div>
-            <div>
-              <p className="font-semibold" data-testid="text-user-name">
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold truncate" data-testid="text-user-name">
                 {user?.firstName && user?.lastName
                   ? `${user.firstName} ${user.lastName}`
                   : (language === 'fr' ? 'Utilisateur' : 'User')}
               </p>
-              <p className="text-sm text-muted-foreground" data-testid="text-user-email">
+              <p className="text-sm text-muted-foreground truncate" data-testid="text-user-email">
                 {user?.email}
               </p>
             </div>
@@ -387,83 +387,60 @@ export default function Account() {
       </Card>
 
       {/* Subscription Card - Important for mobile users */}
-      <Card className="border-primary/20">
-        <CardHeader>
+      <Card>
+        <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Crown className="w-5 h-5 text-yellow-500" />
+            <Crown className="w-5 h-5 text-primary" />
             <CardTitle>{language === 'fr' ? 'Abonnement' : 'Subscription'}</CardTitle>
           </div>
-          <CardDescription>
-            {language === 'fr' 
-              ? 'Gérez votre forfait et passez à Premium' 
-              : 'Manage your plan and upgrade to Premium'}
-          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
               {plan === 'premium' ? (
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
-                  <Crown className="w-5 h-5 text-white" />
-                </div>
+                <Crown className="w-5 h-5 text-primary" />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-muted-foreground" />
-                </div>
+                <Sparkles className="w-5 h-5 text-muted-foreground" />
               )}
-              <div>
-                <p className="font-semibold" data-testid="text-current-plan">
-                  {plan === 'premium' 
-                    ? (language === 'fr' ? 'Forfait Premium' : 'Premium Plan')
-                    : (language === 'fr' ? 'Forfait Gratuit' : 'Free Plan')}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {plan === 'premium'
-                    ? (language === 'fr' ? 'Accès illimité à toutes les fonctionnalités' : 'Unlimited access to all features')
-                    : (language === 'fr' ? '2 cours/mois, fonctionnalités limitées' : '2 courses/month, limited features')}
-                </p>
-              </div>
             </div>
-            {plan === 'premium' && <PremiumBadge size="sm" />}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <p className="font-medium" data-testid="text-current-plan">
+                  {plan === 'premium' 
+                    ? (language === 'fr' ? 'Premium' : 'Premium')
+                    : (language === 'fr' ? 'Gratuit' : 'Free')}
+                </p>
+                {plan === 'premium' && <PremiumBadge size="sm" />}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {plan === 'premium'
+                  ? (language === 'fr' ? 'Accès illimité' : 'Unlimited access')
+                  : (language === 'fr' ? '2 cours/mois' : '2 courses/month')}
+              </p>
+            </div>
           </div>
 
-          {plan === 'free' ? (
+          {plan === 'free' && (
             <div className="space-y-3">
-              <div className="text-center py-2">
-                <p className="text-2xl font-bold text-primary">500 XAF / 1 USD</p>
-                <p className="text-sm text-muted-foreground">
-                  {language === 'fr' ? 'par mois' : 'per month'}
-                </p>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{language === 'fr' ? 'Premium' : 'Premium'}</span>
+                <span className="font-semibold">500 XAF <span className="text-muted-foreground font-normal">/ 1 USD</span></span>
               </div>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  {language === 'fr' ? 'Cours illimités' : 'Unlimited courses'}
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  {language === 'fr' ? 'Résumés IA jusqu\'à 150 000 caractères' : 'AI summaries up to 150,000 characters'}
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  {language === 'fr' ? 'Tariq IA sans limites' : 'Unlimited Tariq AI'}
-                </li>
-              </ul>
               <Link href="/subscription">
-                <Button className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white" data-testid="button-upgrade-premium">
+                <Button className="w-full" data-testid="button-upgrade-premium">
                   <Crown className="w-4 h-4 mr-2" />
                   {language === 'fr' ? 'Passer à Premium' : 'Upgrade to Premium'}
                 </Button>
               </Link>
             </div>
-          ) : (
-            <div className="text-center py-2">
-              <p className="text-sm text-muted-foreground">
-                {language === 'fr' 
-                  ? 'Merci de soutenir Corrige Tes Cours !' 
-                  : 'Thank you for supporting Corrige Tes Cours!'}
-              </p>
-            </div>
+          )}
+
+          {plan === 'premium' && (
+            <p className="text-sm text-center text-muted-foreground">
+              {language === 'fr' 
+                ? 'Merci de soutenir Corrige Tes Cours !' 
+                : 'Thank you for supporting Corrige Tes Cours!'}
+            </p>
           )}
         </CardContent>
       </Card>

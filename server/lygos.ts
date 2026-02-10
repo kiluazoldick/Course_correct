@@ -1,3 +1,4 @@
+
 import { nanoid } from 'nanoid';
 
 const LYGOS_API_KEY = process.env.LYGOS_API_KEY;

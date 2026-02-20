@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
 import { insertCourseSchema, insertQuizSchema, insertQuizResultSchema, insertSummarySchema, updateUserProfileSchema, type Payment, payments } from "@shared/schema";
-import { generateCourseSummary, generateQuiz, evaluateOpenAnswer, chatWithAI } from "./ai";
+import { generateCourseSummary, generateQuiz, evaluateOpenAnswer, chatWithAI, generateFlashcards, generateStudyGuide } from "./ai";
 import multer from "multer";
 import { processUploadedFile } from "./fileProcessor";
 import { drizzle } from "drizzle-orm/neon-serverless";
@@ -20,11 +20,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   setupAuth(app);
 
-  // Configure multer for file uploads (10MB limit)
+  // Configure multer for file uploads (25MB limit to handle large PDFs)
   const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
-      fileSize: 10 * 1024 * 1024, // 10 MB
+      fileSize: 25 * 1024 * 1024, // 25 MB
     },
     fileFilter: (req, file, cb) => {
       const allowedTypes = [
@@ -1840,6 +1840,180 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error processing Flutterwave webhook:", error);
       res.status(500).json({ message: 'Webhook processing failed' });
+    }
+  });
+
+  // ============ FLASHCARD ROUTES ============
+
+  app.get('/api/flashcard-sets', isAuthenticated, async (req: any, res) => {
+    try {
+      const sets = await storage.getFlashcardSetsByUserId(req.user.id);
+      res.json(sets);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching flashcard sets' });
+    }
+  });
+
+  app.get('/api/flashcard-sets/course/:courseId', isAuthenticated, async (req: any, res) => {
+    try {
+      const sets = await storage.getFlashcardSetsByCourseId(req.params.courseId);
+      res.json(sets);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching flashcard sets' });
+    }
+  });
+
+  app.post('/api/courses/:id/generate-flashcards', isAuthenticated, async (req: any, res) => {
+    try {
+      const course = await storage.getCourse(req.params.id);
+      if (!course) {
+        return res.status(404).json({ message: 'Course not found' });
+      }
+      if (course.userId !== req.user.id) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+
+      const subscription = await storage.getSubscriptionByUserId(req.user.id);
+      const isPremium = subscription?.status === 'premium' && subscription?.endDate && new Date(subscription.endDate) > new Date();
+
+      const existingSets = await storage.getFlashcardSetsByCourseId(course.id);
+      if (!isPremium && existingSets.length >= 1) {
+        const msg = req.user.language === 'en'
+          ? 'Free users can generate 1 flashcard set per course. Upgrade to Premium for unlimited sets.'
+          : 'Les utilisateurs gratuits peuvent generer 1 jeu de flashcards par cours. Passez en Premium pour des jeux illimites.';
+        return res.status(403).json({ message: msg });
+      }
+
+      const language = (req.user.language as 'fr' | 'en') || 'fr';
+      const result = await generateFlashcards(course.content, course.title, language, !!isPremium);
+
+      const flashcardSet = await storage.createFlashcardSet({
+        courseId: course.id,
+        userId: req.user.id,
+        cards: result.cards,
+        totalCards: result.cards.length,
+        masteredCards: 0,
+      });
+
+      res.json(flashcardSet);
+    } catch (error: any) {
+      console.error('Error generating flashcards:', error);
+      res.status(500).json({ message: error.message || 'Error generating flashcards' });
+    }
+  });
+
+  app.get('/api/flashcard-sets/:id/progress', isAuthenticated, async (req: any, res) => {
+    try {
+      const progress = await storage.getFlashcardProgress(req.params.id, req.user.id);
+      res.json(progress);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching progress' });
+    }
+  });
+
+  app.patch('/api/flashcard-sets/:id/progress', isAuthenticated, async (req: any, res) => {
+    try {
+      const { cardIndex, status } = req.body;
+      if (cardIndex === undefined || !status) {
+        return res.status(400).json({ message: 'cardIndex and status are required' });
+      }
+
+      const result = await storage.upsertFlashcardProgress({
+        flashcardSetId: req.params.id,
+        userId: req.user.id,
+        cardIndex,
+        status,
+      });
+
+      const allProgress = await storage.getFlashcardProgress(req.params.id, req.user.id);
+      const masteredCount = allProgress.filter(p => p.status === 'mastered').length;
+      await storage.updateFlashcardSet(req.params.id, { masteredCards: masteredCount });
+
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating progress' });
+    }
+  });
+
+  app.delete('/api/flashcard-sets/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const set = await storage.getFlashcardSet(req.params.id);
+      if (!set || set.userId !== req.user.id) {
+        return res.status(404).json({ message: 'Flashcard set not found' });
+      }
+      await storage.deleteFlashcardSet(req.params.id);
+      res.json({ message: 'Deleted' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting flashcard set' });
+    }
+  });
+
+  // ============ STUDY GUIDE ROUTES ============
+
+  app.get('/api/study-guides', isAuthenticated, async (req: any, res) => {
+    try {
+      const guides = await storage.getStudyGuidesByUserId(req.user.id);
+      res.json(guides);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching study guides' });
+    }
+  });
+
+  app.get('/api/study-guides/course/:courseId', isAuthenticated, async (req: any, res) => {
+    try {
+      const guides = await storage.getStudyGuidesByCourseId(req.params.courseId);
+      res.json(guides);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching study guides' });
+    }
+  });
+
+  app.post('/api/courses/:id/generate-study-guide', isAuthenticated, async (req: any, res) => {
+    try {
+      const course = await storage.getCourse(req.params.id);
+      if (!course) {
+        return res.status(404).json({ message: 'Course not found' });
+      }
+      if (course.userId !== req.user.id) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+
+      const subscription = await storage.getSubscriptionByUserId(req.user.id);
+      const isPremium = subscription?.status === 'premium' && subscription?.endDate && new Date(subscription.endDate) > new Date();
+
+      if (!isPremium) {
+        const msg = req.user.language === 'en'
+          ? 'Study guides are a Premium feature. Upgrade to access them.'
+          : 'Les guides d\'etude sont une fonctionnalite Premium. Passez en Premium pour y acceder.';
+        return res.status(403).json({ message: msg });
+      }
+
+      const language = (req.user.language as 'fr' | 'en') || 'fr';
+      const result = await generateStudyGuide(course.content, course.title, language, !!isPremium);
+
+      const guide = await storage.createStudyGuide({
+        courseId: course.id,
+        userId: req.user.id,
+        content: result,
+      });
+
+      res.json(guide);
+    } catch (error: any) {
+      console.error('Error generating study guide:', error);
+      res.status(500).json({ message: error.message || 'Error generating study guide' });
+    }
+  });
+
+  app.delete('/api/study-guides/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const guide = await storage.getStudyGuide(req.params.id);
+      if (!guide || guide.userId !== req.user.id) {
+        return res.status(404).json({ message: 'Study guide not found' });
+      }
+      await storage.deleteStudyGuide(req.params.id);
+      res.json({ message: 'Deleted' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting study guide' });
     }
   });
 

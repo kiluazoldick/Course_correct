@@ -25,6 +25,12 @@ import {
   type InsertAnonymousUpload,
   type SharedStats,
   type InsertSharedStats,
+  type FlashcardSet,
+  type InsertFlashcardSet,
+  type FlashcardProgress,
+  type InsertFlashcardProgress,
+  type StudyGuide,
+  type InsertStudyGuide,
   type Referral,
   type InsertReferral,
   users,
@@ -37,6 +43,9 @@ import {
   payments,
   anonymousUploads,
   sharedStats,
+  flashcardSets,
+  flashcardProgress,
+  studyGuides,
   referrals,
 } from "@shared/schema";
 
@@ -120,6 +129,25 @@ export interface IStorage {
   createSharedStats(stats: InsertSharedStats): Promise<SharedStats>;
   updateSharedStats(id: string, stats: Partial<InsertSharedStats>): Promise<SharedStats | undefined>;
   deleteSharedStats(id: string): Promise<void>;
+
+  // Flashcard Sets
+  getFlashcardSet(id: string): Promise<FlashcardSet | undefined>;
+  getFlashcardSetsByCourseId(courseId: string): Promise<FlashcardSet[]>;
+  getFlashcardSetsByUserId(userId: string): Promise<FlashcardSet[]>;
+  createFlashcardSet(set: InsertFlashcardSet): Promise<FlashcardSet>;
+  updateFlashcardSet(id: string, updates: Partial<InsertFlashcardSet>): Promise<FlashcardSet | undefined>;
+  deleteFlashcardSet(id: string): Promise<void>;
+
+  // Flashcard Progress
+  getFlashcardProgress(flashcardSetId: string, userId: string): Promise<FlashcardProgress[]>;
+  upsertFlashcardProgress(progress: InsertFlashcardProgress): Promise<FlashcardProgress>;
+
+  // Study Guides
+  getStudyGuide(id: string): Promise<StudyGuide | undefined>;
+  getStudyGuidesByCourseId(courseId: string): Promise<StudyGuide[]>;
+  getStudyGuidesByUserId(userId: string): Promise<StudyGuide[]>;
+  createStudyGuide(guide: InsertStudyGuide): Promise<StudyGuide>;
+  deleteStudyGuide(id: string): Promise<void>;
 
   // Referrals
   getUserByReferralCode(referralCode: string): Promise<User | undefined>;
@@ -469,6 +497,85 @@ export class DbStorage implements IStorage {
   async updateReferral(id: string, updates: Partial<InsertReferral>): Promise<Referral | undefined> {
     const result = await db.update(referrals).set(updates).where(eq(referrals.id, id)).returning();
     return result[0];
+  }
+
+  // Flashcard Sets
+  async getFlashcardSet(id: string): Promise<FlashcardSet | undefined> {
+    const result = await db.select().from(flashcardSets).where(eq(flashcardSets.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getFlashcardSetsByCourseId(courseId: string): Promise<FlashcardSet[]> {
+    return await db.select().from(flashcardSets).where(eq(flashcardSets.courseId, courseId)).orderBy(desc(flashcardSets.createdAt));
+  }
+
+  async getFlashcardSetsByUserId(userId: string): Promise<FlashcardSet[]> {
+    return await db.select().from(flashcardSets).where(eq(flashcardSets.userId, userId)).orderBy(desc(flashcardSets.createdAt));
+  }
+
+  async createFlashcardSet(set: InsertFlashcardSet): Promise<FlashcardSet> {
+    const result = await db.insert(flashcardSets).values(set).returning();
+    return result[0];
+  }
+
+  async updateFlashcardSet(id: string, updates: Partial<InsertFlashcardSet>): Promise<FlashcardSet | undefined> {
+    const result = await db.update(flashcardSets).set(updates).where(eq(flashcardSets.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteFlashcardSet(id: string): Promise<void> {
+    await db.delete(flashcardSets).where(eq(flashcardSets.id, id));
+  }
+
+  // Flashcard Progress
+  async getFlashcardProgress(flashcardSetId: string, userId: string): Promise<FlashcardProgress[]> {
+    return await db.select().from(flashcardProgress).where(
+      and(eq(flashcardProgress.flashcardSetId, flashcardSetId), eq(flashcardProgress.userId, userId))
+    );
+  }
+
+  async upsertFlashcardProgress(progress: InsertFlashcardProgress): Promise<FlashcardProgress> {
+    const existing = await db.select().from(flashcardProgress).where(
+      and(
+        eq(flashcardProgress.flashcardSetId, progress.flashcardSetId),
+        eq(flashcardProgress.userId, progress.userId),
+        eq(flashcardProgress.cardIndex, progress.cardIndex)
+      )
+    ).limit(1);
+
+    if (existing[0]) {
+      const result = await db.update(flashcardProgress)
+        .set({ status: progress.status, lastReviewedAt: new Date() })
+        .where(eq(flashcardProgress.id, existing[0].id))
+        .returning();
+      return result[0];
+    }
+
+    const result = await db.insert(flashcardProgress).values({ ...progress, lastReviewedAt: new Date() }).returning();
+    return result[0];
+  }
+
+  // Study Guides
+  async getStudyGuide(id: string): Promise<StudyGuide | undefined> {
+    const result = await db.select().from(studyGuides).where(eq(studyGuides.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getStudyGuidesByCourseId(courseId: string): Promise<StudyGuide[]> {
+    return await db.select().from(studyGuides).where(eq(studyGuides.courseId, courseId)).orderBy(desc(studyGuides.createdAt));
+  }
+
+  async getStudyGuidesByUserId(userId: string): Promise<StudyGuide[]> {
+    return await db.select().from(studyGuides).where(eq(studyGuides.userId, userId)).orderBy(desc(studyGuides.createdAt));
+  }
+
+  async createStudyGuide(guide: InsertStudyGuide): Promise<StudyGuide> {
+    const result = await db.insert(studyGuides).values(guide).returning();
+    return result[0];
+  }
+
+  async deleteStudyGuide(id: string): Promise<void> {
+    await db.delete(studyGuides).where(eq(studyGuides.id, id));
   }
 }
 

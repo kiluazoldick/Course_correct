@@ -534,6 +534,210 @@ export async function evaluateOpenAnswer(question: string, userAnswer: string, e
   return evaluation;
 }
 
+export async function generateFlashcards(
+  courseContent: string,
+  courseTitle: string,
+  language: Language = 'fr',
+  isPremium: boolean = false
+): Promise<{ cards: Array<{ front: string; back: string }> }> {
+  const limits = isPremium ? CONTENT_LIMITS.premium : CONTENT_LIMITS.free;
+  const { content: truncatedContent } = truncateContent(courseContent, limits.maxChars, language);
+
+  const systemPrompt = language === 'fr'
+    ? `Tu es un expert en creation de flashcards educatives pour etudiants universitaires.
+
+INSTRUCTIONS :
+- Genere entre 10 et 15 flashcards basees sur le contenu du cours
+- Chaque flashcard a un "front" (question ou concept) et un "back" (reponse ou definition)
+- Les questions doivent couvrir les concepts cles, definitions, formules et points importants
+- Varie les types : definitions, questions de comprehension, applications, distinctions entre concepts
+- Les reponses doivent etre concises mais completes (2-3 phrases max)
+- Utilise un langage clair et accessible
+
+Format de sortie : JSON avec cette structure exacte :
+{
+  "cards": [
+    {"front": "Qu'est-ce que [concept] ?", "back": "Explication concise du concept."},
+    {"front": "Quelle est la difference entre X et Y ?", "back": "X se caracterise par... tandis que Y..."}
+  ]
+}`
+    : `You are an expert at creating educational flashcards for university students.
+
+INSTRUCTIONS:
+- Generate between 10 and 15 flashcards based on the course content
+- Each flashcard has a "front" (question or concept) and a "back" (answer or definition)
+- Questions should cover key concepts, definitions, formulas and important points
+- Vary the types: definitions, comprehension questions, applications, distinctions between concepts
+- Answers should be concise but complete (2-3 sentences max)
+- Use clear and accessible language
+
+Output format: JSON with this exact structure:
+{
+  "cards": [
+    {"front": "What is [concept]?", "back": "Concise explanation of the concept."},
+    {"front": "What is the difference between X and Y?", "back": "X is characterized by... while Y..."}
+  ]
+}`;
+
+  const userPrompt = language === 'fr'
+    ? `Genere des flashcards pour le cours suivant :
+
+Titre : ${courseTitle}
+
+Contenu :
+${truncatedContent}`
+    : `Generate flashcards for the following course:
+
+Title: ${courseTitle}
+
+Content:
+${truncatedContent}`;
+
+  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://corrigetescours.com',
+      'X-Title': 'Corrige Tes Cours',
+    },
+    body: JSON.stringify({
+      model: 'deepseek/deepseek-r1',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 3000,
+      response_format: { type: "json_object" }
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('OpenRouter API error (flashcards):', response.status, errorText);
+    const userMessage = parseOpenRouterError(response.status, errorText, language);
+    throw new Error(userMessage);
+  }
+
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content;
+
+  if (!content) {
+    throw new Error(language === 'fr' ? 'Impossible de generer les flashcards.' : 'Could not generate flashcards.');
+  }
+
+  return JSON.parse(content);
+}
+
+export async function generateStudyGuide(
+  courseContent: string,
+  courseTitle: string,
+  language: Language = 'fr',
+  isPremium: boolean = false
+): Promise<{ objectives: string[]; keyConcepts: Array<{ title: string; explanation: string }>; pitfalls: string[]; exercises: string[] }> {
+  const limits = isPremium ? CONTENT_LIMITS.premium : CONTENT_LIMITS.free;
+  const { content: truncatedContent } = truncateContent(courseContent, limits.maxChars, language);
+
+  const systemPrompt = language === 'fr'
+    ? `Tu es un expert en pedagogie universitaire. Tu crees des guides d'etude structures pour aider les etudiants a reviser efficacement.
+
+INSTRUCTIONS :
+- Analyse le cours et genere un guide d'etude complet
+- Le guide doit etre pratique et actionnable
+- Utilise un langage clair et accessible
+
+Format de sortie : JSON avec cette structure exacte :
+{
+  "objectives": ["Objectif 1", "Objectif 2", "Objectif 3"],
+  "keyConcepts": [
+    {"title": "Concept cle 1", "explanation": "Explication claire et concise du concept."},
+    {"title": "Concept cle 2", "explanation": "Explication claire et concise du concept."}
+  ],
+  "pitfalls": ["Piege courant 1 a eviter", "Piege courant 2 a eviter"],
+  "exercises": ["Exercice pratique 1", "Exercice pratique 2"]
+}
+
+Genere :
+- 3-5 objectifs d'apprentissage
+- 5-8 concepts cles avec explications
+- 3-5 pieges courants a eviter
+- 3-5 exercices pratiques suggerés`
+    : `You are an expert in university pedagogy. You create structured study guides to help students review effectively.
+
+INSTRUCTIONS:
+- Analyze the course and generate a comprehensive study guide
+- The guide should be practical and actionable
+- Use clear and accessible language
+
+Output format: JSON with this exact structure:
+{
+  "objectives": ["Objective 1", "Objective 2", "Objective 3"],
+  "keyConcepts": [
+    {"title": "Key Concept 1", "explanation": "Clear and concise explanation of the concept."},
+    {"title": "Key Concept 2", "explanation": "Clear and concise explanation of the concept."}
+  ],
+  "pitfalls": ["Common pitfall 1 to avoid", "Common pitfall 2 to avoid"],
+  "exercises": ["Practical exercise 1", "Practical exercise 2"]
+}
+
+Generate:
+- 3-5 learning objectives
+- 5-8 key concepts with explanations
+- 3-5 common pitfalls to avoid
+- 3-5 suggested practical exercises`;
+
+  const userPrompt = language === 'fr'
+    ? `Cree un guide d'etude pour le cours suivant :
+
+Titre : ${courseTitle}
+
+Contenu :
+${truncatedContent}`
+    : `Create a study guide for the following course:
+
+Title: ${courseTitle}
+
+Content:
+${truncatedContent}`;
+
+  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://corrigetescours.com',
+      'X-Title': 'Corrige Tes Cours',
+    },
+    body: JSON.stringify({
+      model: 'deepseek/deepseek-r1',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 3000,
+      response_format: { type: "json_object" }
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('OpenRouter API error (study guide):', response.status, errorText);
+    const userMessage = parseOpenRouterError(response.status, errorText, language);
+    throw new Error(userMessage);
+  }
+
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content;
+
+  if (!content) {
+    throw new Error(language === 'fr' ? 'Impossible de generer le guide d\'etude.' : 'Could not generate study guide.');
+  }
+
+  return JSON.parse(content);
+}
+
 export async function chatWithAI(
   userMessage: string,
   conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>,

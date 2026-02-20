@@ -10,8 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { insertCourseSchema, type Course, type InsertCourse } from '@shared/schema';
-import { Plus, BookOpen, Trash2, Edit, Calendar, Sparkles, FileText, Eye, Upload } from 'lucide-react';
+import { Plus, BookOpen, Trash2, Edit, Calendar, Sparkles, FileText, Eye, Upload, ChevronRight } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useLocation } from 'wouter';
 import jsPDF from 'jspdf';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import {
@@ -28,6 +29,7 @@ import {
 export default function Courses() {
   const { toast } = useToast();
   const { t, language } = useLanguage();
+  const [, setLocation] = useLocation();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -490,11 +492,14 @@ export default function Courses() {
       ) : (
         <div className="grid gap-3 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course) => (
-            <Card key={course.id} className="hover-elevate" data-testid={`card-course-${course.id}`}>
+            <Card key={course.id} className="hover-elevate cursor-pointer" onClick={() => setLocation(`/courses/${course.id}`)} data-testid={`card-course-${course.id}`}>
               <CardHeader>
-                <CardTitle className="line-clamp-1" data-testid={`text-course-title-${course.id}`}>
-                  {course.title}
-                </CardTitle>
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="line-clamp-1 flex-1" data-testid={`text-course-title-${course.id}`}>
+                    {course.title}
+                  </CardTitle>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                </div>
                 {course.subject && (
                   <CardDescription className="line-clamp-1">{course.subject}</CardDescription>
                 )}
@@ -514,53 +519,25 @@ export default function Courses() {
                   </span>
                 </div>
               </CardContent>
-              <CardFooter className="flex flex-col gap-2">
+              <CardFooter className="flex gap-2">
                 <Button
-                  variant="default"
+                  variant="outline"
                   size="sm"
-                  onClick={() => handleGenerateSummary(course)}
-                  disabled={generateSummaryMutation.isPending}
-                  data-testid={`button-generate-summary-${course.id}`}
-                  className="w-full"
+                  onClick={(e) => { e.stopPropagation(); handleEdit(course); }}
+                  data-testid={`button-edit-course-${course.id}`}
+                  className="flex-1"
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  {generateSummaryMutation.isPending && selectedCourse?.id === course.id
-                    ? t.coursesPage.generatingSummary
-                    : t.coursesPage.generateSummary}
+                  <Edit className="w-4 h-4 mr-2" />
+                  {t.coursesPage.edit}
                 </Button>
-                <div className="flex gap-2 w-full">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedCourse(course);
-                      setIsViewOpen(true);
-                    }}
-                    data-testid={`button-view-course-${course.id}`}
-                    className="flex-1"
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    {t.coursesPage.view}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(course)}
-                    data-testid={`button-edit-course-${course.id}`}
-                    className="flex-1"
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    {t.coursesPage.edit}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(course)}
-                    data-testid={`button-delete-course-${course.id}`}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => { e.stopPropagation(); handleDelete(course); }}
+                  data-testid={`button-delete-course-${course.id}`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </CardFooter>
             </Card>
           ))}

@@ -10,6 +10,7 @@ import Performance from './dashboard/Performance';
 import Subscription from './dashboard/Subscription';
 import PaymentMethod from './dashboard/PaymentMethod';
 import Account from './dashboard/Account';
+import CourseDetail from './dashboard/CourseDetail';
 
 function DashboardContent() {
   return (
@@ -39,6 +40,7 @@ function DashboardContent() {
         <main className="flex-1 overflow-auto p-4 pb-20 md:p-6 md:pb-6">
           <Switch>
             <Route path="/" component={DashboardHome} />
+            <Route path="/courses/:id" component={CourseDetail} />
             <Route path="/courses" component={Courses} />
             <Route path="/quizzes" component={Quizzes} />
             <Route path="/chat" component={Chat} />
@@ -49,6 +51,7 @@ function DashboardContent() {
             {/* Dashboard prefixed routes for payment redirects */}
             <Route path="/dashboard/subscription" component={Subscription} />
             <Route path="/dashboard/payment-method" component={PaymentMethod} />
+            <Route path="/dashboard/courses/:id" component={CourseDetail} />
             <Route path="/dashboard/courses" component={Courses} />
             <Route path="/dashboard/quizzes" component={Quizzes} />
             <Route path="/dashboard/chat" component={Chat} />

@@ -11,15 +11,27 @@ export interface ExtractedText {
   title: string;
 }
 
+const MAX_PDF_BUFFER_SIZE = 50 * 1024 * 1024; // 50MB buffer limit
+
 export async function extractTextFromPDF(fileBuffer: Buffer): Promise<ExtractedText> {
+  if (fileBuffer.length > MAX_PDF_BUFFER_SIZE) {
+    throw new Error(
+      'Ce PDF est trop volumineux pour etre traite (>' + Math.round(MAX_PDF_BUFFER_SIZE / 1024 / 1024) + ' MB). ' +
+      'Essayez de diviser le document en parties plus petites.'
+    );
+  }
+
   let parser: any = null;
   
   try {
-    // Create parser instance with pdf-parse v2 API
+    // Create parser instance with pdf-parse v2 API, with timeout
     parser = new pdfParse({ data: fileBuffer });
     
-    // Extract text using v2 API
-    const result = await parser.getText();
+    // Extract text with a timeout to prevent hanging on very large documents
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('PDF_TIMEOUT')), 60000);
+    });
+    const result = await Promise.race([parser.getText(), timeoutPromise]);
     
     // Clean up text
     const text = result.text
@@ -52,16 +64,21 @@ export async function extractTextFromPDF(fileBuffer: Buffer): Promise<ExtractedT
   } catch (error) {
     console.error('PDF extraction error:', error);
     
-    // Provide more helpful error messages
     if (error instanceof Error) {
-      if (error.message.includes('images') || error.message.includes('scannées')) {
-        throw error; // Re-throw our custom error
+      if (error.message.includes('images') || error.message.includes('scannées') || error.message.includes('volumineux')) {
+        throw error;
+      }
+      if (error.message === 'PDF_TIMEOUT') {
+        throw new Error(
+          'Le traitement de ce PDF a pris trop de temps. ' +
+          'Le document est probablement trop long. Essayez de diviser le document en parties plus petites (moins de 200 pages).'
+        );
       }
     }
     
     throw new Error(
       'Impossible d\'extraire le texte du PDF. ' +
-      'Assurez-vous que le PDF contient du texte sélectionnable (non scanné).'
+      'Assurez-vous que le PDF contient du texte selectionnable (non scanne).'
     );
   } finally {
     // Clean up resources
@@ -92,18 +109,51 @@ export async function extractTextFromWord(fileBuffer: Buffer): Promise<Extracted
   }
 }
 
+const MAX_CONTENT_CHARS = 200000;
+
+function truncateExtractedText(result: ExtractedText): ExtractedText {
+  if (result.text.length <= MAX_CONTENT_CHARS) {
+    return result;
+  }
+
+  let truncated = result.text.substring(0, MAX_CONTENT_CHARS);
+  const lastSentence = Math.max(
+    truncated.lastIndexOf('. '),
+    truncated.lastIndexOf('.\n'),
+    truncated.lastIndexOf('? '),
+    truncated.lastIndexOf('! ')
+  );
+  if (lastSentence > MAX_CONTENT_CHARS * 0.8) {
+    truncated = truncated.substring(0, lastSentence + 1);
+  }
+
+  const notice = '\n\n[... Document tronque pour respecter les limites. Les ' +
+    Math.round(MAX_CONTENT_CHARS / 1000) + ' premiers milliers de caracteres ont ete conserves.]';
+
+  console.log(`Content truncated from ${result.text.length} to ${truncated.length} chars`);
+
+  return {
+    text: truncated + notice,
+    title: result.title,
+  };
+}
+
 export async function processUploadedFile(
   fileBuffer: Buffer,
   mimetype: string
 ): Promise<ExtractedText> {
+  let result: ExtractedText;
+
   if (mimetype === 'application/pdf') {
-    return extractTextFromPDF(fileBuffer);
+    result = await extractTextFromPDF(fileBuffer);
   } else if (
     mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
     mimetype === 'application/msword'
   ) {
-    return extractTextFromWord(fileBuffer);
+    result = await extractTextFromWord(fileBuffer);
   } else {
     throw new Error('Type de fichier non supporté. Utilise PDF ou Word (.docx)');
   }
+
+  return truncateExtractedText(result);
 }

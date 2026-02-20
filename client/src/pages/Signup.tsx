@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SiGoogle } from 'react-icons/si';
-import { UserPlus, Mail, Lock, User, GraduationCap } from 'lucide-react';
+import { Mail, Lock, User, GraduationCap, Brain, Layers, BookMarked, ArrowRight, CheckCircle } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
@@ -32,7 +32,6 @@ export default function Signup() {
   const uploadId = searchParams.get('uploadId');
   const refCode = searchParams.get('ref');
 
-  // Validate referral code on mount
   useEffect(() => {
     if (refCode) {
       fetch(`/api/referral/validate/${refCode}`)
@@ -123,212 +122,248 @@ export default function Signup() {
     window.location.href = '/api/auth/google';
   };
 
+  const sideFeatures = [
+    { icon: Brain, label: language === 'fr' ? "Résumés IA instantanés" : "Instant AI summaries" },
+    { icon: Layers, label: language === 'fr' ? "Flashcards intelligentes" : "Smart flashcards" },
+    { icon: BookMarked, label: language === 'fr' ? "Guides d'étude personnalisés" : "Personalized study guides" },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background p-4 relative overflow-hidden">
+    <div className="min-h-screen flex">
       <SEO 
         title={t.signupPage.title}
         description={t.signupPage.subtitle}
         url="https://corrigetescours.com/signup"
       />
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-        <LanguageToggle />
-        <ThemeToggle />
+
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary to-purple-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(255,255,255,0.1),transparent)]" />
+        <div className="relative z-10 flex flex-col justify-center p-12 xl:p-16 text-white">
+          <div className="flex items-center gap-3 mb-12">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <span className="text-xl font-bold">Corrige Tes Cours</span>
+          </div>
+          
+          <h2 className="text-3xl xl:text-4xl font-bold mb-4 leading-tight">
+            {language === 'fr' ? "Commence à étudier plus efficacement" : "Start studying more effectively"}
+          </h2>
+          <p className="text-white/70 mb-10 text-lg leading-relaxed">
+            {language === 'fr' 
+              ? "Crée ton compte gratuit et accède à tous les outils IA dont tu as besoin pour réussir."
+              : "Create your free account and access all the AI tools you need to succeed."}
+          </p>
+
+          <div className="space-y-4">
+            {sideFeatures.map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + i * 0.15 }}
+                className="flex items-center gap-3 bg-white/10 rounded-xl p-4"
+              >
+                <div className="w-9 h-9 bg-white/15 rounded-lg flex items-center justify-center shrink-0">
+                  <feature.icon className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-medium">{feature.label}</span>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-10 flex items-center gap-3 text-sm text-white/60">
+            <CheckCircle className="w-4 h-4" />
+            <span>{language === 'fr' ? "100% gratuit pour commencer" : "100% free to start"}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Decorative elements */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full max-w-md relative z-10"
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="text-center mb-8"
-        >
-          <div 
-            className="inline-flex items-center gap-2 mb-4 cursor-pointer hover-elevate rounded-md px-3 py-2" 
-            onClick={() => setLocation('/')}
-          >
-            <GraduationCap className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold" data-testid="text-signup-title">
-              Corrige Tes Cours
-            </h1>
-          </div>
-          <p className="text-muted-foreground">{t.signupPage.welcome}</p>
-        </motion.div>
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 relative">
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+          <LanguageToggle />
+          <ThemeToggle />
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
         >
-          <Card className="backdrop-blur-sm bg-card/50">
-          {referrerName && (
-            <div className="bg-green-500/10 border-b border-green-500/20 p-3 text-center">
-              <p className="text-sm text-green-700 dark:text-green-400">
-                {language === 'fr' 
-                  ? `Tu as été invité par ${referrerName}. Inscris-toi pour lui offrir 14 jours Premium gratuits !`
-                  : `You were invited by ${referrerName}. Sign up to give them 14 free Premium days!`}
-              </p>
+          <div 
+            className="flex lg:hidden items-center gap-2.5 mb-8 cursor-pointer" 
+            onClick={() => setLocation('/')}
+          >
+            <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
+              <GraduationCap className="h-4.5 w-4.5 text-primary-foreground" />
             </div>
-          )}
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">{t.signupPage.title}</CardTitle>
-            <CardDescription className="text-center">
-              {t.signupPage.subtitle}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={handleGoogleSignup}
-              variant="outline"
-              className="w-full"
-              size="lg"
-              data-testid="button-signup-google"
-            >
-              <SiGoogle className="h-5 w-5 mr-2" />
-              {t.signupPage.continueWithGoogle}
-            </Button>
+            <h1 className="text-xl font-bold" data-testid="text-signup-title">
+              Corrige Tes Cours
+            </h1>
+          </div>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">{t.signupPage.orWithEmail}</span>
-              </div>
-            </div>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold mb-2">{t.signupPage.title}</h2>
+            <p className="text-muted-foreground">{t.signupPage.subtitle}</p>
+          </div>
 
-            <form onSubmit={handleEmailSignup} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">{t.signupPage.firstName}</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="firstName"
-                      type="text"
-                      placeholder={t.signupPage.firstNamePlaceholder}
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      className="pl-10"
-                      required
-                      data-testid="input-firstname"
-                    />
-                  </div>
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              {referrerName && (
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-lg text-center">
+                  <p className="text-sm text-emerald-700 dark:text-emerald-400">
+                    {language === 'fr' 
+                      ? `Invit\u00e9 par ${referrerName} \u2014 14 jours Premium gratuits pour vous deux !`
+                      : `Invited by ${referrerName} \u2014 14 free Premium days for both of you!`}
+                  </p>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">{t.signupPage.lastName}</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="lastName"
-                      type="text"
-                      placeholder={t.signupPage.lastNamePlaceholder}
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      className="pl-10"
-                      required
-                      data-testid="input-lastname"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">{t.signupPage.email}</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder={t.signupPage.emailPlaceholder}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                    required
-                    data-testid="input-email"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">{t.signupPage.password}</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
-                    required
-                    data-testid="input-password"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">{t.signupPage.confirmPassword}</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="pl-10"
-                    required
-                    data-testid="input-confirm-password"
-                  />
-                </div>
-              </div>
+              )}
 
               <Button
-                type="submit"
+                onClick={handleGoogleSignup}
+                variant="outline"
                 className="w-full"
                 size="lg"
-                disabled={isLoading}
-                data-testid="button-signup"
+                data-testid="button-signup-google"
               >
-                {isLoading ? (
-                  t.signupPage.submitting
-                ) : (
-                  <>
-                    <UserPlus className="h-5 w-5 mr-2" />
-                    {t.signupPage.submit}
-                  </>
-                )}
+                <SiGoogle className="h-4 w-4 mr-2" />
+                {t.signupPage.continueWithGoogle}
               </Button>
-            </form>
 
-            <div className="text-center text-sm pt-4 border-t">
-              <span className="text-muted-foreground">{t.signupPage.hasAccount} </span>
-              <button
-                onClick={() => setLocation('/login')}
-                className="text-primary font-semibold hover:underline bg-transparent border-0 p-0 cursor-pointer"
-                data-testid="link-login"
-              >
-                {t.signupPage.login}
-              </button>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">{t.signupPage.orWithEmail}</span>
+                </div>
+              </div>
+
+              <form onSubmit={handleEmailSignup} className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="firstName" className="text-sm">{t.signupPage.firstName}</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="firstName"
+                        type="text"
+                        placeholder={t.signupPage.firstNamePlaceholder}
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="pl-10"
+                        required
+                        data-testid="input-firstname"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lastName" className="text-sm">{t.signupPage.lastName}</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="lastName"
+                        type="text"
+                        placeholder={t.signupPage.lastNamePlaceholder}
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="pl-10"
+                        required
+                        data-testid="input-lastname"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-sm">{t.signupPage.email}</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder={t.signupPage.emailPlaceholder}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10"
+                      required
+                      data-testid="input-email"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="password" className="text-sm">{t.signupPage.password}</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10"
+                      required
+                      data-testid="input-password"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="confirmPassword" className="text-sm">{t.signupPage.confirmPassword}</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="pl-10"
+                      required
+                      data-testid="input-confirm-password"
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full group"
+                  size="lg"
+                  disabled={isLoading}
+                  data-testid="button-signup"
+                >
+                  {isLoading ? (
+                    t.signupPage.submitting
+                  ) : (
+                    <>
+                      {t.signupPage.submit}
+                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                    </>
+                  )}
+                </Button>
+              </form>
+
+              <div className="text-center text-sm pt-4 border-t">
+                <span className="text-muted-foreground">{t.signupPage.hasAccount} </span>
+                <button
+                  onClick={() => setLocation('/login')}
+                  className="text-primary font-semibold hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                  data-testid="link-login"
+                >
+                  {t.signupPage.login}
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <p className="text-center text-xs text-muted-foreground mt-6">
+            {t.signupPage.termsNotice}
+          </p>
         </motion.div>
-
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          {t.signupPage.termsNotice}
-        </p>
-      </motion.div>
+      </div>
     </div>
   );
 }

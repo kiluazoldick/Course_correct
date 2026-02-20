@@ -1,7 +1,7 @@
 import Navbar from '@/components/Navbar';
 import AppFooter from '@/components/AppFooter';
 import SEO from '@/components/SEO';
-import { Check, Sparkles, Zap, Shield, Clock, TrendingUp } from 'lucide-react';
+import { Check, Sparkles, Zap, Shield, Clock, TrendingUp, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,40 +20,45 @@ export default function Pricing() {
       description: t.pricingPage.free.description,
       features: t.pricingPage.free.features,
       cta: t.pricingPage.free.cta,
-      popular: false
+      popular: false,
     },
     {
       name: t.pricingPage.premium.name,
       price: "500",
       period: t.pricingPage.premium.period,
       description: t.pricingPage.premium.description,
-      features: t.pricingPage.premium.features,
+      features: [
+        ...t.pricingPage.premium.features,
+        ...(language === 'fr' 
+          ? ["Flashcards illimit\u00e9es par cours", "Guides d'\u00e9tude IA"] 
+          : ["Unlimited flashcards per course", "AI study guides"]),
+      ],
       cta: t.pricingPage.premium.cta,
-      popular: true
-    }
+      popular: true,
+    },
   ];
 
   const benefits = [
     {
       icon: Zap,
       title: t.pricingPage.benefits.fast.title,
-      description: t.pricingPage.benefits.fast.description
+      description: t.pricingPage.benefits.fast.description,
     },
     {
       icon: Shield,
       title: t.pricingPage.benefits.guarantee.title,
-      description: t.pricingPage.benefits.guarantee.description
+      description: t.pricingPage.benefits.guarantee.description,
     },
     {
       icon: Clock,
       title: t.pricingPage.benefits.support.title,
-      description: t.pricingPage.benefits.support.description
+      description: t.pricingPage.benefits.support.description,
     },
     {
       icon: TrendingUp,
       title: t.pricingPage.benefits.progress.title,
-      description: t.pricingPage.benefits.progress.description
-    }
+      description: t.pricingPage.benefits.progress.description,
+    },
   ];
 
   const faqItems = [
@@ -67,22 +72,17 @@ export default function Pricing() {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
+      transition: { staggerChildren: 0.08 },
+    },
   };
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { y: 30, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut"
-      }
-    }
+      transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    },
   };
 
   return (
@@ -95,53 +95,43 @@ export default function Pricing() {
       <Navbar />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative bg-gradient-to-b from-primary/5 via-background to-background py-20 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <section className="relative py-20 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-purple-500/5 dark:from-primary/15 dark:via-background dark:to-purple-500/10" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(59,130,246,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(59,130,246,0.2),transparent)]" />
+          
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-7xl mx-auto text-center relative z-10"
+            className="max-w-4xl mx-auto text-center relative z-10"
           >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
-              className="inline-block mb-6"
-            >
-              <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                {t.pricingPage.badge}
-              </div>
-            </motion.div>
+            <Badge variant="secondary" className="mb-6">
+              <Sparkles className="w-3 h-3 mr-1" />
+              {t.pricingPage.badge}
+            </Badge>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6" data-testid="text-pricing-title">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight" data-testid="text-pricing-title">
               {t.pricingPage.heroTitle}
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               {t.pricingPage.heroSubtitle}
             </p>
           </motion.div>
-
-          {/* Decorative elements */}
-          <div className="absolute top-1/4 -left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 -right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         </section>
 
-        {/* Pricing Cards */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto">
             <motion.div
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-8"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
             >
               {plans.map((plan, index) => (
                 <motion.div key={index} variants={itemVariants}>
                   <Card 
-                    className={`relative h-full hover-elevate transition-all duration-300 ${plan.popular ? 'border-primary shadow-xl shadow-primary/5' : ''}`}
+                    className={`relative h-full hover-elevate ${plan.popular ? 'border-primary' : ''}`}
                     data-testid={`card-plan-${index}`}
                   >
                     {plan.popular && (
@@ -152,24 +142,24 @@ export default function Pricing() {
                         </Badge>
                       </div>
                     )}
-                    <CardHeader className="pb-6">
+                    <CardHeader className="pb-6 pt-8">
                       <CardTitle className="text-2xl">{plan.name}</CardTitle>
                       <CardDescription>{plan.description}</CardDescription>
                       <div className="mt-4">
                         {plan.popular ? (
                           <div className="space-y-1">
-                            <div>
+                            <div className="flex items-baseline gap-1">
                               <span className="text-5xl font-bold">500</span>
-                              <span className="text-muted-foreground ml-2">XAF /{plan.period}</span>
+                              <span className="text-muted-foreground">XAF /{plan.period}</span>
                             </div>
-                            <div className="text-lg text-muted-foreground">
+                            <div className="text-base text-muted-foreground">
                               {language === 'en' ? 'or' : 'ou'} <span className="font-semibold text-foreground">$1 USD</span> /{plan.period}
                             </div>
                           </div>
                         ) : (
-                          <div>
+                          <div className="flex items-baseline gap-1">
                             <span className="text-5xl font-bold">{plan.price}</span>
-                            <span className="text-muted-foreground ml-2">XAF /{plan.period}</span>
+                            <span className="text-muted-foreground">XAF /{plan.period}</span>
                           </div>
                         )}
                       </div>
@@ -177,8 +167,8 @@ export default function Pricing() {
                     <CardContent className="space-y-6">
                       <ul className="space-y-3">
                         {plan.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-2">
-                            <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                          <li key={idx} className="flex items-start gap-2.5">
+                            <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                             <span className="text-sm">{feature}</span>
                           </li>
                         ))}
@@ -186,11 +176,12 @@ export default function Pricing() {
                       <Link href="/signup">
                         <Button 
                           variant={plan.popular ? "default" : "outline"}
-                          className="w-full"
+                          className="w-full group"
                           size="lg"
                           data-testid={`button-select-plan-${index}`}
                         >
                           {plan.cta}
+                          <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
                         </Button>
                       </Link>
                     </CardContent>
@@ -199,13 +190,12 @@ export default function Pricing() {
               ))}
             </motion.div>
 
-            {/* Benefits Grid */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="mt-20"
+              className="mt-20 md:mt-28"
             >
               <h2 className="text-3xl font-bold mb-12 text-center">{t.pricingPage.benefits.title}</h2>
               <motion.div
@@ -213,17 +203,17 @@ export default function Pricing() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
               >
                 {benefits.map((benefit, index) => (
                   <motion.div key={index} variants={itemVariants}>
-                    <Card className="h-full hover-elevate transition-all duration-300">
+                    <Card className="h-full hover-elevate">
                       <CardContent className="p-6 text-center">
-                        <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
                           <benefit.icon className="h-6 w-6 text-primary" />
                         </div>
                         <h3 className="font-semibold mb-2">{benefit.title}</h3>
-                        <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{benefit.description}</p>
                       </CardContent>
                     </Card>
                   </motion.div>
@@ -231,21 +221,20 @@ export default function Pricing() {
               </motion.div>
             </motion.div>
 
-            {/* FAQ */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="mt-20 text-center"
+              className="mt-20 md:mt-28"
             >
-              <h2 className="text-3xl font-bold mb-12">{t.pricingPage.faq.title}</h2>
-              <div className="max-w-3xl mx-auto grid gap-8 text-left">
+              <h2 className="text-3xl font-bold mb-12 text-center">{t.pricingPage.faq.title}</h2>
+              <div className="max-w-3xl mx-auto space-y-4">
                 {faqItems.map((item, index) => (
-                  <Card key={index} className="hover-elevate transition-all duration-300">
+                  <Card key={index} className="hover-elevate">
                     <CardContent className="p-6">
                       <h3 className="font-semibold mb-2">{item.question}</h3>
-                      <p className="text-sm text-muted-foreground">{item.answer}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{item.answer}</p>
                     </CardContent>
                   </Card>
                 ))}

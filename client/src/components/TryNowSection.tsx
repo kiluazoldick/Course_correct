@@ -2,7 +2,8 @@ import { useState, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, Loader2, Sparkles, Zap, Gift } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Upload, Loader2, Sparkles, FileText, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -11,8 +12,9 @@ export default function TryNowSection() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const getOrCreateSessionId = () => {
     let sessionId = localStorage.getItem('anonymousSessionId');
@@ -115,21 +117,40 @@ export default function TryNowSection() {
     }
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  };
+
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-primary/5 to-background">
+    <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
+        viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.6 }}
-        className="max-w-4xl mx-auto"
+        className="max-w-3xl mx-auto"
       >
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
-            <Sparkles className="w-4 h-4" />
+        <div className="text-center mb-10">
+          <Badge variant="secondary" className="mb-4">
+            <Sparkles className="w-3 h-3 mr-1" />
             {t.tryNowSection.badge}
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          </Badge>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
             {t.tryNowSection.title}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -137,20 +158,29 @@ export default function TryNowSection() {
           </p>
         </div>
 
-        <Card className="border-primary/20">
-          <CardContent className="p-8">
-            <div className="flex flex-col items-center gap-6">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
+        <Card className={`transition-all duration-300 ${isDragging ? 'border-primary border-2 bg-primary/5' : ''}`}>
+          <CardContent className="p-8 md:p-10">
+            <div
+              className="flex flex-col items-center gap-6"
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${isDragging ? 'bg-primary/20 scale-110' : 'bg-primary/10'}`}>
                 {uploading ? (
-                  <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 ) : (
-                  <Upload className="w-10 h-10 text-primary" />
+                  <Upload className="w-8 h-8 text-primary" />
                 )}
               </div>
               
               <div className="text-center space-y-2">
                 <h3 className="text-xl font-semibold">
-                  {uploading ? t.tryNowSection.uploading : t.tryNowSection.uploadTitle}
+                  {uploading 
+                    ? t.tryNowSection.uploading 
+                    : isDragging
+                      ? (language === 'fr' ? "Dépose ton fichier ici" : "Drop your file here")
+                      : t.tryNowSection.uploadTitle}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {t.tryNowSection.supportedFormats}
@@ -171,7 +201,7 @@ export default function TryNowSection() {
                 size="lg"
                 onClick={handleButtonClick}
                 disabled={uploading}
-                className="px-8"
+                className="px-8 group"
                 data-testid="button-upload-file"
               >
                 {uploading ? (
@@ -181,22 +211,27 @@ export default function TryNowSection() {
                   </>
                 ) : (
                   <>
-                    <Upload className="w-4 h-4 mr-2" />
+                    <FileText className="w-4 h-4 mr-2" />
                     {t.tryNowSection.chooseFile}
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </Button>
 
-              <p className="text-xs text-muted-foreground flex items-center gap-4">
-                <span className="flex items-center gap-1">
-                  <Zap className="w-3 h-3" />
-                  {t.tryNowSection.benefits.split('•')[0].trim()}
+              <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  {language === 'fr' ? "Résultat en 30 secondes" : "Result in 30 seconds"}
                 </span>
-                <span className="flex items-center gap-1">
-                  <Gift className="w-3 h-3" />
-                  {t.tryNowSection.benefits.split('•')[1]?.trim()}
+                <span className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  {language === 'fr' ? "100% gratuit" : "100% free"}
                 </span>
-              </p>
+                <span className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  {language === 'fr' ? "Aucun compte requis" : "No account required"}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>

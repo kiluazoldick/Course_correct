@@ -5,136 +5,100 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function AppFooter() {
   const currentYear = new Date().getFullYear();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  const socialLinks = [
+    { href: "https://www.facebook.com/share/17ahNC7zbw/?mibextid=wwXIfr", icon: SiFacebook, label: "Facebook", testId: "link-footer-facebook" },
+    { href: "https://www.instagram.com/corrigetescours_?igsh=MzE1dGRsb3ZlNWp2&utm_source=qr", icon: SiInstagram, label: "Instagram", testId: "link-footer-instagram" },
+    { href: "https://x.com/corrigetescours?s=21", icon: SiX, label: "X (Twitter)", testId: "link-footer-twitter" },
+    { href: "https://t.me/corrigetesc0urs", icon: SiTelegram, label: "Telegram", testId: "link-footer-telegram" },
+  ];
 
   return (
-    <footer className="border-t bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Logo et description */}
-          <div className="md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <GraduationCap className="h-6 w-6 text-primary" />
-              <span className="text-lg font-bold">Corrige Tes Cours</span>
+    <footer className="border-t bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+          <div className="col-span-2 md:col-span-1">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <GraduationCap className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <span className="text-lg font-bold tracking-tight">Corrige Tes Cours</span>
             </div>
-            <p className="text-sm text-muted-foreground max-w-md">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mb-6">
               {t.footer.description}
             </p>
             
-            {/* Réseaux Sociaux */}
-            <div className="mt-6">
-              <h3 className="font-semibold mb-3 text-sm" data-testid="text-footer-social-title">{t.footer.followUs}</h3>
-              <div className="flex gap-3">
+            <div className="flex gap-2">
+              {socialLinks.map((social) => (
                 <a 
-                  href="https://www.facebook.com/share/17ahNC7zbw/?mibextid=wwXIfr" 
+                  key={social.testId}
+                  href={social.href}
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                  data-testid="link-footer-facebook"
-                  aria-label="Facebook"
+                  className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover-elevate"
+                  data-testid={social.testId}
+                  aria-label={social.label}
                 >
-                  <SiFacebook className="h-5 w-5" />
+                  <social.icon className="h-4 w-4" />
                 </a>
-                <a 
-                  href="https://www.instagram.com/corrigetescours_?igsh=MzE1dGRsb3ZlNWp2&utm_source=qr" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                  data-testid="link-footer-instagram"
-                  aria-label="Instagram"
-                >
-                  <SiInstagram className="h-5 w-5" />
-                </a>
-                <a 
-                  href="https://x.com/corrigetescours?s=21" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                  data-testid="link-footer-twitter"
-                  aria-label="X (Twitter)"
-                >
-                  <SiX className="h-5 w-5" />
-                </a>
-                <a 
-                  href="https://t.me/corrigetesc0urs" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                  data-testid="link-footer-telegram"
-                  aria-label="Telegram"
-                >
-                  <SiTelegram className="h-5 w-5" />
-                </a>
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* Navigation */}
           <div>
-            <h3 className="font-semibold mb-4" data-testid="text-footer-nav-title">{t.footer.navigation}</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/features" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-features">
-                  {t.nav.features}
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-pricing">
-                  {t.nav.pricing}
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-about">
-                  {t.nav.about}
-                </Link>
-              </li>
+            <h3 className="font-semibold text-sm mb-4" data-testid="text-footer-nav-title">{t.footer.navigation}</h3>
+            <ul className="space-y-2.5">
+              {[
+                { href: "/features", label: t.nav.features, testId: "link-footer-features" },
+                { href: "/pricing", label: t.nav.pricing, testId: "link-footer-pricing" },
+                { href: "/about", label: t.nav.about, testId: "link-footer-about" },
+              ].map((link) => (
+                <li key={link.testId}>
+                  <Link href={link.href} className="text-sm text-muted-foreground" data-testid={link.testId}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
-            <h3 className="font-semibold mb-4" data-testid="text-footer-contact-title">{t.footer.contact}</h3>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <span data-testid="text-footer-email">contact@corrigetescours.cm</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span data-testid="text-footer-location">Douala, Cameroun</span>
-              </li>
+            <h3 className="font-semibold text-sm mb-4" data-testid="text-footer-legal-title">{t.footer.legalSection}</h3>
+            <ul className="space-y-2.5">
+              {[
+                { href: "/legal", label: t.footer.legal, testId: "link-footer-legal" },
+                { href: "/privacy", label: t.footer.privacy, testId: "link-footer-privacy" },
+                { href: "/terms", label: t.footer.terms, testId: "link-footer-terms" },
+              ].map((link) => (
+                <li key={link.testId}>
+                  <Link href={link.href} className="text-sm text-muted-foreground" data-testid={link.testId}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
-          
-          {/* Légal */}
+
           <div>
-            <h3 className="font-semibold mb-4" data-testid="text-footer-legal-title">{t.footer.legalSection}</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/legal" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-legal">
-                  {t.footer.legal}
-                </Link>
+            <h3 className="font-semibold text-sm mb-4" data-testid="text-footer-contact-title">{t.footer.contact}</h3>
+            <ul className="space-y-2.5">
+              <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                <Mail className="h-4 w-4 mt-0.5 shrink-0" />
+                <span data-testid="text-footer-email">contact@corrigetescours.cm</span>
               </li>
-              <li>
-                <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-privacy">
-                  {t.footer.privacy}
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-terms">
-                  {t.footer.terms}
-                </Link>
+              <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                <span data-testid="text-footer-location">Douala, Cameroun</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t">
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground" data-testid="text-footer-copyright">
-              © {currentYear} Corrige Tes Cours. {t.footer.copyright}.
-            </p>
-          </div>
+        <div className="mt-10 pt-6 border-t">
+          <p className="text-center text-xs text-muted-foreground" data-testid="text-footer-copyright">
+            © {currentYear} Corrige Tes Cours. {t.footer.copyright}.
+          </p>
         </div>
       </div>
     </footer>

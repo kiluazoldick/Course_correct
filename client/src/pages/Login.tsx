@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SiGoogle } from 'react-icons/si';
-import { LogIn, Mail, Lock, GraduationCap, Brain, Layers, BookMarked, ArrowRight } from 'lucide-react';
+import { Mail, Lock, GraduationCap, Brain, Layers, BookMarked, ArrowRight, CheckCircle } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
@@ -96,8 +96,8 @@ export default function Login() {
         url="https://corrigetescours.com/login"
       />
 
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary to-purple-600 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(255,255,255,0.1),transparent)]" />
+      <div className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(255,255,255,0.08),transparent)]" />
         <div className="relative z-10 flex flex-col justify-center p-12 xl:p-16 text-white">
           <div className="flex items-center gap-3 mb-12">
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -242,7 +242,7 @@ export default function Login() {
                 <span className="text-muted-foreground">{t.loginPage.noAccount} </span>
                 <button
                   onClick={() => setLocation('/signup')}
-                  className="text-primary font-semibold hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                  className="text-primary font-semibold bg-transparent border-0 p-0 cursor-pointer"
                   data-testid="link-signup"
                 >
                   {t.loginPage.createAccount}

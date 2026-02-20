@@ -136,8 +136,8 @@ export default function Signup() {
         url="https://corrigetescours.com/signup"
       />
 
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary to-purple-600 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(255,255,255,0.1),transparent)]" />
+      <div className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(255,255,255,0.08),transparent)]" />
         <div className="relative z-10 flex flex-col justify-center p-12 xl:p-16 text-white">
           <div className="flex items-center gap-3 mb-12">
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -211,8 +211,8 @@ export default function Signup() {
           <Card>
             <CardContent className="p-6 space-y-4">
               {referrerName && (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-lg text-center">
-                  <p className="text-sm text-emerald-700 dark:text-emerald-400">
+                <div className="bg-primary/10 border border-primary/20 p-3 rounded-lg text-center">
+                  <p className="text-sm text-primary">
                     {language === 'fr' 
                       ? `Invit\u00e9 par ${referrerName} \u2014 14 jours Premium gratuits pour vous deux !`
                       : `Invited by ${referrerName} \u2014 14 free Premium days for both of you!`}
@@ -350,7 +350,7 @@ export default function Signup() {
                 <span className="text-muted-foreground">{t.signupPage.hasAccount} </span>
                 <button
                   onClick={() => setLocation('/login')}
-                  className="text-primary font-semibold hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                  className="text-primary font-semibold bg-transparent border-0 p-0 cursor-pointer"
                   data-testid="link-login"
                 >
                   {t.signupPage.login}

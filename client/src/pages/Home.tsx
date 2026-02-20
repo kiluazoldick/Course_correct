@@ -2,7 +2,7 @@ import Navbar from '@/components/Navbar';
 import AppFooter from '@/components/AppFooter';
 import TryNowSection from '@/components/TryNowSection';
 import SEO from '@/components/SEO';
-import { Brain, TrendingUp, BookOpen, Award, Sparkles, Zap, ChevronRight, Upload, MessageCircle, BarChart3, CheckCircle, Layers, BookMarked, GraduationCap, ArrowRight, Star, Users } from 'lucide-react';
+import { Brain, TrendingUp, BookOpen, Award, Sparkles, Zap, ChevronRight, Upload, MessageCircle, BarChart3, CheckCircle, Layers, BookMarked, GraduationCap, ArrowRight, Star, Users, Shield, Clock, FileText, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,43 +18,31 @@ export default function Home() {
       icon: Brain,
       title: t.landing.features.summary.title,
       description: t.landing.features.summary.description,
-      gradient: 'from-blue-500/10 to-cyan-500/10',
-      iconColor: 'text-blue-500',
     },
     {
       icon: BookOpen,
       title: t.landing.features.quiz.title,
       description: t.landing.features.quiz.description,
-      gradient: 'from-purple-500/10 to-pink-500/10',
-      iconColor: 'text-purple-500',
     },
     {
       icon: Layers,
       title: language === 'fr' ? "Flashcards IA" : "AI Flashcards",
       description: language === 'fr' ? "Générez des flashcards intelligentes depuis vos cours et révisez efficacement avec le suivi de progression" : "Generate smart flashcards from your courses and review efficiently with progress tracking",
-      gradient: 'from-emerald-500/10 to-teal-500/10',
-      iconColor: 'text-emerald-500',
     },
     {
       icon: BookMarked,
       title: language === 'fr' ? "Guide d'Étude IA" : "AI Study Guide",
       description: language === 'fr' ? "Obtenez des guides de révision structurés avec objectifs, concepts clés et exercices pratiques" : "Get structured study guides with objectives, key concepts and practice exercises",
-      gradient: 'from-amber-500/10 to-orange-500/10',
-      iconColor: 'text-amber-500',
     },
     {
       icon: MessageCircle,
       title: language === 'fr' ? "Tariq IA" : "Tariq AI",
       description: language === 'fr' ? "Votre tuteur IA personnel qui répond à toutes vos questions et vous motive" : "Your personal AI tutor who answers all your questions and motivates you",
-      gradient: 'from-rose-500/10 to-red-500/10',
-      iconColor: 'text-rose-500',
     },
     {
       icon: TrendingUp,
       title: language === 'fr' ? "Suivi de Progression" : "Progress Tracking",
       description: language === 'fr' ? "Visualisez vos progrès et identifiez vos points à améliorer avec des statistiques détaillées" : "Visualize your progress and identify areas to improve with detailed statistics",
-      gradient: 'from-indigo-500/10 to-violet-500/10',
-      iconColor: 'text-indigo-500',
     },
   ];
 
@@ -97,6 +85,50 @@ export default function Home() {
     { value: "100%", label: "Free to start", icon: GraduationCap },
   ];
 
+  const whyChooseUs = language === 'fr' ? [
+    {
+      icon: Target,
+      title: "Conçu pour les étudiants camerounais",
+      description: "Notre plateforme est spécialement adaptée au système universitaire camerounais et francophone.",
+    },
+    {
+      icon: Shield,
+      title: "Données 100% sécurisées",
+      description: "Vos cours et données personnelles sont protégés et ne sont jamais partagés avec des tiers.",
+    },
+    {
+      icon: Clock,
+      title: "Gain de temps considérable",
+      description: "Réduisez vos heures de révision de moitié grâce à l'IA qui extrait l'essentiel de vos cours.",
+    },
+    {
+      icon: Award,
+      title: "Prix accessible pour tous",
+      description: "Seulement 500 XAF/mois pour le Premium. Payez facilement via Mobile Money (MTN, Orange).",
+    },
+  ] : [
+    {
+      icon: Target,
+      title: "Made for Cameroonian students",
+      description: "Our platform is specially adapted to the Cameroonian and francophone university system.",
+    },
+    {
+      icon: Shield,
+      title: "100% secure data",
+      description: "Your courses and personal data are protected and never shared with third parties.",
+    },
+    {
+      icon: Clock,
+      title: "Significant time savings",
+      description: "Cut your study hours in half with AI that extracts the essentials from your courses.",
+    },
+    {
+      icon: Award,
+      title: "Affordable for everyone",
+      description: "Only 500 XAF/month for Premium. Pay easily via Mobile Money (MTN, Orange).",
+    },
+  ];
+
   const testimonials = language === 'fr' ? [
     {
       name: "Marie K.",
@@ -116,6 +148,12 @@ export default function Home() {
       content: "Grâce aux quiz personnalisés et aux flashcards, je sais exactement quoi réviser. Mes notes se sont vraiment améliorées !",
       rating: 5,
     },
+    {
+      name: "Paul T.",
+      role: "Étudiant en Informatique, UY1",
+      content: "Le guide d'étude IA m'a aidé à structurer mes révisions avant les examens. Je ne pourrais plus m'en passer.",
+      rating: 5,
+    },
   ] : [
     {
       name: "Marie K.",
@@ -133,6 +171,12 @@ export default function Home() {
       name: "Aminata S.",
       role: "Economics Student, UDla",
       content: "Thanks to personalized quizzes and flashcards, I know exactly what to review. My grades have really improved!",
+      rating: 5,
+    },
+    {
+      name: "Paul T.",
+      role: "CS Student, UY1",
+      content: "The AI study guide helped me structure my revision before exams. I couldn't do without it now.",
       rating: 5,
     },
   ];
@@ -160,39 +204,24 @@ export default function Home() {
       <Navbar />
 
       <main className="flex-1">
-        {/* Hero Section */}
+        {/* Hero Section - Clean with 3D card */}
         <section className="relative min-h-[90vh] md:min-h-[85vh] flex items-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-purple-500/5 dark:from-primary/15 dark:via-background dark:to-purple-500/10" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(59,130,246,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(59,130,246,0.2),transparent)]" />
-
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-20 left-[10%] w-2 h-2 bg-primary/20 rounded-full animate-pulse" />
-            <div className="absolute top-40 right-[15%] w-3 h-3 bg-purple-500/20 rounded-full animate-pulse delay-1000" />
-            <div className="absolute bottom-32 left-[20%] w-2 h-2 bg-emerald-500/20 rounded-full animate-pulse delay-500" />
-            <div className="absolute top-1/3 right-[30%] w-1.5 h-1.5 bg-amber-500/20 rounded-full animate-pulse delay-700" />
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background dark:from-primary/10 dark:via-background dark:to-background" />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-20">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               >
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15, duration: 0.5 }}
-                  className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full text-sm font-medium text-primary mb-6"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
+                <Badge variant="secondary" className="mb-6">
+                  <Sparkles className="w-3 h-3 mr-1" />
                   {language === 'fr' ? "Propulsé par l'IA" : "Powered by AI"}
-                </motion.div>
+                </Badge>
 
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.1] mb-6" data-testid="text-hero-title">
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground/70">
-                    {t.landing.heroTitle}
-                  </span>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6" data-testid="text-hero-title">
+                  {t.landing.heroTitle}
                 </h1>
 
                 <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-xl leading-relaxed">
@@ -201,13 +230,13 @@ export default function Home() {
 
                 <div className="flex flex-col sm:flex-row gap-3 mb-8">
                   <Link href="/signup">
-                    <Button size="lg" className="text-base px-8 w-full sm:w-auto group" data-testid="button-cta-signup">
+                    <Button size="lg" className="w-full sm:w-auto group" data-testid="button-cta-signup">
                       {t.landing.cta}
-                      <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                     </Button>
                   </Link>
                   <Link href="/features">
-                    <Button size="lg" variant="outline" className="text-base px-8 w-full sm:w-auto" data-testid="button-cta-features">
+                    <Button size="lg" variant="outline" className="w-full sm:w-auto" data-testid="button-cta-features">
                       {language === 'fr' ? "Découvrir" : "Discover"}
                     </Button>
                   </Link>
@@ -224,7 +253,7 @@ export default function Home() {
                   <div>
                     <div className="flex items-center gap-1">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-3 h-3 text-amber-500 fill-amber-500" />
+                        <Star key={i} className="w-3 h-3 text-primary fill-primary" />
                       ))}
                     </div>
                     <span>{language === 'fr' ? "Rejoins des centaines d'étudiants" : "Join hundreds of students"}</span>
@@ -232,15 +261,24 @@ export default function Home() {
                 </div>
               </motion.div>
 
+              {/* 3D Card Preview */}
               <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 className="hidden lg:block"
               >
-                <div className="relative">
-                  <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-purple-500/20 to-emerald-500/20 rounded-3xl blur-2xl opacity-40" />
-                  <Card className="relative overflow-visible">
+                <div 
+                  className="relative"
+                  style={{ perspective: '1200px' }}
+                >
+                  <Card 
+                    className="relative"
+                    style={{ 
+                      transform: 'rotateY(-4deg) rotateX(2deg)',
+                      transformStyle: 'preserve-3d',
+                    }}
+                  >
                     <CardContent className="p-6 space-y-4">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -254,10 +292,10 @@ export default function Home() {
 
                       <div className="space-y-3">
                         {[
-                          { icon: Brain, label: language === 'fr' ? "Résumé IA généré" : "AI Summary generated", color: "text-blue-500", bg: "bg-blue-500/10" },
-                          { icon: Layers, label: language === 'fr' ? "15 flashcards créées" : "15 flashcards created", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-                          { icon: CheckCircle, label: language === 'fr' ? "Quiz: 85% de réussite" : "Quiz: 85% success", color: "text-purple-500", bg: "bg-purple-500/10" },
-                          { icon: BookMarked, label: language === 'fr' ? "Guide d'étude prêt" : "Study guide ready", color: "text-amber-500", bg: "bg-amber-500/10" },
+                          { icon: Brain, label: language === 'fr' ? "Résumé IA généré" : "AI Summary generated" },
+                          { icon: Layers, label: language === 'fr' ? "15 flashcards créées" : "15 flashcards created" },
+                          { icon: CheckCircle, label: language === 'fr' ? "Quiz: 85% de réussite" : "Quiz: 85% success" },
+                          { icon: BookMarked, label: language === 'fr' ? "Guide d'étude prêt" : "Study guide ready" },
                         ].map((item, i) => (
                           <motion.div
                             key={i}
@@ -266,11 +304,11 @@ export default function Home() {
                             transition={{ delay: 0.5 + i * 0.15, duration: 0.5 }}
                             className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
                           >
-                            <div className={`w-8 h-8 ${item.bg} rounded-md flex items-center justify-center`}>
-                              <item.icon className={`w-4 h-4 ${item.color}`} />
+                            <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center">
+                              <item.icon className="w-4 h-4 text-primary" />
                             </div>
                             <span className="text-sm font-medium">{item.label}</span>
-                            <CheckCircle className="w-4 h-4 text-emerald-500 ml-auto" />
+                            <CheckCircle className="w-4 h-4 text-primary ml-auto" />
                           </motion.div>
                         ))}
                       </div>
@@ -284,11 +322,46 @@ export default function Home() {
                           initial={{ width: 0 }}
                           animate={{ width: '85%' }}
                           transition={{ delay: 1.2, duration: 1, ease: "easeOut" }}
-                          className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full"
+                          className="h-full bg-primary rounded-full"
                         />
                       </div>
                     </CardContent>
                   </Card>
+
+                  {/* Floating mini cards for 3D depth */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.5, duration: 0.6 }}
+                    className="absolute -bottom-4 -left-6"
+                    style={{ transform: 'rotateY(-4deg) rotateX(2deg) translateZ(30px)' }}
+                  >
+                    <Card className="shadow-lg">
+                      <CardContent className="p-3 flex items-center gap-2">
+                        <div className="w-7 h-7 bg-primary/10 rounded-md flex items-center justify-center">
+                          <Zap className="w-3.5 h-3.5 text-primary" />
+                        </div>
+                        <span className="text-xs font-medium">{language === 'fr' ? "Résumé en 5 min" : "Summary in 5 min"}</span>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.7, duration: 0.6 }}
+                    className="absolute -top-4 -right-6"
+                    style={{ transform: 'rotateY(-4deg) rotateX(2deg) translateZ(40px)' }}
+                  >
+                    <Card className="shadow-lg">
+                      <CardContent className="p-3 flex items-center gap-2">
+                        <div className="w-7 h-7 bg-primary/10 rounded-md flex items-center justify-center">
+                          <Star className="w-3.5 h-3.5 text-primary fill-primary" />
+                        </div>
+                        <span className="text-xs font-medium">4.9/5</span>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 </div>
               </motion.div>
             </div>
@@ -413,10 +486,10 @@ export default function Home() {
             >
               {features.map((feature, index) => (
                 <motion.div key={index} variants={itemVariants}>
-                  <Card className="hover-elevate h-full group" data-testid={`card-feature-${index}`}>
+                  <Card className="hover-elevate h-full" data-testid={`card-feature-${index}`}>
                     <CardContent className="p-6">
-                      <div className={`h-12 w-12 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br ${feature.gradient}`}>
-                        <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
+                      <div className="h-12 w-12 rounded-xl flex items-center justify-center mb-4 bg-primary/10">
+                        <feature.icon className="h-6 w-6 text-primary" />
                       </div>
                       <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
@@ -428,8 +501,58 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Testimonials Section */}
+        {/* Why Choose Us Section */}
         <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-16"
+            >
+              <Badge variant="secondary" className="mb-4">
+                <Shield className="w-3 h-3 mr-1" />
+                {language === 'fr' ? "Pourquoi nous choisir" : "Why choose us"}
+              </Badge>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+                {language === 'fr' ? "Fait pour toi, par des étudiants camerounais" : "Made for you, by Cameroonian students"}
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                {language === 'fr' 
+                  ? "Nous comprenons les défis des étudiants camerounais parce que nous les avons vécus."
+                  : "We understand the challenges of Cameroonian students because we've lived them."}
+              </p>
+            </motion.div>
+
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              {whyChooseUs.map((item, index) => (
+                <motion.div key={index} variants={itemVariants}>
+                  <Card className="h-full hover-elevate" data-testid={`card-why-${index}`}>
+                    <CardContent className="p-6 flex gap-4">
+                      <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
+                        <item.icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-1">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Testimonials Section */}
+        <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-muted/20">
           <div className="max-w-7xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -455,7 +578,7 @@ export default function Home() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-50px" }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
             >
               {testimonials.map((testimonial, index) => (
                 <motion.div key={index} variants={itemVariants}>
@@ -463,10 +586,10 @@ export default function Home() {
                     <CardContent className="p-6">
                       <div className="flex items-center gap-1 mb-4">
                         {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 text-amber-500 fill-amber-500" />
+                          <Star key={i} className="w-4 h-4 text-primary fill-primary" />
                         ))}
                       </div>
-                      <p className="text-muted-foreground mb-6 leading-relaxed">"{testimonial.content}"</p>
+                      <p className="text-sm text-muted-foreground mb-6 leading-relaxed">"{testimonial.content}"</p>
                       <div className="flex items-center gap-3 pt-4 border-t">
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
                           {testimonial.name.charAt(0)}
@@ -485,7 +608,7 @@ export default function Home() {
         </section>
 
         {/* Trustpilot Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-muted/20 border-y">
+        <section className="py-12 px-4 sm:px-6 lg:px-8 border-y">
           <div className="max-w-5xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -508,7 +631,7 @@ export default function Home() {
                     data-style-width="100%" 
                     data-token="da1d8c6a-d9fe-4532-8a96-30cdc4b952d8"
                   >
-                    <a href="https://fr.trustpilot.com/review/corrigetescours.com" target="_blank" rel="noopener" className="text-primary hover:underline">
+                    <a href="https://fr.trustpilot.com/review/corrigetescours.com" target="_blank" rel="noopener" className="text-primary">
                       {t.trustpilot.seeReviews}
                     </a>
                   </div>
@@ -527,9 +650,8 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <div className="relative overflow-hidden rounded-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-purple-600" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent)]" />
+              <div className="relative overflow-hidden rounded-2xl bg-primary">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent)]" />
                 <div className="relative p-8 md:p-12 lg:p-16">
                   <div className="grid md:grid-cols-2 gap-8 items-center">
                     <div className="text-white">
@@ -542,8 +664,8 @@ export default function Home() {
                       </h2>
                       <p className="text-white/80 mb-6 leading-relaxed">
                         {language === 'fr' 
-                          ? "Uploads illimités, Tariq IA sans limite, flashcards illimitées, guides d'étude IA et statistiques avancées"
-                          : "Unlimited uploads, unlimited Tariq AI, unlimited flashcards, AI study guides and advanced statistics"}
+                          ? "Uploads illimités, Tariq IA sans limite, flashcards illimitées, guides d'étude IA et statistiques avancées."
+                          : "Unlimited uploads, unlimited Tariq AI, unlimited flashcards, AI study guides and advanced statistics."}
                       </p>
                       <div className="space-y-3 mb-8">
                         {[
@@ -560,7 +682,7 @@ export default function Home() {
                         ))}
                       </div>
                       <Link href="/pricing">
-                        <Button size="lg" className="bg-white text-primary border-0 w-full md:w-auto">
+                        <Button size="lg" variant="secondary" className="w-full md:w-auto">
                           {language === 'fr' ? "Voir les plans" : "View plans"}
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
@@ -601,9 +723,9 @@ export default function Home() {
               {t.landing.cta2.subtitle}
             </p>
             <Link href="/signup">
-              <Button size="lg" className="text-base px-8 group" data-testid="button-final-cta">
+              <Button size="lg" className="group" data-testid="button-final-cta">
                 {language === 'fr' ? "Créer mon compte gratuit" : "Create my free account"}
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Button>
             </Link>
             <p className="text-sm text-muted-foreground mt-4">

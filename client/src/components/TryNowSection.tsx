@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Loader2, Sparkles, FileText, ArrowRight } from 'lucide-react';
+import { Upload, Loader2, Sparkles, FileText, ArrowRight, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -201,7 +201,7 @@ export default function TryNowSection() {
                 size="lg"
                 onClick={handleButtonClick}
                 disabled={uploading}
-                className="px-8 group"
+                className="group"
                 data-testid="button-upload-file"
               >
                 {uploading ? (
@@ -213,22 +213,22 @@ export default function TryNowSection() {
                   <>
                     <FileText className="w-4 h-4 mr-2" />
                     {t.tryNowSection.chooseFile}
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
                   </>
                 )}
               </Button>
 
               <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <CheckCircle className="w-3 h-3 text-primary" />
                   {language === 'fr' ? "Résultat en 30 secondes" : "Result in 30 seconds"}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  <CheckCircle className="w-3 h-3 text-primary" />
                   {language === 'fr' ? "100% gratuit" : "100% free"}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  <CheckCircle className="w-3 h-3 text-primary" />
                   {language === 'fr' ? "Aucun compte requis" : "No account required"}
                 </span>
               </div>

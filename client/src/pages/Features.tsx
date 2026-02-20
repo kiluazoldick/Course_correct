@@ -13,18 +13,6 @@ export default function Features() {
   const { t, language } = useLanguage();
 
   const featureIcons = [FileText, Brain, Upload, CheckCircle, Layers, BookMarked, MessageCircle, Sparkles, TrendingUp, BarChart3];
-  const featureGradients = [
-    'from-blue-500/10 to-cyan-500/10', 'from-purple-500/10 to-pink-500/10',
-    'from-emerald-500/10 to-teal-500/10', 'from-amber-500/10 to-orange-500/10',
-    'from-green-500/10 to-emerald-500/10', 'from-rose-500/10 to-red-500/10',
-    'from-indigo-500/10 to-violet-500/10', 'from-cyan-500/10 to-blue-500/10',
-    'from-orange-500/10 to-amber-500/10', 'from-violet-500/10 to-purple-500/10',
-  ];
-  const featureColors = [
-    'text-blue-500', 'text-purple-500', 'text-emerald-500', 'text-amber-500',
-    'text-green-500', 'text-rose-500', 'text-indigo-500', 'text-cyan-500',
-    'text-orange-500', 'text-violet-500',
-  ];
 
   const allFeatureKeys = ['notes', 'summaries', 'upload', 'quiz', 'tariq', 'evaluation', 'tracking', 'advancedStats', 'revision'] as const;
   
@@ -74,8 +62,6 @@ export default function Features() {
 
   const baseFeatures = allFeatureKeys.map((key, index) => ({
     icon: featureIcons[index],
-    gradient: featureGradients[index],
-    iconColor: featureColors[index],
     title: t.featuresPage.features[key].title,
     description: t.featuresPage.features[key].description,
     details: t.featuresPage.features[key].details,
@@ -86,16 +72,12 @@ export default function Features() {
     ...baseFeatures.slice(0, insertIndex),
     {
       icon: Layers,
-      gradient: featureGradients[4],
-      iconColor: featureColors[4],
       title: newFeatures[0].title,
       description: newFeatures[0].description,
       details: newFeatures[0].details,
     },
     {
       icon: BookMarked,
-      gradient: featureGradients[5],
-      iconColor: featureColors[5],
       title: newFeatures[1].title,
       description: newFeatures[1].description,
       details: newFeatures[1].details,
@@ -131,8 +113,7 @@ export default function Features() {
 
       <main className="flex-1">
         <section className="relative py-20 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-purple-500/5 dark:from-primary/15 dark:via-background dark:to-purple-500/10" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(59,130,246,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(59,130,246,0.2),transparent)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background dark:from-primary/10 dark:via-background dark:to-background" />
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -167,8 +148,8 @@ export default function Features() {
                 <motion.div key={index} variants={itemVariants}>
                   <Card className="h-full hover-elevate" data-testid={`card-feature-${index}`}>
                     <CardContent className="p-6">
-                      <div className={`h-12 w-12 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br ${feature.gradient}`}>
-                        <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
+                      <div className="h-12 w-12 rounded-xl flex items-center justify-center mb-4 bg-primary/10">
+                        <feature.icon className="h-6 w-6 text-primary" />
                       </div>
                       <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
                       <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{feature.description}</p>
@@ -190,9 +171,8 @@ export default function Features() {
 
         <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto">
-            <div className="relative overflow-hidden rounded-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-purple-600" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent)]" />
+            <div className="relative overflow-hidden rounded-2xl bg-primary">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent)]" />
               <div className="relative p-8 md:p-12 lg:p-16 text-center text-white">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">
                   {t.featuresPage.ctaTitle}
@@ -203,7 +183,7 @@ export default function Features() {
                 <Link href="/signup">
                   <Button size="lg" variant="secondary" className="group" data-testid="button-signup-cta">
                     {t.featuresPage.ctaButton}
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
                   </Button>
                 </Link>
               </div>

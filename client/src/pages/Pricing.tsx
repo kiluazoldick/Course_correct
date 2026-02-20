@@ -96,8 +96,7 @@ export default function Pricing() {
 
       <main className="flex-1">
         <section className="relative py-20 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-purple-500/5 dark:from-primary/15 dark:via-background dark:to-purple-500/10" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(59,130,246,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(59,130,246,0.2),transparent)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background dark:from-primary/10 dark:via-background dark:to-background" />
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -136,7 +135,7 @@ export default function Pricing() {
                   >
                     {plan.popular && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <Badge className="bg-primary" data-testid="badge-popular">
+                        <Badge data-testid="badge-popular">
                           <Sparkles className="w-3 h-3 mr-1" />
                           {t.pricingPage.mostPopular}
                         </Badge>

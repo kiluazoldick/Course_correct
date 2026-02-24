@@ -4,7 +4,7 @@ import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, CheckCircle2, XCircle, Smartphone, CreditCard, Sparkles, Zap } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, CreditCard, Sparkles, Zap } from 'lucide-react';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -25,7 +25,6 @@ export default function Subscription() {
   const { t, language } = useLanguage();
   const [, setLocation] = useLocation();
 
-  // Check URL params for payment result (from return URL)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     
@@ -35,7 +34,6 @@ export default function Subscription() {
         description: t.subscriptionPage.paymentSuccessDesc,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/subscription'] });
-      // Clean URL
       window.history.replaceState({}, '', '/dashboard/subscription');
     } else if (params.get('error')) {
       const error = params.get('error');
@@ -60,14 +58,12 @@ export default function Subscription() {
         description: errorMessage,
         variant: "destructive",
       });
-      // Clean URL
       window.history.replaceState({}, '', '/dashboard/subscription');
     } else if (params.get('pending') === 'true') {
       toast({
         title: t.subscriptionPage.paymentPending,
         description: t.subscriptionPage.paymentPendingDesc,
       });
-      // Clean URL
       window.history.replaceState({}, '', '/dashboard/subscription');
     }
   }, [toast, t, language]);
@@ -87,6 +83,44 @@ export default function Subscription() {
   const isPremium = subscription?.isPremium;
   const endDate = subscription?.endDate ? new Date(subscription.endDate) : null;
 
+  const freeFeatures = language === 'fr' 
+    ? [
+        { included: true, text: "3 cours maximum" },
+        { included: true, text: "1 résumé IA par mois" },
+        { included: true, text: "1 quiz par mois (5 questions)" },
+        { included: true, text: "Tariq IA : 5 messages/session" },
+        { included: false, text: "Flashcards IA" },
+        { included: false, text: "Guides d'étude IA" },
+      ]
+    : [
+        { included: true, text: "Up to 3 courses" },
+        { included: true, text: "1 AI summary per month" },
+        { included: true, text: "1 quiz per month (5 questions)" },
+        { included: true, text: "Tariq AI: 5 messages/session" },
+        { included: false, text: "AI Flashcards" },
+        { included: false, text: "AI Study Guides" },
+      ];
+
+  const premiumFeatures = language === 'fr'
+    ? [
+        "Cours illimités",
+        "Résumés IA illimités",
+        "Quiz illimités (10-15 questions)",
+        "Tariq IA : messages illimités",
+        "Flashcards IA illimitées",
+        "Guides d'étude IA",
+        "Accès prioritaire aux nouvelles fonctionnalités",
+      ]
+    : [
+        "Unlimited courses",
+        "Unlimited AI summaries",
+        "Unlimited quizzes (10-15 questions)",
+        "Tariq AI: unlimited messages",
+        "Unlimited AI flashcards",
+        "AI study guides",
+        "Priority access to new features",
+      ];
+
   return (
     <div className="w-full py-8 px-6 space-y-8">
       <div className="max-w-7xl mx-auto">
@@ -99,7 +133,7 @@ export default function Subscription() {
       <div className="max-w-7xl mx-auto grid gap-6 lg:grid-cols-2">
         <Card data-testid="card-current-plan">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle>{t.subscriptionPage.currentPlan}</CardTitle>
               {isPremium ? (
                 <PremiumBadge size="md" />
@@ -118,43 +152,29 @@ export default function Subscription() {
           <CardContent className="space-y-4">
             {isPremium && endDate ? (
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between gap-2 text-sm">
                   <span className="text-muted-foreground">{t.subscriptionPage.expiresOn}</span>
                   <span className="font-medium" data-testid="text-expiry-date">
                     {format(endDate, 'dd MMMM yyyy', { locale: language === 'fr' ? fr : enUS })}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between gap-2 text-sm">
                   <span className="text-muted-foreground">{language === 'fr' ? 'Montant' : 'Amount'}</span>
-                  <span className="font-medium">{t.subscriptionPage.price}{t.subscriptionPage.perMonth}</span>
+                  <span className="font-medium">$10/{language === 'fr' ? 'mois' : 'month'}</span>
                 </div>
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>{language === 'fr' ? 'Saisir ses cours (illimité)' : 'Create courses (unlimited)'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>{language === 'fr' ? 'Résumés IA (illimités)' : 'AI Summaries (unlimited)'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>{language === 'fr' ? 'Téléchargement PDF des résumés' : 'PDF download of summaries'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>{language === 'fr' ? 'Quiz personnalisés (illimités)' : 'Personalized quizzes (unlimited)'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <XCircle className="w-4 h-4" />
-                  <span>{language === 'fr' ? 'Upload : 2 fichiers/mois (10MB max)' : 'Upload: 2 files/month (10MB max)'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <XCircle className="w-4 h-4" />
-                  <span>{language === 'fr' ? 'Tariq IA : 5 messages/session (3h cooldown)' : 'Tariq AI: 5 messages/session (3h cooldown)'}</span>
-                </div>
+                {freeFeatures.map((feat, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm">
+                    {feat.included ? (
+                      <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-muted-foreground shrink-0" />
+                    )}
+                    <span className={feat.included ? '' : 'text-muted-foreground'}>{feat.text}</span>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
@@ -173,34 +193,16 @@ export default function Subscription() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">{language === 'fr' ? 'Tout du plan Gratuit' : 'Everything from Free plan'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">{t.subscriptionPage.features.unlimitedUploads}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">{t.subscriptionPage.features.unlimitedChat}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">{language === 'fr' ? 'Pas de cooldown' : 'No cooldown'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">{t.subscriptionPage.features.advancedStats}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span className="font-medium">{t.subscriptionPage.features.prioritySupport}</span>
-            </div>
+            {premiumFeatures.map((feat, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm">
+                <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+                <span className="font-medium">{feat}</span>
+              </div>
+            ))}
 
             <div className="pt-4 mt-4 border-t">
               <div className="text-3xl font-bold mb-2" data-testid="text-price">
-                500 XAF / $1 USD <span className="text-lg font-normal text-muted-foreground">{t.subscriptionPage.perMonth}</span>
+                $10 <span className="text-lg font-normal text-muted-foreground">/{language === 'fr' ? 'mois' : 'month'}</span>
               </div>
 
               {!isPremium && (
@@ -224,51 +226,29 @@ export default function Subscription() {
           <CardHeader>
             <CardTitle>{t.subscriptionPage.paymentMethods}</CardTitle>
             <CardDescription>
-              {language === 'fr' ? 'Paye facilement avec Mobile Money ou carte bancaire' : 'Pay easily with Mobile Money or credit card'}
+              {language === 'fr' ? 'Paiement sécurisé par carte bancaire' : 'Secure card payment'}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="flex items-center gap-3 p-3 border rounded-md">
-              <div className="p-2 bg-yellow-500/10 rounded-md">
-                <Smartphone className="w-5 h-5 text-yellow-600" />
-              </div>
-              <div>
-                <div className="font-medium text-sm">{t.subscriptionPage.mtnMomo}</div>
-                <div className="text-xs text-muted-foreground">{language === 'fr' ? 'Cameroun' : 'Cameroon'}</div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 border rounded-md">
-              <div className="p-2 bg-orange-500/10 rounded-md">
-                <Smartphone className="w-5 h-5 text-orange-600" />
-              </div>
-              <div>
-                <div className="font-medium text-sm">{t.subscriptionPage.orangeMoney}</div>
-                <div className="text-xs text-muted-foreground">{language === 'fr' ? 'Cameroun' : 'Cameroon'}</div>
-              </div>
-            </div>
-
             <div className="flex items-center gap-3 p-3 border rounded-md">
               <div className="p-2 bg-blue-500/10 rounded-md">
                 <CreditCard className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <div className="font-medium text-sm">{t.subscriptionPage.creditCard}</div>
+                <div className="font-medium text-sm">{language === 'fr' ? 'Carte Bancaire' : 'Credit Card'}</div>
                 <div className="text-xs text-muted-foreground">Visa, Mastercard</div>
               </div>
             </div>
-          </div>
 
-          <div className="mt-4 p-4 bg-muted/50 rounded-md">
-            <p className="text-sm text-muted-foreground">
-              {language === 'fr' 
-                ? <>Tes paiements sont sécurisés par <span className="font-medium">Stripe</span>.</>
-                : <>Your payments are secured by <span className="font-medium">Stripe</span>.</>
-              }
-            </p>
-          </div>
-        </CardContent>
+            <div className="mt-4 p-4 bg-muted/50 rounded-md">
+              <p className="text-sm text-muted-foreground">
+                {language === 'fr' 
+                  ? <>Tes paiements sont sécurisés par <span className="font-medium">Stripe</span>.</>
+                  : <>Your payments are secured by <span className="font-medium">Stripe</span>.</>
+                }
+              </p>
+            </div>
+          </CardContent>
         </Card>
       </div>
     </div>

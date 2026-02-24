@@ -89,7 +89,7 @@ export default function AppFooter() {
               </li>
               <li className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                <span data-testid="text-footer-location">Douala, Cameroun</span>
+                <span data-testid="text-footer-location">{language === 'fr' ? 'En ligne, partout dans le monde' : 'Online, worldwide'}</span>
               </li>
             </ul>
           </div>

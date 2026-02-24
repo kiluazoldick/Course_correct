@@ -111,8 +111,8 @@ export default function Login() {
           </h2>
           <p className="text-white/70 mb-10 text-lg leading-relaxed">
             {language === 'fr' 
-              ? "Rejoins des centaines d'étudiants camerounais qui utilisent l'IA pour réussir leurs examens."
-              : "Join hundreds of Cameroonian students using AI to ace their exams."}
+              ? "Rejoins des milliers d'étudiants qui utilisent l'IA pour réussir leurs examens."
+              : "Join thousands of students using AI to ace their exams."}
           </p>
 
           <div className="space-y-4">

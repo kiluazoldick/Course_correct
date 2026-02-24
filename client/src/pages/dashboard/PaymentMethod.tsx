@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Smartphone, CreditCard, ArrowLeft, Shield } from 'lucide-react';
+import { Loader2, CreditCard, ArrowLeft, Shield, CheckCircle2 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -19,11 +19,10 @@ export default function PaymentMethod() {
   const { toast } = useToast();
   const { language } = useLanguage();
   const [, setLocation] = useLocation();
-  const [selectedMethod, setSelectedMethod] = useState<'mobile' | 'card' | null>(null);
 
   const checkoutMutation = useMutation({
-    mutationFn: async (currency: 'XAF' | 'USD') => {
-      const res = await apiRequest('POST', '/api/payment/stripe/checkout', { currency });
+    mutationFn: async () => {
+      const res = await apiRequest('POST', '/api/payment/stripe/checkout', {});
       return await res.json();
     },
     onSuccess: (data: PaymentResponse) => {
@@ -37,24 +36,32 @@ export default function PaymentMethod() {
         description: getErrorMessage(error, language),
         variant: "destructive",
       });
-      setSelectedMethod(null);
     },
   });
 
-  const handlePayment = (method: 'mobile' | 'card') => {
-    setSelectedMethod(method);
-    if (method === 'mobile') {
-      checkoutMutation.mutate('XAF');
-    } else {
-      checkoutMutation.mutate('USD');
-    }
-  };
-
   const isLoading = checkoutMutation.isPending;
+
+  const features = language === 'fr' 
+    ? [
+        "Cours illimités",
+        "Résumés IA illimités",
+        "Quiz illimités (10-15 questions)",
+        "Tariq IA sans limites",
+        "Flashcards IA illimitées",
+        "Guides d'étude IA",
+      ]
+    : [
+        "Unlimited courses",
+        "Unlimited AI summaries",
+        "Unlimited quizzes (10-15 questions)",
+        "Unlimited Tariq AI",
+        "Unlimited AI flashcards",
+        "AI study guides",
+      ];
 
   return (
     <div className="w-full py-8 px-6">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-lg mx-auto space-y-6">
         <Button 
           variant="ghost" 
           onClick={() => setLocation('/dashboard/subscription')}
@@ -65,101 +72,66 @@ export default function PaymentMethod() {
           {language === 'fr' ? 'Retour' : 'Back'}
         </Button>
 
-        <div className="text-center mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold" data-testid="text-payment-title">
-            {language === 'fr' ? 'Choisir une méthode de paiement' : 'Choose a payment method'}
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {language === 'fr' 
-              ? 'Premium - 500 XAF / 1 USD par mois' 
-              : 'Premium - 500 XAF / $1 USD per month'}
-          </p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card 
-            className={`cursor-pointer transition-all hover-elevate ${selectedMethod === 'mobile' ? 'ring-2 ring-primary' : ''}`}
-            onClick={() => !isLoading && handlePayment('mobile')}
-            data-testid="card-payment-mobile"
-          >
-            <CardHeader className="text-center pb-2">
-              <div className="mx-auto p-4 bg-primary/10 rounded-full mb-2">
-                <Smartphone className="w-8 h-8 text-primary" />
+        <Card data-testid="card-payment-checkout">
+          <CardHeader className="text-center">
+            <div className="mx-auto p-4 bg-primary/10 rounded-full mb-2">
+              <CreditCard className="w-8 h-8 text-primary" />
+            </div>
+            <CardTitle className="text-xl">
+              {language === 'fr' ? 'Passer au Premium' : 'Upgrade to Premium'}
+            </CardTitle>
+            <CardDescription>
+              {language === 'fr' 
+                ? 'Débloquez toutes les fonctionnalités' 
+                : 'Unlock all features'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="text-center">
+              <div className="text-4xl font-bold" data-testid="text-price">
+                $10 <span className="text-lg font-normal text-muted-foreground">/{language === 'fr' ? 'mois' : 'month'}</span>
               </div>
-              <CardTitle className="text-lg">Mobile Money</CardTitle>
-              <CardDescription>
-                MTN MoMo, Orange Money
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center">
-              <div className="text-2xl font-bold text-primary mb-2">500 XAF</div>
-              <p className="text-sm text-muted-foreground mb-4">
-                {language === 'fr' ? 'Cameroun uniquement' : 'Cameroon only'}
-              </p>
-              <Button 
-                className="w-full"
-                disabled={isLoading}
-                data-testid="button-pay-mobile"
-              >
-                {selectedMethod === 'mobile' && isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {language === 'fr' ? 'Chargement...' : 'Loading...'}
-                  </>
-                ) : (
-                  language === 'fr' ? 'Payer avec Mobile Money' : 'Pay with Mobile Money'
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+            </div>
 
-          <Card 
-            className={`cursor-pointer transition-all hover-elevate ${selectedMethod === 'card' ? 'ring-2 ring-primary' : ''}`}
-            onClick={() => !isLoading && handlePayment('card')}
-            data-testid="card-payment-card"
-          >
-            <CardHeader className="text-center pb-2">
-              <div className="mx-auto p-4 bg-primary/10 rounded-full mb-2">
-                <CreditCard className="w-8 h-8 text-primary" />
-              </div>
-              <CardTitle className="text-lg">
-                {language === 'fr' ? 'Carte Bancaire' : 'Credit Card'}
-              </CardTitle>
-              <CardDescription>
-                Visa, Mastercard
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center">
-              <div className="text-2xl font-bold text-primary mb-2">$1 USD</div>
-              <p className="text-sm text-muted-foreground mb-4">
-                {language === 'fr' ? 'International' : 'International'}
-              </p>
-              <Button 
-                className="w-full"
-                disabled={isLoading}
-                data-testid="button-pay-card"
-              >
-                {selectedMethod === 'card' && isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {language === 'fr' ? 'Chargement...' : 'Loading...'}
-                  </>
-                ) : (
-                  language === 'fr' ? 'Payer par Carte' : 'Pay with Card'
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+            <div className="space-y-2">
+              {features.map((feature, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm">
+                  <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+                  <span>{feature}</span>
+                </div>
+              ))}
+            </div>
 
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mt-6">
-          <Shield className="w-4 h-4" />
-          <span>
-            {language === 'fr' 
-              ? 'Paiements sécurisés par Stripe' 
-              : 'Secure payments via Stripe'}
-          </span>
-        </div>
+            <Button 
+              className="w-full"
+              size="lg"
+              disabled={isLoading}
+              onClick={() => checkoutMutation.mutate()}
+              data-testid="button-pay"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {language === 'fr' ? 'Redirection...' : 'Redirecting...'}
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  {language === 'fr' ? 'Payer par carte' : 'Pay with card'}
+                </>
+              )}
+            </Button>
+
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <Shield className="w-3.5 h-3.5" />
+              <span>
+                {language === 'fr' 
+                  ? 'Paiement sécurisé par Stripe' 
+                  : 'Secure payment via Stripe'}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function LegalNotice() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -80,7 +80,7 @@ export default function LegalNotice() {
                     <strong>{t.legalPage.editor.company} :</strong> Corrige Tes Cours
                   </p>
                   <p className="text-muted-foreground mb-2">
-                    <strong>{t.legalPage.editor.address} :</strong> Douala, Cameroun
+                    <strong>{t.legalPage.editor.address} :</strong> {language === 'fr' ? 'En ligne' : 'Online'}
                   </p>
                   <p className="text-muted-foreground">
                     <strong>{t.legalPage.editor.email} :</strong> contact@corrigetescours.cm

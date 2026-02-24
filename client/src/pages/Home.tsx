@@ -88,8 +88,8 @@ export default function Home() {
   const whyChooseUs = language === 'fr' ? [
     {
       icon: Target,
-      title: "Conçu pour les étudiants camerounais",
-      description: "Notre plateforme est spécialement adaptée au système universitaire camerounais et francophone.",
+      title: "Conçu pour les étudiants",
+      description: "Notre plateforme est spécialement adaptée aux étudiants universitaires francophones et anglophones.",
     },
     {
       icon: Shield,
@@ -104,13 +104,13 @@ export default function Home() {
     {
       icon: Award,
       title: "Prix accessible pour tous",
-      description: "Seulement 500 XAF/mois pour le Premium. Payez facilement via Mobile Money (MTN, Orange).",
+      description: "Seulement $10/mois pour le Premium. Paiement sécurisé par carte bancaire via Stripe.",
     },
   ] : [
     {
       icon: Target,
-      title: "Made for Cameroonian students",
-      description: "Our platform is specially adapted to the Cameroonian and francophone university system.",
+      title: "Made for students",
+      description: "Our platform is specially adapted for university students, both French and English speaking.",
     },
     {
       icon: Shield,
@@ -125,7 +125,7 @@ export default function Home() {
     {
       icon: Award,
       title: "Affordable for everyone",
-      description: "Only 500 XAF/month for Premium. Pay easily via Mobile Money (MTN, Orange).",
+      description: "Only $10/month for Premium. Secure card payment via Stripe.",
     },
   ];
 
@@ -516,12 +516,12 @@ export default function Home() {
                 {language === 'fr' ? "Pourquoi nous choisir" : "Why choose us"}
               </Badge>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-                {language === 'fr' ? "Fait pour toi, par des étudiants camerounais" : "Made for you, by Cameroonian students"}
+                {language === 'fr' ? "Fait pour toi, par des étudiants" : "Made for you, by students"}
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 {language === 'fr' 
-                  ? "Nous comprenons les défis des étudiants camerounais parce que nous les avons vécus."
-                  : "We understand the challenges of Cameroonian students because we've lived them."}
+                  ? "Nous comprenons les défis des étudiants parce que nous les avons vécus."
+                  : "We understand the challenges of students because we've lived them."}
               </p>
             </motion.div>
 
@@ -691,9 +691,9 @@ export default function Home() {
                     <div className="flex justify-center">
                       <div className="text-center p-8 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
                         <div className="text-white/60 text-sm mb-1">{language === 'fr' ? 'A partir de' : 'Starting at'}</div>
-                        <div className="text-6xl font-bold text-white mb-1">500</div>
-                        <div className="text-white/70 mb-1">XAF / {language === 'fr' ? 'mois' : 'month'}</div>
-                        <div className="text-white/50 text-sm mb-4">{language === 'fr' ? 'ou' : 'or'} $1 USD / {language === 'fr' ? 'mois' : 'month'}</div>
+                        <div className="text-6xl font-bold text-white mb-1">$10</div>
+                        <div className="text-white/70 mb-1">/{language === 'fr' ? 'mois' : 'month'}</div>
+                        <div className="text-white/50 text-sm mb-4">{language === 'fr' ? 'Paiement par carte' : 'Card payment'}</div>
                         <div className="inline-flex items-center gap-2 text-xs text-white/70 bg-white/10 px-3 py-1.5 rounded-full">
                           <Award className="w-3 h-3" />
                           {language === 'fr' ? "Annuler à tout moment" : "Cancel anytime"}

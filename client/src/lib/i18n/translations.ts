@@ -65,7 +65,7 @@ export const translations = {
     // Landing Page
     landing: {
       heroTitle: "Révise plus intelligemment, pas plus longtemps",
-      heroSubtitle: "L'IA qui transforme tes cours en résumés clairs et quiz personnalisés. Conçu pour les étudiants camerounais.",
+      heroSubtitle: "L'IA qui transforme tes cours en résumés clairs et quiz personnalisés. Pour tous les étudiants.",
       cta: "Commencer gratuitement",
       tryDemo: "Essayer sans inscription",
       trustedBy: "Utilisé par des étudiants de",
@@ -108,7 +108,7 @@ export const translations = {
         title: "Des prix adaptés aux étudiants",
         free: {
           title: "Gratuit",
-          price: "0 XAF",
+          price: "$0",
           features: [
             "Saisie de cours illimitée",
             "Résumés IA illimités",
@@ -119,7 +119,7 @@ export const translations = {
         },
         premium: {
           title: "Premium",
-          price: "500 XAF",
+          price: "$10",
           period: "/mois",
           features: [
             "Tout du plan Gratuit",
@@ -413,8 +413,8 @@ export const translations = {
       premiumFeatures: "Fonctionnalités Premium",
       unlockAll: "Débloquez tout le potentiel de Corrige Tes Cours",
       expiresOn: "Date d'expiration",
-      price: "500",
-      currency: "XAF",
+      price: "10",
+      currency: "USD",
       perMonth: "/mois",
       subscribe: "Passer au Premium",
       subscribing: "Initialisation...",
@@ -422,11 +422,11 @@ export const translations = {
       upgradeToPremium: "Passer au Premium",
       unlockAllFeatures: "Débloque toutes les fonctionnalités",
       paymentMethods: "Moyens de paiement",
-      paymentMethodsDesc: "Paye facilement avec Mobile Money ou carte bancaire",
-      mtn: "MTN Mobile Money",
-      orange: "Orange Money",
+      paymentMethodsDesc: "Paiement sécurisé par carte bancaire",
+      mtn: "",
+      orange: "",
       card: "Carte bancaire",
-      cameroon: "Cameroun",
+      cameroon: "",
       visaMastercard: "Visa, Mastercard",
       securedBy: "Tes paiements sont sécurisés par",
       success: "Paiement réussi !",
@@ -443,10 +443,10 @@ export const translations = {
         prioritySupport: "Support prioritaire",
       },
       freeFeatures: {
-        courses: "Saisir ses cours (illimité)",
-        summaries: "Résumés IA (illimités)",
+        courses: "Jusqu'à 3 cours",
+        summaries: "1 résumé IA par mois",
         pdfDownload: "Téléchargement PDF des résumés",
-        quizzes: "Quiz personnalisés (illimités)",
+        quizzes: "1 quiz par mois",
         uploads: "Upload : 2 fichiers/mois (10MB max)",
         chat: "Tariq IA : 5 messages/session (3h cooldown)",
       },
@@ -571,9 +571,9 @@ export const translations = {
       faq: {
         title: "Questions fréquentes",
         q1: { question: "Puis-je changer de plan à tout moment ?", answer: "Oui, vous pouvez passer du plan Gratuit au plan Premium à tout moment. Le changement est immédiat et vous payez au prorata." },
-        q2: { question: "Comment puis-je payer ?", answer: "Nous acceptons les paiements par Mobile Money (MTN, Orange) et carte bancaire via notre partenaire sécurisé CinetPay." },
+        q2: { question: "Comment puis-je payer ?", answer: "Nous acceptons les paiements par carte bancaire via notre partenaire sécurisé Stripe." },
         q3: { question: "Y a-t-il une garantie ?", answer: "Oui, le plan Premium inclut une garantie satisfait ou remboursé de 14 jours, sans poser de questions." },
-        q4: { question: "Le plan Gratuit est-il vraiment gratuit ?", answer: "Oui, totalement ! Vous pouvez utiliser Corrige Tes Cours gratuitement pour toujours avec des résumés illimités, des quiz, et Tariq IA (avec quelques limites)." }
+        q4: { question: "Le plan Gratuit est-il vraiment gratuit ?", answer: "Oui, totalement ! Vous pouvez utiliser Corrige Tes Cours gratuitement pour toujours avec jusqu'à 3 cours, 1 résumé et 1 quiz par mois, et Tariq IA (5 messages/session)." }
       }
     },
     
@@ -581,7 +581,7 @@ export const translations = {
     aboutPage: {
       badge: "Notre histoire",
       heroTitle: "À propos de Corrige Tes Cours",
-      heroSubtitle: "Nous croyons que chaque étudiant camerounais mérite les meilleurs outils pour réussir ses études",
+      heroSubtitle: "Nous croyons que chaque étudiant mérite les meilleurs outils pour réussir ses études",
       stats: {
         students: "Étudiants actifs",
         satisfaction: "Taux de satisfaction",
@@ -590,15 +590,15 @@ export const translations = {
       },
       story: {
         title: "Notre histoire",
-        p1: "Corrige Tes Cours est né d'un constat simple : les étudiants camerounais passent trop de temps à réviser sans vraiment progresser. Face aux longues heures de lecture et aux notes difficiles à retenir, nous avons voulu créer une solution.",
+        p1: "Corrige Tes Cours est né d'un constat simple : les étudiants passent trop de temps à réviser sans vraiment progresser. Face aux longues heures de lecture et aux notes difficiles à retenir, nous avons voulu créer une solution.",
         p2: "Notre plateforme utilise l'intelligence artificielle pour transformer vos cours en résumés clairs, générer des quiz personnalisés, et vous accompagner avec Tariq IA, votre tuteur personnel disponible 24/7.",
-        p3: "Aujourd'hui, des milliers d'étudiants à Douala et partout au Cameroun améliorent leurs résultats grâce à Corrige Tes Cours. Et ce n'est que le début !"
+        p3: "Aujourd'hui, des milliers d'étudiants partout dans le monde améliorent leurs résultats grâce à Corrige Tes Cours. Et ce n'est que le début !"
       },
       values: {
-        mission: { title: "Notre mission", description: "Rendre l'apprentissage plus efficace et accessible à tous les étudiants camerounais grâce à l'intelligence artificielle." },
+        mission: { title: "Notre mission", description: "Rendre l'apprentissage plus efficace et accessible à tous les étudiants du monde entier grâce à l'intelligence artificielle." },
         passion: { title: "Notre passion", description: "Aider les étudiants à réussir en leur fournissant des outils simples qui facilitent la compréhension et la mémorisation." },
         approach: { title: "Notre approche", description: "Des outils intelligents qui s'adaptent à votre rythme et votre style d'apprentissage pour des révisions ultra-efficaces." },
-        community: { title: "Notre communauté", description: "Des milliers d'étudiants à Douala et partout au Cameroun nous font confiance pour améliorer leurs résultats académiques." }
+        community: { title: "Notre communauté", description: "Des milliers d'étudiants partout dans le monde nous font confiance pour améliorer leurs résultats académiques." }
       },
       commitment: {
         title: "Notre engagement envers vous",
@@ -677,7 +677,7 @@ export const translations = {
       },
       intellectual: {
         title: "Propriété intellectuelle",
-        p1: "L'ensemble du contenu de ce site (textes, images, logos, graphiques, interface utilisateur) est la propriété exclusive de Corrige Tes Cours et est protégé par les lois en vigueur sur la propriété intellectuelle au Cameroun et internationalement.",
+        p1: "L'ensemble du contenu de ce site (textes, images, logos, graphiques, interface utilisateur) est la propriété exclusive de Corrige Tes Cours et est protégé par les lois en vigueur sur la propriété intellectuelle internationalement.",
         p2: "Toute reproduction, distribution, modification ou utilisation non autorisée de ce contenu est strictement interdite et peut faire l'objet de poursuites judiciaires."
       },
       responsibility: {
@@ -705,7 +705,7 @@ export const translations = {
           "Contenus de cours que vous créez ou uploadez",
           "Résultats de quiz et statistiques de progression",
           "Historique de conversations avec Tariq IA",
-          "Informations de paiement (traitées de manière sécurisée via CinetPay)"
+          "Informations de paiement (traitées de manière sécurisée via Stripe)"
         ]
       },
       usage: {
@@ -837,8 +837,8 @@ export const translations = {
         title: "6. Paiements et abonnements",
         intro: "Pour les plans payants :",
         items: [
-          "Les prix sont indiqués en Francs CFA (XAF) - Premium : 500 XAF/mois",
-          "Le paiement se fait par Mobile Money (MTN, Orange) ou carte bancaire via CinetPay",
+          "Les prix sont indiqués en dollars américains (USD) - Premium : $10/mois",
+          "Le paiement se fait par carte bancaire via Stripe",
           "Vous pouvez annuler votre abonnement à tout moment",
           "Garantie satisfait ou remboursé de 14 jours sur le plan Premium"
         ]
@@ -1147,13 +1147,13 @@ export const translations = {
         prioritySupport: "Support prioritaire",
         noAds: "Sans publicité",
       },
-      price: "500 XAF",
+      price: "$10",
       perMonth: "/mois",
       subscribe: "S'abonner maintenant",
       subscribing: "Traitement...",
       paymentMethods: "Paiements sécurisés via",
-      mtnMomo: "MTN Mobile Money",
-      orangeMoney: "Orange Money",
+      mtnMomo: "",
+      orangeMoney: "",
       creditCard: "Carte bancaire",
       paymentSuccess: "Paiement réussi !",
       paymentSuccessDesc: "Ton abonnement Premium est maintenant actif",
@@ -1240,7 +1240,7 @@ export const translations = {
     // Landing Page
     landing: {
       heroTitle: "Study smarter, not harder",
-      heroSubtitle: "AI that transforms your courses into clear summaries and personalized quizzes. Designed for Cameroonian students.",
+      heroSubtitle: "AI that transforms your courses into clear summaries and personalized quizzes. For all students.",
       cta: "Get started for free",
       tryDemo: "Try without signing up",
       trustedBy: "Trusted by students from",
@@ -1283,7 +1283,7 @@ export const translations = {
         title: "Pricing for students",
         free: {
           title: "Free",
-          price: "0 XAF",
+          price: "$0",
           features: [
             "Unlimited course entries",
             "Unlimited AI summaries",
@@ -1294,7 +1294,7 @@ export const translations = {
         },
         premium: {
           title: "Premium",
-          price: "500 XAF",
+          price: "$10",
           period: "/month",
           features: [
             "Everything in Free plan",
@@ -1588,8 +1588,8 @@ export const translations = {
       premiumFeatures: "Premium Features",
       unlockAll: "Unlock the full potential of Corrige Tes Cours",
       expiresOn: "Expiration date",
-      price: "500",
-      currency: "XAF",
+      price: "10",
+      currency: "USD",
       perMonth: "/month",
       subscribe: "Upgrade to Premium",
       subscribing: "Initializing...",
@@ -1597,11 +1597,11 @@ export const translations = {
       upgradeToPremium: "Upgrade to Premium",
       unlockAllFeatures: "Unlock all features",
       paymentMethods: "Payment methods",
-      paymentMethodsDesc: "Pay easily with Mobile Money or credit card",
-      mtn: "MTN Mobile Money",
-      orange: "Orange Money",
+      paymentMethodsDesc: "Secure card payment",
+      mtn: "",
+      orange: "",
       card: "Credit card",
-      cameroon: "Cameroon",
+      cameroon: "",
       visaMastercard: "Visa, Mastercard",
       securedBy: "Your payments are secured by",
       success: "Payment successful!",
@@ -1618,10 +1618,10 @@ export const translations = {
         prioritySupport: "Priority support",
       },
       freeFeatures: {
-        courses: "Unlimited course entries",
-        summaries: "Unlimited AI summaries",
+        courses: "Up to 3 courses",
+        summaries: "1 AI summary per month",
         pdfDownload: "PDF download for summaries",
-        quizzes: "Unlimited personalized quizzes",
+        quizzes: "1 quiz per month",
         uploads: "Upload: 2 files/month (10MB max)",
         chat: "Tariq AI: 5 messages/session (3h cooldown)",
       },
@@ -1746,9 +1746,9 @@ export const translations = {
       faq: {
         title: "Frequently asked questions",
         q1: { question: "Can I change plans at any time?", answer: "Yes, you can upgrade from Free to Premium at any time. The change is immediate and you pay pro-rata." },
-        q2: { question: "How can I pay?", answer: "We accept payments via Mobile Money (MTN, Orange) and credit card through our secure partner CinetPay." },
+        q2: { question: "How can I pay?", answer: "We accept payments via credit card through our secure partner Stripe." },
         q3: { question: "Is there a guarantee?", answer: "Yes, the Premium plan includes a 14-day money-back guarantee, no questions asked." },
-        q4: { question: "Is the Free plan really free?", answer: "Yes, absolutely! You can use Corrige Tes Cours for free forever with unlimited summaries, quizzes, and Tariq AI (with some limits)." }
+        q4: { question: "Is the Free plan really free?", answer: "Yes, absolutely! You can use Corrige Tes Cours for free forever with up to 3 courses, 1 summary and 1 quiz per month, and Tariq AI (5 messages/session)." }
       }
     },
     
@@ -1756,7 +1756,7 @@ export const translations = {
     aboutPage: {
       badge: "Our story",
       heroTitle: "About Corrige Tes Cours",
-      heroSubtitle: "We believe every Cameroonian student deserves the best tools to succeed in their studies",
+      heroSubtitle: "We believe every student deserves the best tools to succeed in their studies",
       stats: {
         students: "Active students",
         satisfaction: "Satisfaction rate",
@@ -1765,15 +1765,15 @@ export const translations = {
       },
       story: {
         title: "Our story",
-        p1: "Corrige Tes Cours was born from a simple observation: Cameroonian students spend too much time studying without really progressing. Faced with long hours of reading and notes that are hard to remember, we wanted to create a solution.",
+        p1: "Corrige Tes Cours was born from a simple observation: students spend too much time studying without really progressing. Faced with long hours of reading and notes that are hard to remember, we wanted to create a solution.",
         p2: "Our platform uses artificial intelligence to transform your courses into clear summaries, generate personalized quizzes, and support you with Tariq AI, your personal tutor available 24/7.",
-        p3: "Today, thousands of students in Douala and across Cameroon are improving their results with Corrige Tes Cours. And this is just the beginning!"
+        p3: "Today, thousands of students around the world are improving their results with Corrige Tes Cours. And this is just the beginning!"
       },
       values: {
-        mission: { title: "Our mission", description: "Making learning more effective and accessible to all Cameroonian students through artificial intelligence." },
+        mission: { title: "Our mission", description: "Making learning more effective and accessible to students worldwide through artificial intelligence." },
         passion: { title: "Our passion", description: "Helping students succeed by providing simple tools that facilitate understanding and memorization." },
         approach: { title: "Our approach", description: "Smart tools that adapt to your pace and learning style for ultra-effective revision." },
-        community: { title: "Our community", description: "Thousands of students in Douala and across Cameroon trust us to improve their academic results." }
+        community: { title: "Our community", description: "Thousands of students around the world trust us to improve their academic results." }
       },
       commitment: {
         title: "Our commitment to you",
@@ -1852,7 +1852,7 @@ export const translations = {
       },
       intellectual: {
         title: "Intellectual Property",
-        p1: "All content on this site (texts, images, logos, graphics, user interface) is the exclusive property of Corrige Tes Cours and is protected by intellectual property laws in Cameroon and internationally.",
+        p1: "All content on this site (texts, images, logos, graphics, user interface) is the exclusive property of Corrige Tes Cours and is protected by intellectual property laws internationally.",
         p2: "Any unauthorized reproduction, distribution, modification or use of this content is strictly prohibited and may result in legal proceedings."
       },
       responsibility: {
@@ -1880,7 +1880,7 @@ export const translations = {
           "Course content you create or upload",
           "Quiz results and progress statistics",
           "Conversation history with Tariq AI",
-          "Payment information (processed securely via CinetPay)"
+          "Payment information (processed securely via Stripe)"
         ]
       },
       usage: {
@@ -2012,8 +2012,8 @@ export const translations = {
         title: "6. Payments and Subscriptions",
         intro: "For paid plans:",
         items: [
-          "Prices are in CFA Francs (XAF) - Premium: 500 XAF/month",
-          "Payment is via Mobile Money (MTN, Orange) or credit card via CinetPay",
+          "Prices are in US dollars (USD) - Premium: $10/month",
+          "Payment is via credit card through Stripe",
           "You can cancel your subscription at any time",
           "14-day money-back guarantee on Premium plan"
         ]
@@ -2322,13 +2322,13 @@ export const translations = {
         prioritySupport: "Priority support",
         noAds: "Ad-free",
       },
-      price: "500 XAF",
+      price: "$10",
       perMonth: "/month",
       subscribe: "Subscribe now",
       subscribing: "Processing...",
       paymentMethods: "Secure payments via",
-      mtnMomo: "MTN Mobile Money",
-      orangeMoney: "Orange Money",
+      mtnMomo: "",
+      orangeMoney: "",
       creditCard: "Credit card",
       paymentSuccess: "Payment successful!",
       paymentSuccessDesc: "Your Premium subscription is now active",

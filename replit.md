@@ -1,17 +1,24 @@
 # Corrige Tes Cours - Technical Documentation
 
 ## Overview
-Corrige Tes Cours is an AI-powered educational platform for French-speaking university students in Cameroon. It aims to enhance studying efficiency through automated course summaries, personalized quizzes, and performance tracking. The platform features a sales-focused landing page, an anonymous onboarding flow for conversion optimization, and a comprehensive user dashboard. It operates on a freemium model, offering both a free tier and a Premium subscription (500 XAF/month or $1 USD/month) with advanced features. Payment is processed via Stripe (supporting cards and Mobile Money). The business vision is to provide accessible, AI-driven educational tools to improve student outcomes in Cameroon.
+Corrige Tes Cours is a universal AI-powered study tool for students worldwide. It enhances studying efficiency through automated course summaries, personalized quizzes, AI chatbot (Tariq IA), flashcards, study guides, and performance tracking. The platform features a sales-focused landing page, an anonymous onboarding flow for conversion optimization, and a comprehensive user dashboard. It operates on a freemium model with a Premium subscription at $10 USD/month via Stripe card payments only.
 
 **Latest Update (Feb 2026):**
-- **Stripe Payment Integration**: Migrated payment system from Flutterwave/Lygos to Stripe via Replit connector. Supports dual currency pricing:
-  - **XAF (500 XAF/month)**: For Cameroon users
-  - **USD ($1/month)**: For international users via Visa/Mastercard
-  - Uses Stripe Checkout for secure hosted payment pages
+- **Universal Platform Pivot**: Migrated from Cameroon-focused to worldwide platform. Removed all Cameroon-specific content, XAF pricing, and Mobile Money payment options.
+- **Simplified Pricing**: Single $10 USD/month Premium tier via Stripe Checkout (card payments only)
+  - Stripe Price ID stored in STRIPE_PRICE_ID env var
+  - Single checkout endpoint: /api/payment/stripe/checkout
   - Webhook-based payment verification with Stripe signature validation
-  - stripe-replit-sync handles schema management and data sync
-  - Payment flow: user selects currency → redirected to Stripe Checkout → webhook verifies payment → Premium activated
   - Files: server/stripeClient.ts, server/webhookHandlers.ts, server/seed-products.ts
+- **Free Tier Restrictions** (enforced in backend):
+  - 3 courses maximum
+  - 1 AI summary per month
+  - 1 quiz per month
+  - 2 file uploads per month
+  - 5 Tariq AI messages per session (3h cooldown)
+  - 1 flashcard set per course
+  - No study guides (Premium only)
+- **Premium Features**: Unlimited courses, summaries, quizzes, uploads, AI messages, flashcards, and study guides
 - Implemented anonymous onboarding system allowing users to test the app (upload 1 course + generate summary) before creating an account, with seamless migration upon signup to maximize conversion rates.
 - **Mobile-First UX**: Complete mobile optimization with WhatsApp-style bottom navigation bar. Sidebar hidden on mobile (<768px), replaced by fixed bottom nav with 5 items (Home, Cours, Chat, Stats, Profile). All dashboard pages optimized with responsive text sizes, compact spacing, and mobile-first layouts while desktop design remains unchanged.
 - **Chat Page Redesign**: Complete UI/UX overhaul inspired by ChatGPT for minimalist, clean aesthetic. Replaced flashy gradient avatars with simple bordered icons (GraduationCap for Tariq, "Tu" badge for user). Implemented ChatGPT-style layout with centered messages (max-w-3xl), fixed input at bottom with backdrop blur, generous spacing, and responsive design. Header streamlined to h-14 with minimal branding. Mobile-optimized with hidden badge text, compact buttons, and smaller avatars.

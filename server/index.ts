@@ -63,7 +63,6 @@ app.post(
       if (event.type === 'checkout.session.completed') {
         const session = event.data.object as any;
         const userId = session.metadata?.userId;
-        const currency = session.metadata?.currency;
 
         if (userId && session.payment_status === 'paid') {
           try {
@@ -78,7 +77,7 @@ app.post(
                 startDate,
                 endDate,
                 paymentMethod: 'stripe',
-                amount: currency === 'USD' ? 1 : 500,
+                amount: 10,
                 transactionId: session.payment_intent || session.id,
               });
             } else {
@@ -88,7 +87,7 @@ app.post(
                 startDate,
                 endDate,
                 paymentMethod: 'stripe',
-                amount: currency === 'USD' ? 1 : 500,
+                amount: 10,
                 transactionId: session.payment_intent || session.id,
               });
             }

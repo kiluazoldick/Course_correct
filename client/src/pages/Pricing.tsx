@@ -24,7 +24,7 @@ export default function Pricing() {
     },
     {
       name: t.pricingPage.premium.name,
-      price: "500",
+      price: "10",
       period: t.pricingPage.premium.period,
       description: t.pricingPage.premium.description,
       features: [
@@ -145,22 +145,10 @@ export default function Pricing() {
                       <CardTitle className="text-2xl">{plan.name}</CardTitle>
                       <CardDescription>{plan.description}</CardDescription>
                       <div className="mt-4">
-                        {plan.popular ? (
-                          <div className="space-y-1">
-                            <div className="flex items-baseline gap-1">
-                              <span className="text-5xl font-bold">500</span>
-                              <span className="text-muted-foreground">XAF /{plan.period}</span>
-                            </div>
-                            <div className="text-base text-muted-foreground">
-                              {language === 'en' ? 'or' : 'ou'} <span className="font-semibold text-foreground">$1 USD</span> /{plan.period}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-5xl font-bold">{plan.price}</span>
-                            <span className="text-muted-foreground">XAF /{plan.period}</span>
-                          </div>
-                        )}
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-5xl font-bold">${plan.price}</span>
+                          <span className="text-muted-foreground">/{plan.period}</span>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-6">

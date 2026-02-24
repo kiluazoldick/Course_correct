@@ -72,6 +72,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/courses', isAuthenticated, async (req: any, res) => {
     try {
       const userId = (req.user as any).id;
+
+      const subscription = await storage.getSubscriptionByUserId(userId);
+      const isPremium = subscription?.status === 'premium' && 
+                        (!subscription.endDate || new Date(subscription.endDate) > new Date());
+
+      if (!isPremium) {
+        const existingCourses = await storage.getCoursesByUserId(userId);
+        if (existingCourses.length >= 3) {
+          const user = await storage.getUserById(userId);
+          const msg = user?.language === 'en' 
+            ? "Free plan is limited to 3 courses. Upgrade to Premium for unlimited courses!"
+            : "Le plan gratuit est limité à 3 cours. Passe au Premium pour des cours illimités !";
+          return res.status(403).json({ message: msg });
+        }
+      }
+
       const validated = insertCourseSchema.parse(req.body);
       const course = await storage.createCourse({
         ...validated,
@@ -249,21 +265,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check subscription status
       const subscription = await storage.getSubscriptionByUserId(userId);
       const isPremium = subscription?.status === 'premium' && 
-                        subscription?.endDate && 
-                        new Date(subscription.endDate) > new Date();
+                        (!subscription.endDate || new Date(subscription.endDate) > new Date());
 
-      // If not premium, check upload limit (2 files per month)
       if (!isPremium) {
+        const existingCourses = await storage.getCoursesByUserId(userId);
+        if (existingCourses.length >= 3) {
+          const user = await storage.getUserById(userId);
+          const isEn = user?.language === 'en';
+          return res.status(403).json({ 
+            message: isEn ? "Course limit reached" : "Limite de cours atteinte",
+            limitExceeded: true,
+            limit: 3,
+            description: isEn 
+              ? "Free plan is limited to 3 courses. Upgrade to Premium for unlimited courses!"
+              : "Le plan gratuit est limité à 3 cours. Passe au Premium pour des cours illimités !"
+          });
+        }
+
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const uploads = await storage.getUploadCountThisMonth(userId, startOfMonth);
 
         if (uploads >= 2) {
+          const user = await storage.getUserById(userId);
+          const isEn = user?.language === 'en';
           return res.status(403).json({ 
-            message: "Limite d'upload atteinte",
+            message: isEn ? "Upload limit reached" : "Limite d'upload atteinte",
             limitExceeded: true,
             limit: 2,
-            description: "Tu as atteint ta limite de 2 fichiers par mois. Passe au Premium pour des uploads illimités !"
+            description: isEn 
+              ? "Free plan is limited to 2 file uploads per month. Upgrade to Premium for unlimited uploads!"
+              : "Le plan gratuit est limité à 2 uploads par mois. Passe au Premium pour des uploads illimités !"
           });
         }
       }
@@ -563,10 +595,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use user's language preference for AI generation
       const language = (user?.language || 'fr') as 'fr' | 'en';
       
-      // Check if user is premium to apply appropriate limits
       const subscription = await storage.getSubscriptionByUserId(userId);
       const isPremium = subscription?.status === 'premium' && 
                         (!subscription.endDate || new Date(subscription.endDate) > new Date());
+
+      if (!isPremium) {
+        const allSummaries = await storage.getSummariesByUserId(userId);
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const summariesThisMonth = allSummaries.filter(s => new Date(s.createdAt) >= monthStart);
+        if (summariesThisMonth.length >= 1) {
+          const msg = language === 'en'
+            ? "Free plan is limited to 1 AI summary per month. Upgrade to Premium for unlimited summaries!"
+            : "Le plan gratuit est limité à 1 résumé IA par mois. Passe au Premium pour des résumés illimités !";
+          return res.status(403).json({ message: msg });
+        }
+      }
       
       const result = await generateCourseSummary(course.content, course.title, language, isPremium);
       
@@ -611,8 +655,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
 
-      // Use user's language preference for AI generation
       const language = (user?.language || 'fr') as 'fr' | 'en';
+
+      const subscription = await storage.getSubscriptionByUserId(userId);
+      const isPremium = subscription?.status === 'premium' && 
+                        (!subscription.endDate || new Date(subscription.endDate) > new Date());
+
+      if (!isPremium) {
+        const allQuizzes = await storage.getQuizzesByUserId(userId);
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const quizzesThisMonth = allQuizzes.filter(q => new Date(q.createdAt) >= monthStart);
+        if (quizzesThisMonth.length >= 1) {
+          const msg = language === 'en'
+            ? "Free plan is limited to 1 quiz per month. Upgrade to Premium for unlimited quizzes!"
+            : "Le plan gratuit est limité à 1 quiz par mois. Passe au Premium pour des quiz illimités !";
+          return res.status(403).json({ message: msg });
+        }
+      }
+
       const quizData = await generateQuiz(course.content, course.title, type, language);
       
       const quiz = await storage.createQuiz({
@@ -896,10 +957,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = (req.user as any).id;
       const user = await storage.getUserById(userId);
-      const { currency = 'XAF' } = req.body;
 
       if (!user) {
-        return res.status(404).json({ message: "Utilisateur introuvable" });
+        return res.status(404).json({ message: "User not found" });
       }
 
       const stripe = await getUncachableStripeClient();
@@ -919,26 +979,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updateUser(userId, { stripeCustomerId: customer.id });
       }
 
-      const priceId = currency === 'USD'
-        ? process.env.STRIPE_USD_PRICE_ID
-        : process.env.STRIPE_XAF_PRICE_ID;
-
+      const priceId = process.env.STRIPE_PRICE_ID;
       if (!priceId) {
-        return res.status(500).json({ message: "Configuration de prix manquante" });
+        return res.status(500).json({ message: "Price configuration missing" });
       }
-
-      const amount = currency === 'USD' ? 1 : 500;
 
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
-        payment_method_types: currency === 'USD' ? ['card'] : ['card'],
+        payment_method_types: ['card'],
         line_items: [{ price: priceId, quantity: 1 }],
         mode: 'payment',
         success_url: `${baseUrl}/dashboard/subscription?success=true`,
         cancel_url: `${baseUrl}/dashboard/subscription?error=payment_cancelled`,
         metadata: {
           userId,
-          currency,
+          currency: 'USD',
           type: 'premium_subscription',
         },
       });
@@ -946,8 +1001,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const payment = await storage.createPayment({
         userId,
         subscriptionId: null,
-        amount,
-        currency,
+        amount: 10,
+        currency: 'USD',
         status: 'pending',
         paymentMethod: 'stripe',
         lygosProductId: null,
@@ -966,7 +1021,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error creating Stripe checkout:", error);
-      res.status(500).json({ message: "Échec d'initialisation du paiement" });
+      res.status(500).json({ message: "Payment initialization failed" });
     }
   });
 

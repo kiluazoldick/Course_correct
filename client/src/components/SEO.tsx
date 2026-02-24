@@ -12,14 +12,14 @@ interface SEOProps {
 
 const defaultMeta = {
   fr: {
-    title: "Corrige Tes Cours - Plateforme IA pour Révisions & Réussite Universitaire au Cameroun",
-    description: "Révise intelligemment avec l'IA ! Résumés automatiques de cours, quiz personnalisés, chatbot éducatif Tariq IA. Pour étudiants universitaires camerounais. Essai gratuit, Premium à 500 FCFA/mois - Promo Noël !",
-    keywords: "révision intelligente, résumé de cours IA, quiz personnalisés, révision universitaire Cameroun, plateforme éducative IA, étudier efficacement, Tariq IA chatbot, réussite universitaire"
+    title: "Corrige Tes Cours - Plateforme IA pour Révisions & Réussite Universitaire",
+    description: "Révise intelligemment avec l'IA ! Résumés automatiques de cours, quiz personnalisés, chatbot éducatif Tariq IA. Essai gratuit, Premium à $10/mois.",
+    keywords: "révision intelligente, résumé de cours IA, quiz personnalisés, plateforme éducative IA, étudier efficacement, Tariq IA chatbot, réussite universitaire"
   },
   en: {
-    title: "Corrige Tes Cours - AI Platform for University Success in Cameroon",
-    description: "Study smarter with AI! Automatic course summaries, personalized quizzes, educational chatbot Tariq AI. For Cameroonian university students. Free trial, Premium at 500 XAF/month - Christmas Promo!",
-    keywords: "smart revision, AI course summary, personalized quizzes, university revision Cameroon, AI educational platform, study effectively, Tariq AI chatbot, academic success"
+    title: "Corrige Tes Cours - AI Platform for University Study Success",
+    description: "Study smarter with AI! Automatic course summaries, personalized quizzes, educational chatbot Tariq AI. Free trial, Premium at $10/month.",
+    keywords: "smart revision, AI course summary, personalized quizzes, AI educational platform, study effectively, Tariq AI chatbot, academic success"
   }
 };
 

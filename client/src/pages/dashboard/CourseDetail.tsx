@@ -76,6 +76,16 @@ export default function CourseDetail() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [reviewOnly, setReviewOnly] = useState(false);
 
+  const { data: profile } = useQuery<{ plan: string }>({
+    queryKey: ['/api/user/profile'],
+    queryFn: async () => {
+      const res = await fetch('/api/user/profile', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed');
+      return res.json();
+    },
+  });
+  const isPremium = profile?.plan === 'premium';
+
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
     queryKey: ['/api/courses', courseId],
     queryFn: async () => {
@@ -725,18 +735,38 @@ export default function CourseDetail() {
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center justify-center py-12 gap-4">
                   <BookMarked className="w-12 h-12 text-muted-foreground" />
-                  <p className="text-muted-foreground text-center">{t.studyGuide.noGuideDesc}</p>
-                  <Button
-                    onClick={() => generateStudyGuideMutation.mutate()}
-                    disabled={generateStudyGuideMutation.isPending}
-                    data-testid="button-generate-study-guide"
-                  >
-                    {generateStudyGuideMutation.isPending ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t.studyGuide.generating}</>
-                    ) : (
-                      <><Sparkles className="w-4 h-4 mr-2" />{t.studyGuide.generate}</>
-                    )}
-                  </Button>
+                  {isPremium ? (
+                    <>
+                      <p className="text-muted-foreground text-center">{t.studyGuide.noGuideDesc}</p>
+                      <Button
+                        onClick={() => generateStudyGuideMutation.mutate()}
+                        disabled={generateStudyGuideMutation.isPending}
+                        data-testid="button-generate-study-guide"
+                      >
+                        {generateStudyGuideMutation.isPending ? (
+                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t.studyGuide.generating}</>
+                        ) : (
+                          <><Sparkles className="w-4 h-4 mr-2" />{t.studyGuide.generate}</>
+                        )}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-8 h-8 text-muted-foreground" />
+                      <p className="text-muted-foreground text-center">
+                        {language === 'fr' 
+                          ? "Les guides d'étude sont réservés aux membres Premium."
+                          : "Study guides are available for Premium members only."}
+                      </p>
+                      <Button
+                        onClick={() => setLocation('/dashboard/subscription')}
+                        data-testid="button-upgrade-study-guide"
+                      >
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        {language === 'fr' ? 'Passer en Premium - $10/mois' : 'Upgrade to Premium - $10/mo'}
+                      </Button>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -12,7 +12,7 @@ import { getErrorMessage } from '@/lib/errorHandler';
 interface PaymentResponse {
   paymentId: string;
   checkoutUrl: string;
-  transactionId: string;
+  sessionId: string;
 }
 
 export default function PaymentMethod() {
@@ -21,29 +21,9 @@ export default function PaymentMethod() {
   const [, setLocation] = useLocation();
   const [selectedMethod, setSelectedMethod] = useState<'mobile' | 'card' | null>(null);
 
-  const mobileMoneyMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest('POST', '/api/payment/initiate');
-      return await res.json();
-    },
-    onSuccess: (data: PaymentResponse) => {
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      }
-    },
-    onError: (error: any) => {
-      toast({
-        title: language === 'fr' ? "Erreur" : "Error",
-        description: getErrorMessage(error, language),
-        variant: "destructive",
-      });
-      setSelectedMethod(null);
-    },
-  });
-
-  const cardMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest('POST', '/api/payment/flutterwave/initiate', { currency: 'USD' });
+  const checkoutMutation = useMutation({
+    mutationFn: async (currency: 'XAF' | 'USD') => {
+      const res = await apiRequest('POST', '/api/payment/stripe/checkout', { currency });
       return await res.json();
     },
     onSuccess: (data: PaymentResponse) => {
@@ -64,13 +44,13 @@ export default function PaymentMethod() {
   const handlePayment = (method: 'mobile' | 'card') => {
     setSelectedMethod(method);
     if (method === 'mobile') {
-      mobileMoneyMutation.mutate();
+      checkoutMutation.mutate('XAF');
     } else {
-      cardMutation.mutate();
+      checkoutMutation.mutate('USD');
     }
   };
 
-  const isLoading = mobileMoneyMutation.isPending || cardMutation.isPending;
+  const isLoading = checkoutMutation.isPending;
 
   return (
     <div className="w-full py-8 px-6">
@@ -98,13 +78,13 @@ export default function PaymentMethod() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <Card 
-            className={`cursor-pointer transition-all hover-elevate ${selectedMethod === 'mobile' ? 'ring-2 ring-yellow-500' : ''}`}
+            className={`cursor-pointer transition-all hover-elevate ${selectedMethod === 'mobile' ? 'ring-2 ring-primary' : ''}`}
             onClick={() => !isLoading && handlePayment('mobile')}
             data-testid="card-payment-mobile"
           >
             <CardHeader className="text-center pb-2">
-              <div className="mx-auto p-4 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-full mb-2">
-                <Smartphone className="w-8 h-8 text-yellow-600" />
+              <div className="mx-auto p-4 bg-primary/10 rounded-full mb-2">
+                <Smartphone className="w-8 h-8 text-primary" />
               </div>
               <CardTitle className="text-lg">Mobile Money</CardTitle>
               <CardDescription>
@@ -112,12 +92,12 @@ export default function PaymentMethod() {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="text-2xl font-bold text-yellow-600 mb-2">500 XAF</div>
+              <div className="text-2xl font-bold text-primary mb-2">500 XAF</div>
               <p className="text-sm text-muted-foreground mb-4">
                 {language === 'fr' ? 'Cameroun uniquement' : 'Cameroon only'}
               </p>
               <Button 
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white"
+                className="w-full"
                 disabled={isLoading}
                 data-testid="button-pay-mobile"
               >
@@ -134,13 +114,13 @@ export default function PaymentMethod() {
           </Card>
 
           <Card 
-            className={`cursor-pointer transition-all hover-elevate ${selectedMethod === 'card' ? 'ring-2 ring-blue-500' : ''}`}
+            className={`cursor-pointer transition-all hover-elevate ${selectedMethod === 'card' ? 'ring-2 ring-primary' : ''}`}
             onClick={() => !isLoading && handlePayment('card')}
             data-testid="card-payment-card"
           >
             <CardHeader className="text-center pb-2">
-              <div className="mx-auto p-4 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-full mb-2">
-                <CreditCard className="w-8 h-8 text-blue-600" />
+              <div className="mx-auto p-4 bg-primary/10 rounded-full mb-2">
+                <CreditCard className="w-8 h-8 text-primary" />
               </div>
               <CardTitle className="text-lg">
                 {language === 'fr' ? 'Carte Bancaire' : 'Credit Card'}
@@ -150,12 +130,12 @@ export default function PaymentMethod() {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="text-2xl font-bold text-blue-600 mb-2">$1 USD</div>
+              <div className="text-2xl font-bold text-primary mb-2">$1 USD</div>
               <p className="text-sm text-muted-foreground mb-4">
                 {language === 'fr' ? 'International' : 'International'}
               </p>
               <Button 
-                className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-white"
+                className="w-full"
                 disabled={isLoading}
                 data-testid="button-pay-card"
               >
@@ -176,8 +156,8 @@ export default function PaymentMethod() {
           <Shield className="w-4 h-4" />
           <span>
             {language === 'fr' 
-              ? 'Paiements sécurisés par Lygos et Flutterwave' 
-              : 'Secure payments via Lygos and Flutterwave'}
+              ? 'Paiements sécurisés par Stripe' 
+              : 'Secure payments via Stripe'}
           </span>
         </div>
       </div>

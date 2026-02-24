@@ -40,4 +40,10 @@ args = "npm run dev"
 waitForPort = 5000
 
 [agent]
-integrations = ["resend:1.0.0"]
+integrations = ["resend:1.0.0", "stripe:2.0.0"]
+
+[userenv]
+
+[userenv.shared]
+STRIPE_XAF_PRICE_ID = "price_1T4LImLyGGZLjAeMN9WbUwDq"
+STRIPE_USD_PRICE_ID = "price_1T4LImLyGGZLjAeM8wXhlVwp"

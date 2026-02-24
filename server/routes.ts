@@ -9,9 +9,8 @@ import { processUploadedFile } from "./fileProcessor";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import { eq } from "drizzle-orm";
 import { Pool } from "@neondatabase/serverless";
-import { lygosService } from "./lygos";
-import { flutterwaveService } from "./flutterwave";
 import { sendWelcomeEmail, sendWeeklyMotivationEmail, sendBulkWeeklyEmails, sendPremiumCongratsEmail, sendReminderEmail } from "./email";
+import { getUncachableStripeClient } from "./stripeClient";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
@@ -892,55 +891,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Payment routes
-  app.post('/api/payment/initiate', isAuthenticated, async (req: any, res) => {
+  // Stripe payment routes
+  app.post('/api/payment/stripe/checkout', isAuthenticated, async (req: any, res) => {
     try {
       const userId = (req.user as any).id;
+      const user = await storage.getUserById(userId);
+      const { currency = 'XAF' } = req.body;
+
+      if (!user) {
+        return res.status(404).json({ message: "Utilisateur introuvable" });
+      }
+
+      const stripe = await getUncachableStripeClient();
 
       const DOMAIN = process.env.CUSTOM_DOMAIN || process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000';
       const protocol = DOMAIN.includes('localhost') ? 'http' : 'https';
       const baseUrl = `${protocol}://${DOMAIN}`;
 
-      const orderId = `CTC-${Date.now()}-${userId.slice(0, 8)}`;
-
-      const paymentResponse = await lygosService.createPayment({
-        amount: 500,
-        shopName: 'Corrige Tes Cours',
-        message: 'Abonnement Premium 1 mois - Accès illimité',
-        successUrl: `${baseUrl}/api/payment/return/lygos?status=success&order_id=${orderId}`,
-        failureUrl: `${baseUrl}/api/payment/return/lygos?status=failed&order_id=${orderId}`,
-        orderId,
-      });
-
-      if (!paymentResponse.success) {
-        return res.status(400).json({ 
-          message: paymentResponse.error || 'Échec de création du paiement' 
+      let customerId = user.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: `${user.firstName} ${user.lastName || ''}`.trim(),
+          metadata: { userId },
         });
+        customerId = customer.id;
+        await storage.updateUser(userId, { stripeCustomerId: customer.id });
       }
+
+      const priceId = currency === 'USD'
+        ? process.env.STRIPE_USD_PRICE_ID
+        : process.env.STRIPE_XAF_PRICE_ID;
+
+      if (!priceId) {
+        return res.status(500).json({ message: "Configuration de prix manquante" });
+      }
+
+      const amount = currency === 'USD' ? 1 : 500;
+
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        payment_method_types: currency === 'USD' ? ['card'] : ['card'],
+        line_items: [{ price: priceId, quantity: 1 }],
+        mode: 'payment',
+        success_url: `${baseUrl}/dashboard/subscription?success=true`,
+        cancel_url: `${baseUrl}/dashboard/subscription?error=payment_cancelled`,
+        metadata: {
+          userId,
+          currency,
+          type: 'premium_subscription',
+        },
+      });
 
       const payment = await storage.createPayment({
         userId,
         subscriptionId: null,
-        amount: 500,
-        currency: 'XAF',
+        amount,
+        currency,
         status: 'pending',
-        paymentMethod: 'mobile_money',
-        lygosProductId: paymentResponse.productId || null, // Only store if we have actual gateway ID
-        lygosTransactionId: orderId, // Our internal order reference
-        metadata: { 
-          checkoutUrl: paymentResponse.checkoutUrl,
-          lygosOrderId: orderId,
-          lygosGatewayId: paymentResponse.productId || null,
+        paymentMethod: 'stripe',
+        lygosProductId: null,
+        lygosTransactionId: session.id,
+        metadata: {
+          provider: 'stripe',
+          stripeSessionId: session.id,
+          checkoutUrl: session.url,
         },
       });
 
       res.json({
         paymentId: payment.id,
-        checkoutUrl: paymentResponse.checkoutUrl,
-        transactionId: orderId,
+        checkoutUrl: session.url,
+        sessionId: session.id,
       });
     } catch (error) {
-      console.error("Error initiating payment:", error);
+      console.error("Error creating Stripe checkout:", error);
       res.status(500).json({ message: "Échec d'initialisation du paiement" });
     }
   });
@@ -954,219 +979,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Paiement introuvable" });
       }
 
-      if (payment.status === 'completed') {
-        return res.json({ status: 'completed', payment });
-      }
-
-      if (payment.lygosProductId) {
-        const status = await lygosService.getPaymentStatus(payment.lygosProductId);
-
-        if (status.status === 'success' && payment.status !== 'completed') {
-          const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
-            ? { ...payment.metadata as object, ...status.details }
-            : status.details;
-
-          const updatedPayment = await storage.updatePayment(payment.id, {
-            status: 'completed',
-            metadata: metadataUpdate,
-          });
-
-          const startDate = new Date();
-          const endDate = new Date();
-          endDate.setMonth(endDate.getMonth() + 1);
-
-          let subscription = await storage.getSubscriptionByUserId(userId);
-          if (subscription) {
-            const updatedSub = await storage.updateSubscription(subscription.id, {
-              status: 'premium',
-              startDate,
-              endDate,
-              paymentMethod: status.paymentMethod || 'mobile_money',
-              amount: 500,
-              transactionId: status.transactionId || payment.lygosTransactionId,
-            });
-
-            if (updatedSub) {
-              await storage.updatePayment(payment.id, {
-                subscriptionId: updatedSub.id,
-              });
-              return res.json({ status: 'completed', payment: updatedPayment, subscription: updatedSub });
-            }
-          } else {
-            const newSub = await storage.createSubscription({
-              userId,
-              status: 'premium',
-              startDate,
-              endDate,
-              paymentMethod: status.paymentMethod || 'mobile_money',
-              amount: 500,
-              transactionId: status.transactionId || payment.lygosTransactionId,
-            });
-
-            await storage.updatePayment(payment.id, {
-              subscriptionId: newSub.id,
-            });
-            return res.json({ status: 'completed', payment: updatedPayment, subscription: newSub });
-          }
-
-          return res.json({ status: 'completed', payment: updatedPayment });
-        } else if (status.status === 'failed') {
-          await storage.updatePayment(payment.id, { status: 'failed' });
-          return res.json({ status: 'failed', payment });
-        }
-      }
-
       res.json({ status: payment.status, payment });
     } catch (error) {
       console.error("Error checking payment status:", error);
       res.status(500).json({ message: "Échec de vérification du statut" });
-    }
-  });
-
-  // Lygos Return URL - When user comes back from payment page
-  // IMPORTANT: Lygos ONLY redirects to success_url if payment succeeded
-  // So if we receive status=success, we trust it and activate Premium immediately
-  app.get('/api/payment/return/lygos', async (req: any, res) => {
-    try {
-      const { status, order_id } = req.query;
-      const orderId = order_id as string;
-      const urlStatus = status as string;
-
-      if (!orderId) {
-        return res.redirect('/dashboard/subscription?error=no_order_id');
-      }
-
-      // Find payment by order ID (stored in lygosTransactionId) - optimized direct query
-      const [payment] = await db.select().from(payments).where(eq(payments.lygosTransactionId, orderId)).limit(1);
-
-      if (!payment) {
-        return res.redirect('/dashboard/subscription?error=payment_not_found');
-      }
-
-      // Skip if already completed
-      if (payment.status === 'completed') {
-        return res.redirect('/dashboard/subscription?success=true');
-      }
-
-      // TRUST THE URL STATUS - Lygos only redirects to success_url if payment succeeded
-      const isSuccess = urlStatus === 'success';
-      const isFailed = urlStatus === 'failed';
-
-      if (isSuccess) {
-        // Update payment status
-        const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
-          ? { ...payment.metadata as object, returnStatus: 'success', returnedAt: new Date().toISOString() }
-          : { returnStatus: 'success', returnedAt: new Date().toISOString() };
-
-        await storage.updatePayment(payment.id, {
-          status: 'completed',
-          paymentMethod: 'mobile_money',
-          metadata: metadataUpdate,
-        });
-
-        // Create or update subscription for Premium access
-        const startDate = new Date();
-        const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + 1);
-
-        let subscription = await storage.getSubscriptionByUserId(payment.userId);
-        if (subscription) {
-          await storage.updateSubscription(subscription.id, {
-            status: 'premium',
-            startDate,
-            endDate,
-            paymentMethod: 'mobile_money',
-            amount: 500,
-            transactionId: orderId,
-          });
-        } else {
-          const newSub = await storage.createSubscription({
-            userId: payment.userId,
-            status: 'premium',
-            startDate,
-            endDate,
-            paymentMethod: 'mobile_money',
-            amount: 500,
-            transactionId: orderId,
-          });
-
-          await storage.updatePayment(payment.id, {
-            subscriptionId: newSub.id,
-          });
-        }
-
-        // Send Premium congratulations email
-        const user = await storage.getUser(payment.userId);
-        if (user) {
-          sendPremiumCongratsEmail(user.email, user.firstName, (user.language as 'fr' | 'en') || 'fr')
-            .catch(err => console.error('Failed to send premium email:', err));
-        }
-
-        return res.redirect('/dashboard/subscription?success=true');
-        
-      } else if (isFailed) {
-        const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
-          ? { ...payment.metadata as object, returnStatus: 'failed', returnedAt: new Date().toISOString() }
-          : { returnStatus: 'failed', returnedAt: new Date().toISOString() };
-
-        await storage.updatePayment(payment.id, {
-          status: 'failed',
-          metadata: metadataUpdate,
-        });
-
-        return res.redirect('/dashboard/subscription?error=payment_failed');
-      } else {
-        // Unknown status - but if user was redirected here, treat as success
-        // because Lygos should only redirect to success_url after payment
-        const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
-          ? { ...payment.metadata as object, returnStatus: urlStatus || 'unknown', returnedAt: new Date().toISOString() }
-          : { returnStatus: urlStatus || 'unknown', returnedAt: new Date().toISOString() };
-
-        await storage.updatePayment(payment.id, {
-          status: 'completed',
-          paymentMethod: 'mobile_money',
-          metadata: metadataUpdate,
-        });
-
-        // Activate Premium anyway since they were redirected to success URL
-        const startDate = new Date();
-        const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + 1);
-
-        let subscription = await storage.getSubscriptionByUserId(payment.userId);
-        if (subscription) {
-          await storage.updateSubscription(subscription.id, {
-            status: 'premium',
-            startDate,
-            endDate,
-            paymentMethod: 'mobile_money',
-            amount: 500,
-            transactionId: orderId,
-          });
-        } else {
-          const newSub = await storage.createSubscription({
-            userId: payment.userId,
-            status: 'premium',
-            startDate,
-            endDate,
-            paymentMethod: 'mobile_money',
-            amount: 500,
-            transactionId: orderId,
-          });
-          await storage.updatePayment(payment.id, { subscriptionId: newSub.id });
-        }
-
-        // Send Premium congratulations email
-        const userForEmail = await storage.getUser(payment.userId);
-        if (userForEmail) {
-          sendPremiumCongratsEmail(userForEmail.email, userForEmail.firstName, (userForEmail.language as 'fr' | 'en') || 'fr')
-            .catch(err => console.error('Failed to send premium email:', err));
-        }
-
-        return res.redirect('/dashboard/subscription?success=true');
-      }
-    } catch (error) {
-      return res.redirect('/dashboard/subscription?error=server_error');
     }
   });
 
@@ -1597,249 +1413,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error syncing users to Resend:", error);
       res.status(500).json({ message: "Failed to sync users" });
-    }
-  });
-
-  // ===== Flutterwave Payment Routes =====
-
-  // Initialize Flutterwave payment
-  app.post('/api/payment/flutterwave/initiate', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = (req.user as any).id;
-      const user = await storage.getUserById(userId);
-      const { currency = 'XAF' } = req.body;
-
-      if (!user) {
-        return res.status(404).json({ message: "Utilisateur introuvable" });
-      }
-
-      const DOMAIN = process.env.CUSTOM_DOMAIN || process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000';
-      const protocol = DOMAIN.includes('localhost') ? 'http' : 'https';
-      const baseUrl = `${protocol}://${DOMAIN}`;
-
-      const txRef = flutterwaveService.generateTxRef(userId);
-      
-      // Amount based on currency: 500 XAF or 1 USD
-      const amount = currency === 'USD' ? 1 : 500;
-
-      const paymentResponse = await flutterwaveService.initializePayment({
-        amount,
-        currency: currency as 'XAF' | 'USD',
-        email: user.email,
-        phone_number: user.phone || undefined,
-        name: `${user.firstName} ${user.lastName || ''}`.trim(),
-        tx_ref: txRef,
-        redirect_url: `${baseUrl}/api/payment/flutterwave/callback`,
-        meta: {
-          userId,
-          subscriptionType: 'premium',
-        },
-      });
-
-      if (paymentResponse.status !== 'success' || !paymentResponse.data?.link) {
-        return res.status(400).json({ 
-          message: paymentResponse.message || 'Échec de création du paiement' 
-        });
-      }
-
-      // Create payment record
-      const payment = await storage.createPayment({
-        userId,
-        subscriptionId: null,
-        amount,
-        currency,
-        status: 'pending',
-        paymentMethod: currency === 'XAF' ? 'mobile_money' : 'card',
-        lygosProductId: null,
-        lygosTransactionId: txRef,
-        metadata: { 
-          provider: 'flutterwave',
-          checkoutUrl: paymentResponse.data.link,
-          txRef,
-        },
-      });
-
-      res.json({
-        paymentId: payment.id,
-        checkoutUrl: paymentResponse.data.link,
-        txRef,
-      });
-    } catch (error) {
-      console.error("Error initiating Flutterwave payment:", error);
-      res.status(500).json({ message: "Échec d'initialisation du paiement" });
-    }
-  });
-
-  // Flutterwave callback - user returns from payment page
-  app.get('/api/payment/flutterwave/callback', async (req: any, res) => {
-    try {
-      const { status, tx_ref, transaction_id } = req.query;
-      const txRef = tx_ref as string;
-      const transactionId = transaction_id as string;
-      const paymentStatus = status as string;
-
-      if (!txRef) {
-        return res.redirect('/dashboard/subscription?error=no_tx_ref');
-      }
-
-      // Find payment by tx_ref
-      const [payment] = await db.select().from(payments).where(eq(payments.lygosTransactionId, txRef)).limit(1);
-
-      if (!payment) {
-        return res.redirect('/dashboard/subscription?error=payment_not_found');
-      }
-
-      // Skip if already completed
-      if (payment.status === 'completed') {
-        return res.redirect('/dashboard/subscription?success=true');
-      }
-
-      // Verify payment with Flutterwave API
-      if (paymentStatus === 'successful' && transactionId) {
-        const verification = await flutterwaveService.verifyTransaction(transactionId);
-
-        if (verification.status === 'success' && verification.data?.status === 'successful') {
-          // Payment confirmed - update status
-          const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
-            ? { ...payment.metadata as object, flw_ref: verification.data.flw_ref, verifiedAt: new Date().toISOString() }
-            : { flw_ref: verification.data.flw_ref, verifiedAt: new Date().toISOString() };
-
-          await storage.updatePayment(payment.id, {
-            status: 'completed',
-            paymentMethod: verification.data.payment_type || 'card',
-            metadata: metadataUpdate,
-          });
-
-          // Activate Premium subscription
-          const startDate = new Date();
-          const endDate = new Date();
-          endDate.setMonth(endDate.getMonth() + 1);
-
-          let subscription = await storage.getSubscriptionByUserId(payment.userId);
-          if (subscription) {
-            await storage.updateSubscription(subscription.id, {
-              status: 'premium',
-              startDate,
-              endDate,
-              paymentMethod: verification.data.payment_type || 'card',
-              amount: verification.data.amount,
-              transactionId: verification.data.flw_ref,
-            });
-          } else {
-            const newSub = await storage.createSubscription({
-              userId: payment.userId,
-              status: 'premium',
-              startDate,
-              endDate,
-              paymentMethod: verification.data.payment_type || 'card',
-              amount: verification.data.amount,
-              transactionId: verification.data.flw_ref,
-            });
-            await storage.updatePayment(payment.id, { subscriptionId: newSub.id });
-          }
-
-          // Send Premium congratulations email
-          const user = await storage.getUser(payment.userId);
-          if (user) {
-            sendPremiumCongratsEmail(user.email, user.firstName, (user.language as 'fr' | 'en') || 'fr')
-              .catch(err => console.error('Failed to send premium email:', err));
-          }
-
-          return res.redirect('/dashboard/subscription?success=true');
-        }
-      }
-
-      // Payment failed or cancelled
-      if (paymentStatus === 'cancelled' || paymentStatus === 'failed') {
-        await storage.updatePayment(payment.id, { status: 'failed' });
-        return res.redirect('/dashboard/subscription?error=payment_failed');
-      }
-
-      // Unknown status - redirect with error
-      return res.redirect('/dashboard/subscription?error=verification_failed');
-    } catch (error) {
-      console.error("Error in Flutterwave callback:", error);
-      return res.redirect('/dashboard/subscription?error=server_error');
-    }
-  });
-
-  // Flutterwave webhook - for real-time payment notifications
-  app.post('/api/payment/flutterwave/webhook', async (req: any, res) => {
-    try {
-      const signature = req.headers['verif-hash'] as string;
-      const secretHash = process.env.FLW_SECRET_HASH || process.env.FLW_SECRET_KEY;
-
-      // Verify webhook signature
-      if (!signature || signature !== secretHash) {
-        console.warn('Invalid Flutterwave webhook signature');
-        return res.status(401).json({ message: 'Invalid signature' });
-      }
-
-      const { event, data } = req.body;
-
-      if (event === 'charge.completed' && data.status === 'successful') {
-        const txRef = data.tx_ref;
-        
-        // Find payment by tx_ref
-        const [payment] = await db.select().from(payments).where(eq(payments.lygosTransactionId, txRef)).limit(1);
-
-        if (payment && payment.status !== 'completed') {
-          // Verify with Flutterwave API (never trust webhook data directly)
-          const verification = await flutterwaveService.verifyTransaction(data.id);
-
-          if (verification.status === 'success' && verification.data?.status === 'successful') {
-            const metadataUpdate = payment.metadata && typeof payment.metadata === 'object' 
-              ? { ...payment.metadata as object, webhookVerified: true, flw_ref: data.flw_ref }
-              : { webhookVerified: true, flw_ref: data.flw_ref };
-
-            await storage.updatePayment(payment.id, {
-              status: 'completed',
-              paymentMethod: data.payment_type || 'card',
-              metadata: metadataUpdate,
-            });
-
-            // Activate Premium
-            const startDate = new Date();
-            const endDate = new Date();
-            endDate.setMonth(endDate.getMonth() + 1);
-
-            let subscription = await storage.getSubscriptionByUserId(payment.userId);
-            if (subscription) {
-              await storage.updateSubscription(subscription.id, {
-                status: 'premium',
-                startDate,
-                endDate,
-                paymentMethod: data.payment_type || 'card',
-                amount: data.amount,
-                transactionId: data.flw_ref,
-              });
-            } else {
-              const newSub = await storage.createSubscription({
-                userId: payment.userId,
-                status: 'premium',
-                startDate,
-                endDate,
-                paymentMethod: data.payment_type || 'card',
-                amount: data.amount,
-                transactionId: data.flw_ref,
-              });
-              await storage.updatePayment(payment.id, { subscriptionId: newSub.id });
-            }
-
-            // Send Premium email
-            const user = await storage.getUser(payment.userId);
-            if (user) {
-              sendPremiumCongratsEmail(user.email, user.firstName, (user.language as 'fr' | 'en') || 'fr')
-                .catch(err => console.error('Failed to send premium email:', err));
-            }
-          }
-        }
-      }
-
-      res.json({ status: 'ok' });
-    } catch (error) {
-      console.error("Error processing Flutterwave webhook:", error);
-      res.status(500).json({ message: 'Webhook processing failed' });
     }
   });
 

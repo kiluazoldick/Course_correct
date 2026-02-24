@@ -34,8 +34,9 @@ export const users = pgTable("users", {
   language: varchar("language").notNull().default("fr"), // User's preferred language (fr or en)
   profileImageUrl: varchar("profile_image_url"),
   emailMarketing: varchar("email_marketing").notNull().default("yes"), // yes/no for marketing emails
-  referralCode: varchar("referral_code").unique(), // User's unique referral code
-  referredBy: varchar("referred_by"), // Referral code of the person who referred this user
+  stripeCustomerId: varchar("stripe_customer_id"),
+  referralCode: varchar("referral_code").unique(),
+  referredBy: varchar("referred_by"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

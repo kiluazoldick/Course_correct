@@ -263,8 +263,8 @@ export default function Subscription() {
           <div className="mt-4 p-4 bg-muted/50 rounded-md">
             <p className="text-sm text-muted-foreground">
               {language === 'fr' 
-                ? <>Tes paiements sont sécurisés par <span className="font-medium">Lygos</span> et <span className="font-medium">Flutterwave</span>.</>
-                : <>Your payments are secured by <span className="font-medium">Lygos</span> and <span className="font-medium">Flutterwave</span>.</>
+                ? <>Tes paiements sont sécurisés par <span className="font-medium">Stripe</span>.</>
+                : <>Your payments are secured by <span className="font-medium">Stripe</span>.</>
               }
             </p>
           </div>

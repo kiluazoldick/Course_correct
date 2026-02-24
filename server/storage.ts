@@ -111,6 +111,7 @@ export interface IStorage {
   // Payments
   getPayment(id: string): Promise<Payment | undefined>;
   getPaymentsByUserId(userId: string): Promise<Payment[]>;
+  getPaymentByTransactionId(transactionId: string): Promise<Payment | undefined>;
   createPayment(payment: InsertPayment): Promise<Payment>;
   updatePayment(id: string, payment: Partial<InsertPayment>): Promise<Payment | undefined>;
 
@@ -383,6 +384,11 @@ export class DbStorage implements IStorage {
 
   async getPaymentsByUserId(userId: string): Promise<Payment[]> {
     return await db.select().from(payments).where(eq(payments.userId, userId)).orderBy(desc(payments.createdAt));
+  }
+
+  async getPaymentByTransactionId(transactionId: string): Promise<Payment | undefined> {
+    const result = await db.select().from(payments).where(eq(payments.lygosTransactionId, transactionId)).limit(1);
+    return result[0];
   }
 
   async createPayment(payment: InsertPayment): Promise<Payment> {

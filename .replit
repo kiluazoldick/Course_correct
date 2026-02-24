@@ -47,4 +47,4 @@ integrations = ["resend:1.0.0", "stripe:2.0.0"]
 [userenv.shared]
 STRIPE_XAF_PRICE_ID = "price_1T4LImLyGGZLjAeMN9WbUwDq"
 STRIPE_USD_PRICE_ID = "price_1T4LImLyGGZLjAeM8wXhlVwp"
-STRIPE_PRICE_ID = "price_1T4LZ5LyGGZLjAeMkqveJCgM"
+STRIPE_PRICE_ID = "price_1T4MQUPF3vLdQHDFmFwdp2t7"

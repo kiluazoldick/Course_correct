@@ -424,7 +424,7 @@ export default function Account() {
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{language === 'fr' ? 'Premium' : 'Premium'}</span>
-                <span className="font-semibold">$10 <span className="text-muted-foreground font-normal">/{language === 'fr' ? 'mois' : 'month'}</span></span>
+                <span className="font-semibold text-primary">{language === 'fr' ? 'Tout illimité' : 'Everything unlimited'}</span>
               </div>
               <Link href="/subscription">
                 <Button className="w-full" data-testid="button-upgrade-premium">

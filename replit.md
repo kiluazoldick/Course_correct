@@ -1,11 +1,11 @@
 # Corrige Tes Cours - Technical Documentation
 
 ## Overview
-Corrige Tes Cours is a universal AI-powered study tool for students worldwide. It enhances studying efficiency through automated course summaries, personalized quizzes, AI chatbot (Tariq IA), flashcards, study guides, and performance tracking. The platform features a sales-focused landing page, an anonymous onboarding flow for conversion optimization, and a comprehensive user dashboard. It operates on a freemium model with a Premium subscription at $10 USD/month via Stripe card payments only.
+Corrige Tes Cours is a universal AI-powered study tool for students worldwide. It enhances studying efficiency through automated course summaries, personalized quizzes, AI chatbot (Tariq IA), flashcards, study guides, and performance tracking. The platform features a sales-focused landing page, an anonymous onboarding flow for conversion optimization, and a comprehensive user dashboard. It operates on a freemium model with a Premium subscription via Stripe card payments only. Pricing is intentionally hidden from the UI to focus on value/features first (psychological pricing strategy).
 
 **Latest Update (Feb 2026):**
 - **Universal Platform Pivot**: Migrated from Cameroon-focused to worldwide platform. Removed all Cameroon-specific content, XAF pricing, and Mobile Money payment options.
-- **Simplified Pricing**: Single $10 USD/month Premium tier via Stripe Checkout (card payments only)
+- **Simplified Pricing**: Premium tier via Stripe Checkout (card payments only). Price hidden from UI — users discover it at checkout only.
   - Stripe Price ID stored in STRIPE_PRICE_ID env var
   - Single checkout endpoint: /api/payment/stripe/checkout
   - Webhook-based payment verification with Stripe signature validation

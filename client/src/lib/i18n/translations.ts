@@ -105,10 +105,10 @@ export const translations = {
         },
       },
       pricing: {
-        title: "Des prix adaptés aux étudiants",
+        title: "Des fonctionnalités pour chaque étudiant",
         free: {
           title: "Gratuit",
-          price: "$0",
+          price: "",
           features: [
             "Saisie de cours illimitée",
             "Résumés IA illimités",
@@ -119,8 +119,8 @@ export const translations = {
         },
         premium: {
           title: "Premium",
-          price: "$10",
-          period: "/mois",
+          price: "",
+          period: "",
           features: [
             "Tout du plan Gratuit",
             "Uploads de fichiers illimités",
@@ -413,9 +413,9 @@ export const translations = {
       premiumFeatures: "Fonctionnalités Premium",
       unlockAll: "Débloquez tout le potentiel de Corrige Tes Cours",
       expiresOn: "Date d'expiration",
-      price: "10",
-      currency: "USD",
-      perMonth: "/mois",
+      price: "",
+      currency: "",
+      perMonth: "",
       subscribe: "Passer au Premium",
       subscribing: "Initialisation...",
       unlimited: "Illimité",
@@ -837,7 +837,7 @@ export const translations = {
         title: "6. Paiements et abonnements",
         intro: "Pour les plans payants :",
         items: [
-          "Les prix sont indiqués en dollars américains (USD) - Premium : $10/mois",
+          "Le paiement se fait en dollars américains (USD)",
           "Le paiement se fait par carte bancaire via Stripe",
           "Vous pouvez annuler votre abonnement à tout moment",
           "Garantie satisfait ou remboursé de 14 jours sur le plan Premium"
@@ -1147,8 +1147,8 @@ export const translations = {
         prioritySupport: "Support prioritaire",
         noAds: "Sans publicité",
       },
-      price: "$10",
-      perMonth: "/mois",
+      price: "",
+      perMonth: "",
       subscribe: "S'abonner maintenant",
       subscribing: "Traitement...",
       paymentMethods: "Paiements sécurisés via",
@@ -1280,10 +1280,10 @@ export const translations = {
         },
       },
       pricing: {
-        title: "Pricing for students",
+        title: "Features for every student",
         free: {
           title: "Free",
-          price: "$0",
+          price: "",
           features: [
             "Unlimited course entries",
             "Unlimited AI summaries",
@@ -1294,8 +1294,8 @@ export const translations = {
         },
         premium: {
           title: "Premium",
-          price: "$10",
-          period: "/month",
+          price: "",
+          period: "",
           features: [
             "Everything in Free plan",
             "Unlimited file uploads",
@@ -1588,9 +1588,9 @@ export const translations = {
       premiumFeatures: "Premium Features",
       unlockAll: "Unlock the full potential of Corrige Tes Cours",
       expiresOn: "Expiration date",
-      price: "10",
-      currency: "USD",
-      perMonth: "/month",
+      price: "",
+      currency: "",
+      perMonth: "",
       subscribe: "Upgrade to Premium",
       subscribing: "Initializing...",
       unlimited: "Unlimited",
@@ -2012,7 +2012,7 @@ export const translations = {
         title: "6. Payments and Subscriptions",
         intro: "For paid plans:",
         items: [
-          "Prices are in US dollars (USD) - Premium: $10/month",
+          "Payment is in US dollars (USD)",
           "Payment is via credit card through Stripe",
           "You can cancel your subscription at any time",
           "14-day money-back guarantee on Premium plan"
@@ -2322,8 +2322,8 @@ export const translations = {
         prioritySupport: "Priority support",
         noAds: "Ad-free",
       },
-      price: "$10",
-      perMonth: "/month",
+      price: "",
+      perMonth: "",
       subscribe: "Subscribe now",
       subscribing: "Processing...",
       paymentMethods: "Secure payments via",

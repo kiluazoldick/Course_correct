@@ -159,8 +159,8 @@ export default function Subscription() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2 text-sm">
-                  <span className="text-muted-foreground">{language === 'fr' ? 'Montant' : 'Amount'}</span>
-                  <span className="font-medium">$10/{language === 'fr' ? 'mois' : 'month'}</span>
+                  <span className="text-muted-foreground">{language === 'fr' ? 'Plan' : 'Plan'}</span>
+                  <span className="font-medium">{language === 'fr' ? 'Premium actif' : 'Premium active'}</span>
                 </div>
               </div>
             ) : (
@@ -201,8 +201,8 @@ export default function Subscription() {
             ))}
 
             <div className="pt-4 mt-4 border-t">
-              <div className="text-3xl font-bold mb-2" data-testid="text-price">
-                $10 <span className="text-lg font-normal text-muted-foreground">/{language === 'fr' ? 'mois' : 'month'}</span>
+              <div className="text-xl font-bold mb-2 text-primary" data-testid="text-price">
+                {language === 'fr' ? 'Débloquez tout, sans limite' : 'Unlock everything, no limits'}
               </div>
 
               {!isPremium && (

@@ -763,7 +763,7 @@ export default function CourseDetail() {
                         data-testid="button-upgrade-study-guide"
                       >
                         <Sparkles className="w-4 h-4 mr-2" />
-                        {language === 'fr' ? 'Passer en Premium - $10/mois' : 'Upgrade to Premium - $10/mo'}
+                        {language === 'fr' ? 'Passer en Premium' : 'Upgrade to Premium'}
                       </Button>
                     </>
                   )}

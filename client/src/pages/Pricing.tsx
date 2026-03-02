@@ -15,7 +15,7 @@ export default function Pricing() {
   const plans = [
     {
       name: t.pricingPage.free.name,
-      price: "0",
+      price: null,
       period: t.pricingPage.free.period,
       description: t.pricingPage.free.description,
       features: t.pricingPage.free.features,
@@ -24,7 +24,7 @@ export default function Pricing() {
     },
     {
       name: t.pricingPage.premium.name,
-      price: "10",
+      price: null,
       period: t.pricingPage.premium.period,
       description: t.pricingPage.premium.description,
       features: [
@@ -144,12 +144,6 @@ export default function Pricing() {
                     <CardHeader className="pb-6 pt-8">
                       <CardTitle className="text-2xl">{plan.name}</CardTitle>
                       <CardDescription>{plan.description}</CardDescription>
-                      <div className="mt-4">
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-5xl font-bold">${plan.price}</span>
-                          <span className="text-muted-foreground">/{plan.period}</span>
-                        </div>
-                      </div>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <ul className="space-y-3">

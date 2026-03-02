@@ -13,12 +13,12 @@ interface SEOProps {
 const defaultMeta = {
   fr: {
     title: "Corrige Tes Cours - Plateforme IA pour Révisions & Réussite Universitaire",
-    description: "Révise intelligemment avec l'IA ! Résumés automatiques de cours, quiz personnalisés, chatbot éducatif Tariq IA. Essai gratuit, Premium à $10/mois.",
+    description: "Révise intelligemment avec l'IA ! Résumés automatiques de cours, quiz personnalisés, chatbot éducatif Tariq IA. Commence gratuitement.",
     keywords: "révision intelligente, résumé de cours IA, quiz personnalisés, plateforme éducative IA, étudier efficacement, Tariq IA chatbot, réussite universitaire"
   },
   en: {
     title: "Corrige Tes Cours - AI Platform for University Study Success",
-    description: "Study smarter with AI! Automatic course summaries, personalized quizzes, educational chatbot Tariq AI. Free trial, Premium at $10/month.",
+    description: "Study smarter with AI! Automatic course summaries, personalized quizzes, educational chatbot Tariq AI. Get started for free.",
     keywords: "smart revision, AI course summary, personalized quizzes, AI educational platform, study effectively, Tariq AI chatbot, academic success"
   }
 };

@@ -103,8 +103,8 @@ export default function Home() {
     },
     {
       icon: Award,
-      title: "Prix accessible pour tous",
-      description: "Seulement $10/mois pour le Premium. Paiement sécurisé par carte bancaire via Stripe.",
+      title: "Gratuit pour commencer",
+      description: "Testez la plateforme gratuitement, puis passez au Premium quand vous êtes convaincu.",
     },
   ] : [
     {
@@ -124,8 +124,8 @@ export default function Home() {
     },
     {
       icon: Award,
-      title: "Affordable for everyone",
-      description: "Only $10/month for Premium. Secure card payment via Stripe.",
+      title: "Free to get started",
+      description: "Try the platform for free, then upgrade to Premium when you're convinced.",
     },
   ];
 
@@ -690,13 +690,11 @@ export default function Home() {
                     </div>
                     <div className="flex justify-center">
                       <div className="text-center p-8 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
-                        <div className="text-white/60 text-sm mb-1">{language === 'fr' ? 'A partir de' : 'Starting at'}</div>
-                        <div className="text-6xl font-bold text-white mb-1">$10</div>
-                        <div className="text-white/70 mb-1">/{language === 'fr' ? 'mois' : 'month'}</div>
-                        <div className="text-white/50 text-sm mb-4">{language === 'fr' ? 'Paiement par carte' : 'Card payment'}</div>
+                        <div className="text-4xl font-bold text-white mb-2">{language === 'fr' ? 'Gratuit' : 'Free'}</div>
+                        <div className="text-white/70 text-sm mb-4">{language === 'fr' ? 'pour commencer' : 'to get started'}</div>
                         <div className="inline-flex items-center gap-2 text-xs text-white/70 bg-white/10 px-3 py-1.5 rounded-full">
                           <Award className="w-3 h-3" />
-                          {language === 'fr' ? "Annuler à tout moment" : "Cancel anytime"}
+                          {language === 'fr' ? "Sans engagement" : "No commitment"}
                         </div>
                       </div>
                     </div>

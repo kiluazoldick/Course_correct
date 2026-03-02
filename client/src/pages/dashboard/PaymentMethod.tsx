@@ -88,8 +88,8 @@ export default function PaymentMethod() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center">
-              <div className="text-4xl font-bold" data-testid="text-price">
-                $10 <span className="text-lg font-normal text-muted-foreground">/{language === 'fr' ? 'mois' : 'month'}</span>
+              <div className="text-xl font-bold text-primary" data-testid="text-price">
+                {language === 'fr' ? 'Accès Premium complet' : 'Full Premium access'}
               </div>
             </div>
 

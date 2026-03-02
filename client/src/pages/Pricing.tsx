@@ -130,7 +130,7 @@ export default function Pricing() {
               {plans.map((plan, index) => (
                 <motion.div key={index} variants={itemVariants}>
                   <Card 
-                    className={`relative h-full hover-elevate ${plan.popular ? 'border-primary' : ''}`}
+                    className={`relative h-full hover-elevate text-center ${plan.popular ? 'border-primary' : ''}`}
                     data-testid={`card-plan-${index}`}
                   >
                     {plan.popular && (

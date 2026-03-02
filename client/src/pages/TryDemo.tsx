@@ -237,7 +237,7 @@ export default function TryDemo() {
                 <li>✓ Télécharger vos résumés en PDF</li>
                 <li>✓ Sauvegarder jusqu'à 2 cours par mois</li>
                 <li>✓ Générer des quiz personnalisés</li>
-                <li>✓ Discuter avec Tariq IA (5 messages/session)</li>
+                <li>✓ Discuter avec Tariq IA (3 messages/session)</li>
               </ul>
             </div>
             <Link href={`/signup?uploadId=${uploadId}`}>

@@ -85,18 +85,18 @@ export default function Subscription() {
 
   const freeFeatures = language === 'fr' 
     ? [
-        { included: true, text: "3 cours maximum" },
+        { included: true, text: "2 cours maximum" },
         { included: true, text: "1 résumé IA par mois" },
         { included: true, text: "1 quiz par mois (5 questions)" },
-        { included: true, text: "Tariq IA : 5 messages/session" },
+        { included: true, text: "Tariq IA : 3 messages/session" },
         { included: false, text: "Flashcards IA" },
         { included: false, text: "Guides d'étude IA" },
       ]
     : [
-        { included: true, text: "Up to 3 courses" },
+        { included: true, text: "Up to 2 courses" },
         { included: true, text: "1 AI summary per month" },
         { included: true, text: "1 quiz per month (5 questions)" },
-        { included: true, text: "Tariq AI: 5 messages/session" },
+        { included: true, text: "Tariq AI: 3 messages/session" },
         { included: false, text: "AI Flashcards" },
         { included: false, text: "AI Study Guides" },
       ];

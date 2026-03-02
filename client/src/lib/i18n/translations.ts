@@ -113,8 +113,8 @@ export const translations = {
             "Saisie de cours illimitée",
             "Résumés IA illimités",
             "Quiz personnalisés illimités",
-            "2 uploads de fichiers/mois",
-            "5 messages Tariq IA/session",
+            "1 upload de fichier/mois",
+            "3 messages Tariq IA/session",
           ],
         },
         premium: {
@@ -443,12 +443,12 @@ export const translations = {
         prioritySupport: "Support prioritaire",
       },
       freeFeatures: {
-        courses: "Jusqu'à 3 cours",
+        courses: "Jusqu'à 2 cours",
         summaries: "1 résumé IA par mois",
         pdfDownload: "Téléchargement PDF des résumés",
         quizzes: "1 quiz par mois",
-        uploads: "Upload : 2 fichiers/mois (10MB max)",
-        chat: "Tariq IA : 5 messages/session (3h cooldown)",
+        uploads: "Upload : 1 fichier/mois (10MB max)",
+        chat: "Tariq IA : 3 messages/session (3h cooldown)",
       },
     },
     
@@ -488,7 +488,7 @@ export const translations = {
         upload: {
           title: "Upload de fichiers",
           description: "Importez vos cours en PDF ou Word et laissez l'IA extraire le contenu automatiquement.",
-          details: ["Support PDF et Word", "Extraction automatique", "Jusqu'à 10MB par fichier", "2 fichiers/mois (gratuit)"]
+          details: ["Support PDF et Word", "Extraction automatique", "Jusqu'à 10MB par fichier", "1 fichier/mois (gratuit)"]
         },
         quiz: {
           title: "Quiz personnalisés",
@@ -498,7 +498,7 @@ export const translations = {
         tariq: {
           title: "Tariq IA - Votre tuteur personnel",
           description: "Posez vos questions et obtenez des explications claires avec votre assistant IA intelligent.",
-          details: ["Réponses instantanées", "Explications détaillées", "5 messages/session (gratuit)", "Illimité en Premium"]
+          details: ["Réponses instantanées", "Explications détaillées", "3 messages/session (gratuit)", "Illimité en Premium"]
         },
         evaluation: {
           title: "Évaluation automatique",
@@ -535,11 +535,11 @@ export const translations = {
         description: "Pour commencer et découvrir la plateforme",
         features: [
           "Saisir ses cours (illimité)",
-          "Upload de fichiers : 2/mois (max 10MB)",
+          "Upload de fichiers : 1/mois (max 10MB)",
           "Résumés IA (illimités)",
           "Téléchargement PDF des résumés",
           "Quiz personnalisés (illimités)",
-          "Tariq IA : 5 messages/session",
+          "Tariq IA : 3 messages/session",
           "Cooldown de 3h entre sessions",
           "Statistiques de base"
         ],
@@ -573,7 +573,7 @@ export const translations = {
         q1: { question: "Puis-je changer de plan à tout moment ?", answer: "Oui, vous pouvez passer du plan Gratuit au plan Premium à tout moment. Le changement est immédiat et vous payez au prorata." },
         q2: { question: "Comment puis-je payer ?", answer: "Nous acceptons les paiements par carte bancaire via notre partenaire sécurisé Stripe." },
         q3: { question: "Y a-t-il une garantie ?", answer: "Oui, le plan Premium inclut une garantie satisfait ou remboursé de 14 jours, sans poser de questions." },
-        q4: { question: "Le plan Gratuit est-il vraiment gratuit ?", answer: "Oui, totalement ! Vous pouvez utiliser Corrige Tes Cours gratuitement pour toujours avec jusqu'à 3 cours, 1 résumé et 1 quiz par mois, et Tariq IA (5 messages/session)." }
+        q4: { question: "Le plan Gratuit est-il vraiment gratuit ?", answer: "Oui, totalement ! Vous pouvez utiliser Corrige Tes Cours gratuitement pour toujours avec jusqu'à 2 cours, 1 résumé et 1 quiz par mois, et Tariq IA (3 messages/session)." }
       }
     },
     
@@ -1080,7 +1080,7 @@ export const translations = {
       error: "Erreur",
       cannotSend: "Impossible d'envoyer le message. Réessaye.",
       limitReached: "Limite atteinte",
-      limitReachedDesc: "Tu as utilisé tes 5 messages gratuits. Reviens dans {time} ou passe au plan Premium pour continuer !",
+      limitReachedDesc: "Tu as utilisé tes 3 messages gratuits. Reviens dans {time} ou passe au plan Premium pour continuer !",
       disclaimer: "Tariq peut faire des erreurs. Vérifie les informations importantes.",
       greeting: "Bonjour ! Je suis Tariq",
       avatarYou: "Tu",
@@ -1288,8 +1288,8 @@ export const translations = {
             "Unlimited course entries",
             "Unlimited AI summaries",
             "Unlimited personalized quizzes",
-            "2 file uploads/month",
-            "5 Tariq AI messages/session",
+            "1 file upload/month",
+            "3 Tariq AI messages/session",
           ],
         },
         premium: {
@@ -1618,12 +1618,12 @@ export const translations = {
         prioritySupport: "Priority support",
       },
       freeFeatures: {
-        courses: "Up to 3 courses",
+        courses: "Up to 2 courses",
         summaries: "1 AI summary per month",
         pdfDownload: "PDF download for summaries",
         quizzes: "1 quiz per month",
-        uploads: "Upload: 2 files/month (10MB max)",
-        chat: "Tariq AI: 5 messages/session (3h cooldown)",
+        uploads: "Upload: 1 file/month (10MB max)",
+        chat: "Tariq AI: 3 messages/session (3h cooldown)",
       },
     },
     
@@ -1663,7 +1663,7 @@ export const translations = {
         upload: {
           title: "File uploads",
           description: "Import your courses as PDF or Word and let AI extract the content automatically.",
-          details: ["PDF and Word support", "Automatic extraction", "Up to 10MB per file", "2 files/month (free)"]
+          details: ["PDF and Word support", "Automatic extraction", "Up to 10MB per file", "1 file/month (free)"]
         },
         quiz: {
           title: "Personalized quizzes",
@@ -1673,7 +1673,7 @@ export const translations = {
         tariq: {
           title: "Tariq AI - Your personal tutor",
           description: "Ask your questions and get clear explanations from your intelligent AI assistant.",
-          details: ["Instant answers", "Detailed explanations", "5 messages/session (free)", "Unlimited in Premium"]
+          details: ["Instant answers", "Detailed explanations", "3 messages/session (free)", "Unlimited in Premium"]
         },
         evaluation: {
           title: "Automatic evaluation",
@@ -1710,11 +1710,11 @@ export const translations = {
         description: "To get started and discover the platform",
         features: [
           "Unlimited course entries",
-          "File uploads: 2/month (max 10MB)",
+          "File uploads: 1/month (max 10MB)",
           "Unlimited AI summaries",
           "PDF download for summaries",
           "Unlimited personalized quizzes",
-          "Tariq AI: 5 messages/session",
+          "Tariq AI: 3 messages/session",
           "3h cooldown between sessions",
           "Basic statistics"
         ],
@@ -1748,7 +1748,7 @@ export const translations = {
         q1: { question: "Can I change plans at any time?", answer: "Yes, you can upgrade from Free to Premium at any time. The change is immediate and you pay pro-rata." },
         q2: { question: "How can I pay?", answer: "We accept payments via credit card through our secure partner Stripe." },
         q3: { question: "Is there a guarantee?", answer: "Yes, the Premium plan includes a 14-day money-back guarantee, no questions asked." },
-        q4: { question: "Is the Free plan really free?", answer: "Yes, absolutely! You can use Corrige Tes Cours for free forever with up to 3 courses, 1 summary and 1 quiz per month, and Tariq AI (5 messages/session)." }
+        q4: { question: "Is the Free plan really free?", answer: "Yes, absolutely! You can use Corrige Tes Cours for free forever with up to 2 courses, 1 summary and 1 quiz per month, and Tariq AI (3 messages/session)." }
       }
     },
     
@@ -2255,7 +2255,7 @@ export const translations = {
       error: "Error",
       cannotSend: "Unable to send the message. Try again.",
       limitReached: "Limit reached",
-      limitReachedDesc: "You've used your 5 free messages. Come back in {time} or upgrade to Premium to continue!",
+      limitReachedDesc: "You've used your 3 free messages. Come back in {time} or upgrade to Premium to continue!",
       disclaimer: "Tariq can make mistakes. Verify important information.",
       greeting: "Hello! I'm Tariq",
       avatarYou: "You",

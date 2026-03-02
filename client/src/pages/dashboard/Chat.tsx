@@ -120,7 +120,7 @@ export default function Chat() {
 
   const messages = session?.messages || [];
   const isPremium = session?.isPremium || false;
-  const messagesRemaining = session?.messagesRemaining ?? 5;
+  const messagesRemaining = session?.messagesRemaining ?? 3;
 
   // Suggestion cards from translations
   const suggestionCards = [

@@ -11,11 +11,11 @@ Corrige Tes Cours is a universal AI-powered study tool for students worldwide. I
   - Webhook-based payment verification with Stripe signature validation
   - Files: server/stripeClient.ts, server/webhookHandlers.ts, server/seed-products.ts
 - **Free Tier Restrictions** (enforced in backend):
-  - 3 courses maximum
+  - 2 courses maximum
   - 1 AI summary per month
   - 1 quiz per month
-  - 2 file uploads per month
-  - 5 Tariq AI messages per session (3h cooldown)
+  - 1 file upload per month
+  - 3 Tariq AI messages per session (3h cooldown)
   - 1 flashcard set per course
   - No study guides (Premium only)
 - **Premium Features**: Unlimited courses, summaries, quizzes, uploads, AI messages, flashcards, and study guides

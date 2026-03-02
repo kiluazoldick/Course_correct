@@ -79,11 +79,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!isPremium) {
         const existingCourses = await storage.getCoursesByUserId(userId);
-        if (existingCourses.length >= 3) {
+        if (existingCourses.length >= 2) {
           const user = await storage.getUserById(userId);
           const msg = user?.language === 'en' 
-            ? "Free plan is limited to 3 courses. Upgrade to Premium for unlimited courses!"
-            : "Le plan gratuit est limité à 3 cours. Passe au Premium pour des cours illimités !";
+            ? "Free plan is limited to 2 courses. Upgrade to Premium for unlimited courses!"
+            : "Le plan gratuit est limité à 2 cours. Passe au Premium pour des cours illimités !";
           return res.status(403).json({ message: msg });
         }
       }
@@ -269,16 +269,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!isPremium) {
         const existingCourses = await storage.getCoursesByUserId(userId);
-        if (existingCourses.length >= 3) {
+        if (existingCourses.length >= 2) {
           const user = await storage.getUserById(userId);
           const isEn = user?.language === 'en';
           return res.status(403).json({ 
             message: isEn ? "Course limit reached" : "Limite de cours atteinte",
             limitExceeded: true,
-            limit: 3,
+            limit: 2,
             description: isEn 
-              ? "Free plan is limited to 3 courses. Upgrade to Premium for unlimited courses!"
-              : "Le plan gratuit est limité à 3 cours. Passe au Premium pour des cours illimités !"
+              ? "Free plan is limited to 2 courses. Upgrade to Premium for unlimited courses!"
+              : "Le plan gratuit est limité à 2 cours. Passe au Premium pour des cours illimités !"
           });
         }
 
@@ -286,16 +286,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const uploads = await storage.getUploadCountThisMonth(userId, startOfMonth);
 
-        if (uploads >= 2) {
+        if (uploads >= 1) {
           const user = await storage.getUserById(userId);
           const isEn = user?.language === 'en';
           return res.status(403).json({ 
             message: isEn ? "Upload limit reached" : "Limite d'upload atteinte",
             limitExceeded: true,
-            limit: 2,
+            limit: 1,
             description: isEn 
-              ? "Free plan is limited to 2 file uploads per month. Upgrade to Premium for unlimited uploads!"
-              : "Le plan gratuit est limité à 2 uploads par mois. Passe au Premium pour des uploads illimités !"
+              ? "Free plan is limited to 1 file upload per month. Upgrade to Premium for unlimited uploads!"
+              : "Le plan gratuit est limité à 1 upload par mois. Passe au Premium pour des uploads illimités !"
           });
         }
       }
@@ -807,8 +807,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }) || session;
         }
 
-        // Check if limit exceeded
-        if (session.messageCount >= 5) {
+        // Check if limit exceeded (3 messages per session for free users)
+        if (session.messageCount >= 3) {
           const remainingTime = resetAt ? Math.ceil((resetAt.getTime() - now.getTime()) / 1000 / 60) : 0;
           return res.status(429).json({
             message: "Limite atteinte",
@@ -844,7 +844,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Set reset time for free users when they hit the limit
-      if (!isPremium && newMessageCount >= 5) {
+      if (!isPremium && newMessageCount >= 3) {
         const resetTime = new Date();
         resetTime.setHours(resetTime.getHours() + 3);
         updates.resetAt = resetTime;
@@ -854,7 +854,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         response: aiResponse,
-        messagesRemaining: isPremium ? null : Math.max(0, 5 - newMessageCount),
+        messagesRemaining: isPremium ? null : Math.max(0, 3 - newMessageCount),
         isPremium,
       });
     } catch (error) {

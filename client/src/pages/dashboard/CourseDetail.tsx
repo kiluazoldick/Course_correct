@@ -274,20 +274,67 @@ export default function CourseDetail() {
       doc.line(margin, yPosition, pageWidth - margin, yPosition);
       yPosition += 10;
 
+      const stripMd = (t: string) => t
+        .replace(/\*\*\*(.*?)\*\*\*/g, '$1').replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1').replace(/__(.*?)__/g, '$1').replace(/_(.*?)_/g, '$1')
+        .replace(/~~(.*?)~~/g, '$1').replace(/`([^`]+)`/g, '$1')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+        .replace(/^>\s*/gm, '');
+
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(0);
-      const normalizedSummary = normalizePdfText(latestSummary.content);
-      const lines = normalizedSummary.split('\n');
+      const rawContent = latestSummary.content;
+      const lines = rawContent.split('\n');
+      let inCodeBlock = false;
+
+      const checkPage = (needed: number = 10) => {
+        if (yPosition > pageHeight - footerHeight - needed) { addFooter(pageNumber); doc.addPage(); pageNumber++; yPosition = margin; }
+      };
 
       for (let i = 0; i < lines.length; i++) {
         let text = lines[i].trim();
-        if (!text) { yPosition += 4; continue; }
-        const isUpperCase = text === text.toUpperCase() && text.length > 3;
-        const isListItem = text.startsWith('-') || text.startsWith('\u2022') || text.match(/^\d+\./);
 
-        if (isUpperCase && text.endsWith(':')) {
-          if (yPosition > pageHeight - footerHeight - 20) { addFooter(pageNumber); doc.addPage(); pageNumber++; yPosition = margin; }
+        if (text.startsWith('```')) { inCodeBlock = !inCodeBlock; continue; }
+        if (inCodeBlock) {
+          checkPage();
+          doc.setFontSize(9);
+          doc.setFont('courier', 'normal');
+          doc.text(normalizePdfText(text), margin + 5, yPosition);
+          yPosition += 4.5;
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'normal');
+          continue;
+        }
+
+        if (!text) { yPosition += 4; continue; }
+
+        if (/^\|[\s\-:|]+\|$/.test(text)) continue;
+        if (text.startsWith('|') && text.endsWith('|')) {
+          const cells = text.split('|').filter((_, ci, arr) => ci > 0 && ci < arr.length - 1).map(c => stripMd(c.trim()));
+          if (cells.length > 0) {
+            checkPage();
+            const cellWidth = maxWidth / cells.length;
+            cells.forEach((cell, ci) => {
+              const cellText = normalizePdfText(cell);
+              const truncated = cellText.length > 30 ? cellText.substring(0, 28) + '...' : cellText;
+              doc.text(truncated, margin + ci * cellWidth, yPosition);
+            });
+            yPosition += 5.5;
+          }
+          continue;
+        }
+
+        text = stripMd(text);
+        text = normalizePdfText(text);
+
+        const isHeading = lines[i].trim().match(/^#{1,3}\s/) ||
+          (text === text.toUpperCase() && text.length > 3 && text.endsWith(':'));
+        const isListItem = lines[i].trim().match(/^[-*]\s/) || lines[i].trim().match(/^\d+\.\s/);
+
+        if (isHeading) {
+          text = text.replace(/^#{1,3}\s*/, '');
+          checkPage(20);
           yPosition += 5;
           doc.setFontSize(13);
           doc.setFont('helvetica', 'bold');
@@ -298,15 +345,16 @@ export default function CourseDetail() {
           doc.setFont('helvetica', 'normal');
           doc.setTextColor(0);
         } else if (isListItem) {
+          text = text.replace(/^[-*]\s/, '- ').replace(/^\d+\.\s/, (m) => m);
           const listLines = doc.splitTextToSize(text, maxWidth - 5);
           listLines.forEach((listLine: string, idx: number) => {
-            if (yPosition > pageHeight - footerHeight - 10) { addFooter(pageNumber); doc.addPage(); pageNumber++; yPosition = margin; }
+            checkPage();
             doc.text(listLine, margin + (idx > 0 ? 5 : 0), yPosition);
             yPosition += 5.5;
           });
         } else {
           doc.splitTextToSize(text, maxWidth).forEach((textLine: string) => {
-            if (yPosition > pageHeight - footerHeight - 10) { addFooter(pageNumber); doc.addPage(); pageNumber++; yPosition = margin; }
+            checkPage();
             doc.text(textLine, margin, yPosition);
             yPosition += 5.5;
           });
@@ -324,40 +372,133 @@ export default function CourseDetail() {
     }
   };
 
+  const stripMarkdown = (text: string): string => {
+    return text
+      .replace(/\*\*\*(.*?)\*\*\*/g, '$1')
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/__(.*?)__/g, '$1')
+      .replace(/_(.*?)_/g, '$1')
+      .replace(/~~(.*?)~~/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+      .replace(/^>\s*/gm, '')
+      .trim();
+  };
+
+  const parseMarkdownTable = (lines: string[], startIndex: number): { rows: string[][]; endIndex: number } => {
+    const rows: string[][] = [];
+    let idx = startIndex;
+    while (idx < lines.length) {
+      const line = lines[idx].trim();
+      if (!line.startsWith('|')) break;
+      if (/^\|[\s\-:|]+\|$/.test(line)) { idx++; continue; }
+      const cells = line.split('|').filter((_, ci, arr) => ci > 0 && ci < arr.length - 1).map(c => stripMarkdown(c.trim()));
+      if (cells.length > 0) rows.push(cells);
+      idx++;
+    }
+    return { rows, endIndex: idx - 1 };
+  };
+
   const renderFormattedSummary = (content: string) => {
     const lines = content.split('\n');
-    return lines.map((line, i) => {
-      const trimmed = line.trim();
-      if (!trimmed) return <div key={i} className="h-3" />;
+    const elements: JSX.Element[] = [];
+    let i = 0;
+    let inCodeBlock = false;
+    let codeLines: string[] = [];
 
-      const cleanLine = trimmed.replace(/\*\*/g, '').replace(/^#+\s*/, '');
+    while (i < lines.length) {
+      const trimmed = lines[i].trim();
 
-      if (trimmed.startsWith('# ') || trimmed.startsWith('## ') || trimmed.startsWith('### ') ||
-          (trimmed === trimmed.toUpperCase() && trimmed.length > 3 && trimmed.endsWith(':'))) {
-        return (
-          <h3 key={i} className="text-base font-semibold mt-4 mb-2">
-            {cleanLine}
-          </h3>
-        );
+      if (trimmed.startsWith('```')) {
+        if (inCodeBlock) {
+          elements.push(
+            <div key={`code-${i}`} className="bg-muted rounded-md p-3 my-2 overflow-x-auto">
+              <pre className="text-xs font-mono leading-relaxed whitespace-pre-wrap">{codeLines.join('\n')}</pre>
+            </div>
+          );
+          codeLines = [];
+          inCodeBlock = false;
+        } else {
+          inCodeBlock = true;
+        }
+        i++;
+        continue;
       }
 
-      if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.match(/^\d+\.\s/)) {
+      if (inCodeBlock) {
+        codeLines.push(lines[i]);
+        i++;
+        continue;
+      }
+
+      if (!trimmed) {
+        elements.push(<div key={i} className="h-3" />);
+        i++;
+        continue;
+      }
+
+      if (trimmed.startsWith('|')) {
+        const { rows, endIndex } = parseMarkdownTable(lines, i);
+        if (rows.length > 0) {
+          const headerRow = rows[0];
+          const dataRows = rows.slice(1);
+          elements.push(
+            <div key={`table-${i}`} className="my-3 overflow-x-auto rounded-md border">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-muted/50">
+                    {headerRow.map((cell, ci) => (
+                      <th key={ci} className="px-3 py-2 text-left font-medium border-b">{cell}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {dataRows.map((row, ri) => (
+                    <tr key={ri} className={ri % 2 === 0 ? '' : 'bg-muted/20'}>
+                      {row.map((cell, ci) => (
+                        <td key={ci} className="px-3 py-2 border-b last:border-b-0">{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+          i = endIndex + 1;
+          continue;
+        }
+      }
+
+      if (trimmed.match(/^#{1,3}\s/) ||
+          (trimmed === trimmed.toUpperCase() && trimmed.length > 3 && trimmed.endsWith(':'))) {
+        const cleanLine = stripMarkdown(trimmed.replace(/^#{1,3}\s*/, ''));
+        elements.push(
+          <h3 key={i} className="text-base font-semibold mt-4 mb-2">{cleanLine}</h3>
+        );
+        i++;
+        continue;
+      }
+
+      if (trimmed.match(/^[-*]\s/) || trimmed.match(/^\d+\.\s/)) {
         const bulletText = trimmed.replace(/^[-*]\s/, '').replace(/^\d+\.\s/, '');
-        const cleanBullet = bulletText.replace(/\*\*/g, '');
-        return (
+        elements.push(
           <div key={i} className="flex items-start gap-2 ml-2 mb-1">
             <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground mt-2 shrink-0" />
-            <span className="text-sm leading-relaxed">{cleanBullet}</span>
+            <span className="text-sm leading-relaxed">{stripMarkdown(bulletText)}</span>
           </div>
         );
+        i++;
+        continue;
       }
 
-      return (
-        <p key={i} className="text-sm leading-relaxed mb-1.5">
-          {cleanLine}
-        </p>
+      elements.push(
+        <p key={i} className="text-sm leading-relaxed mb-1.5">{stripMarkdown(trimmed)}</p>
       );
-    });
+      i++;
+    }
+    return elements;
   };
 
   const getCardStatus = (index: number): string => {

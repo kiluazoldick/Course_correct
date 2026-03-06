@@ -30,7 +30,9 @@ import {
   Lightbulb,
   AlertTriangle,
   ClipboardList,
+  Download,
 } from 'lucide-react';
+import jsPDF from 'jspdf';
 
 type FlashcardSet = {
   id: string;
@@ -215,6 +217,149 @@ export default function CourseDetail() {
     },
   });
 
+  const normalizePdfText = (text: string): string => {
+    return text
+      .replace(/→/g, '->').replace(/←/g, '<-').replace(/↑/g, '^').replace(/↓/g, 'v')
+      .replace(/•/g, '-').replace(/–/g, '-').replace(/—/g, '-')
+      .replace(/\u2018/g, "'").replace(/\u2019/g, "'").replace(/\u201C/g, '"').replace(/\u201D/g, '"')
+      .replace(/…/g, '...').replace(/≈/g, '~=').replace(/≠/g, '!=')
+      .replace(/≤/g, '<=').replace(/≥/g, '>=').replace(/×/g, 'x').replace(/÷/g, '/')
+      .replace(/±/g, '+/-').replace(/°/g, ' deg').replace(/µ/g, 'u')
+      .replace(/²/g, '2').replace(/³/g, '3').replace(/¹/g, '1')
+      .replace(/¼/g, '1/4').replace(/½/g, '1/2').replace(/¾/g, '3/4')
+      .replace(/€/g, 'EUR').replace(/£/g, 'GBP').replace(/¥/g, 'JPY')
+      .replace(/™/g, '(TM)').replace(/©/g, '(C)').replace(/®/g, '(R)');
+  };
+
+  const downloadSummaryAsPdf = () => {
+    if (!latestSummary || !course) return;
+    try {
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', putOnlyUsedFonts: true, compress: true });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      const maxWidth = pageWidth - 2 * margin;
+      const footerHeight = 15;
+      let yPosition = margin;
+      let pageNumber = 1;
+
+      const addFooter = (pageNum: number) => {
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(120);
+        const footerY = pageHeight - 10;
+        doc.text(normalizePdfText('Genere par Corrige Tes Cours'), margin, footerY);
+        doc.text(`Page ${pageNum}`, pageWidth - margin, footerY, { align: 'right' });
+        doc.setDrawColor(200);
+        doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
+      };
+
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0);
+      const summaryLabel = language === 'fr' ? 'Resume' : 'Summary';
+      const normalizedTitle = normalizePdfText(`${summaryLabel}: ${course.title}`);
+      const titleLines = doc.splitTextToSize(normalizedTitle, maxWidth);
+      titleLines.forEach((line: string) => { doc.text(line, margin, yPosition); yPosition += 8; });
+      yPosition += 5;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(100);
+      const date = new Date().toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+      doc.text(normalizePdfText(`${language === 'fr' ? 'Genere le' : 'Generated on'} ${date}`), margin, yPosition);
+      yPosition += 3;
+      doc.setDrawColor(100);
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0);
+      const normalizedSummary = normalizePdfText(latestSummary.content);
+      const lines = normalizedSummary.split('\n');
+
+      for (let i = 0; i < lines.length; i++) {
+        let text = lines[i].trim();
+        if (!text) { yPosition += 4; continue; }
+        const isUpperCase = text === text.toUpperCase() && text.length > 3;
+        const isListItem = text.startsWith('-') || text.startsWith('\u2022') || text.match(/^\d+\./);
+
+        if (isUpperCase && text.endsWith(':')) {
+          if (yPosition > pageHeight - footerHeight - 20) { addFooter(pageNumber); doc.addPage(); pageNumber++; yPosition = margin; }
+          yPosition += 5;
+          doc.setFontSize(13);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(50);
+          doc.splitTextToSize(text, maxWidth).forEach((t: string) => { doc.text(t, margin, yPosition); yPosition += 7; });
+          yPosition += 2;
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0);
+        } else if (isListItem) {
+          const listLines = doc.splitTextToSize(text, maxWidth - 5);
+          listLines.forEach((listLine: string, idx: number) => {
+            if (yPosition > pageHeight - footerHeight - 10) { addFooter(pageNumber); doc.addPage(); pageNumber++; yPosition = margin; }
+            doc.text(listLine, margin + (idx > 0 ? 5 : 0), yPosition);
+            yPosition += 5.5;
+          });
+        } else {
+          doc.splitTextToSize(text, maxWidth).forEach((textLine: string) => {
+            if (yPosition > pageHeight - footerHeight - 10) { addFooter(pageNumber); doc.addPage(); pageNumber++; yPosition = margin; }
+            doc.text(textLine, margin, yPosition);
+            yPosition += 5.5;
+          });
+          yPosition += 1;
+        }
+      }
+
+      addFooter(pageNumber);
+      const fileNamePrefix = language === 'fr' ? 'resume' : 'summary';
+      doc.save(`${fileNamePrefix}-${course.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.pdf`);
+      toast({ title: language === 'fr' ? 'PDF telecharge' : 'PDF downloaded', description: language === 'fr' ? 'Le resume a ete telecharge avec succes.' : 'The summary has been downloaded successfully.' });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({ title: language === 'fr' ? 'Erreur' : 'Error', description: language === 'fr' ? 'Impossible de generer le PDF.' : 'Unable to generate PDF.', variant: 'destructive' });
+    }
+  };
+
+  const renderFormattedSummary = (content: string) => {
+    const lines = content.split('\n');
+    return lines.map((line, i) => {
+      const trimmed = line.trim();
+      if (!trimmed) return <div key={i} className="h-3" />;
+
+      const cleanLine = trimmed.replace(/\*\*/g, '').replace(/^#+\s*/, '');
+
+      if (trimmed.startsWith('# ') || trimmed.startsWith('## ') || trimmed.startsWith('### ') ||
+          (trimmed === trimmed.toUpperCase() && trimmed.length > 3 && trimmed.endsWith(':'))) {
+        return (
+          <h3 key={i} className="text-base font-semibold mt-4 mb-2">
+            {cleanLine}
+          </h3>
+        );
+      }
+
+      if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.match(/^\d+\.\s/)) {
+        const bulletText = trimmed.replace(/^[-*]\s/, '').replace(/^\d+\.\s/, '');
+        const cleanBullet = bulletText.replace(/\*\*/g, '');
+        return (
+          <div key={i} className="flex items-start gap-2 ml-2 mb-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground mt-2 shrink-0" />
+            <span className="text-sm leading-relaxed">{cleanBullet}</span>
+          </div>
+        );
+      }
+
+      return (
+        <p key={i} className="text-sm leading-relaxed mb-1.5">
+          {cleanLine}
+        </p>
+      );
+    });
+  };
+
   const getCardStatus = (index: number): string => {
     const progress = flashcardProgress.find(p => p.cardIndex === index);
     return progress?.status || 'to_review';
@@ -331,23 +476,55 @@ export default function CourseDetail() {
         <TabsContent value="summary" className="mt-4">
           {latestSummary ? (
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between gap-2">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
                 <CardTitle className="text-lg">{t.courseDetail.tabs.summary}</CardTitle>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={downloadSummaryAsPdf}
+                    data-testid="button-download-summary-pdf"
+                  >
+                    <Download className="w-4 h-4 mr-1.5" />
+                    {language === 'fr' ? 'Telecharger PDF' : 'Download PDF'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => generateSummaryMutation.mutate()}
+                    disabled={generateSummaryMutation.isPending}
+                    data-testid="button-regenerate-summary"
+                  >
+                    {generateSummaryMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                    ) : (
+                      <RotateCcw className="w-4 h-4 mr-1.5" />
+                    )}
+                    {language === 'fr' ? 'Regenerer' : 'Regenerate'}
+                  </Button>
+                </div>
               </CardHeader>
-              <CardContent>
-                <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed" data-testid="text-summary-detail">
-                  {latestSummary.content}
-                </pre>
+              <CardContent data-testid="text-summary-detail">
+                {renderFormattedSummary(latestSummary.content)}
               </CardContent>
             </Card>
           ) : (
             <Card>
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center justify-center py-12 gap-4">
-                  <FileText className="w-12 h-12 text-muted-foreground" />
-                  <p className="text-muted-foreground text-center">
-                    {language === 'fr' ? 'Aucun resume disponible' : 'No summary available'}
-                  </p>
+                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <FileText className="w-8 h-8 text-primary" />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="font-medium">
+                      {language === 'fr' ? 'Generer un resume IA' : 'Generate an AI summary'}
+                    </p>
+                    <p className="text-sm text-muted-foreground max-w-sm">
+                      {language === 'fr' 
+                        ? "L'IA va analyser votre cours et creer un resume structure avec les points essentiels."
+                        : "AI will analyze your course and create a structured summary with the key points."}
+                    </p>
+                  </div>
                   <Button
                     onClick={() => generateSummaryMutation.mutate()}
                     disabled={generateSummaryMutation.isPending}
@@ -600,19 +777,26 @@ export default function CourseDetail() {
         <TabsContent value="studyguide" className="mt-4">
           {currentGuide && currentGuide.content ? (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">{t.studyGuide.title}</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => deleteStudyGuideMutation.mutate()}
-                  data-testid="button-delete-study-guide"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <BookMarked className="w-4 h-4 text-primary" />
+                    </div>
+                    <CardTitle className="text-lg">{t.studyGuide.title}</CardTitle>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteStudyGuideMutation.mutate()}
+                    data-testid="button-delete-study-guide"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </CardHeader>
+                <CardContent>
 
-              <Accordion type="multiple" defaultValue={['objectives', 'concepts', 'pitfalls', 'exercises']} className="w-full">
+              <Accordion type="multiple" defaultValue={['objectives', 'concepts', 'pitfalls', 'exercises', 'tips']} className="w-full">
                 {currentGuide.content.objectives && currentGuide.content.objectives.length > 0 && (
                   <AccordionItem value="objectives">
                     <AccordionTrigger className="text-base" data-testid="accordion-objectives">
@@ -729,6 +913,8 @@ export default function CourseDetail() {
                   </AccordionItem>
                 )}
               </Accordion>
+                </CardContent>
+              </Card>
             </div>
           ) : (
             <Card>

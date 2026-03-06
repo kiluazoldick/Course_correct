@@ -58,11 +58,13 @@ type StudyGuide = {
   courseId: string;
   userId: string;
   content: {
-    objectives: string[];
-    keyConcepts: Array<{ term: string; definition: string; importance: string }>;
-    commonPitfalls: Array<{ pitfall: string; solution: string }>;
-    practiceExercises: Array<{ question: string; hint: string }>;
-    studyTips: string[];
+    objectives?: string[];
+    keyConcepts?: Array<{ term?: string; title?: string; definition?: string; explanation?: string; importance?: string }>;
+    commonPitfalls?: Array<{ pitfall: string; solution: string } | string>;
+    pitfalls?: string[];
+    practiceExercises?: Array<{ question: string; hint?: string } | string>;
+    exercises?: string[];
+    studyTips?: string[];
   };
   createdAt: string;
 };
@@ -969,23 +971,27 @@ export default function CourseDetail() {
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-3">
-                        {currentGuide.content.keyConcepts.map((concept, i) => (
-                          <Card key={i}>
-                            <CardContent className="pt-4 pb-3">
-                              <p className="font-medium text-sm">{concept.term}</p>
-                              <p className="text-sm text-muted-foreground mt-1">{concept.definition}</p>
+                        {currentGuide.content.keyConcepts.map((concept, i) => {
+                          const conceptTitle = concept.term || concept.title || '';
+                          const conceptDesc = concept.definition || concept.explanation || '';
+                          return (
+                            <div key={i} className="space-y-1 pl-3 py-2 border-l-2 border-yellow-300 dark:border-yellow-700">
+                              <p className="font-medium text-sm">{conceptTitle}</p>
+                              <p className="text-sm text-muted-foreground">{conceptDesc}</p>
                               {concept.importance && (
-                                <Badge variant="secondary" className="mt-2 text-xs">{concept.importance}</Badge>
+                                <Badge variant="secondary" className="mt-1 text-xs">{concept.importance}</Badge>
                               )}
-                            </CardContent>
-                          </Card>
-                        ))}
+                            </div>
+                          );
+                        })}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
                 )}
 
-                {currentGuide.content.commonPitfalls && currentGuide.content.commonPitfalls.length > 0 && (
+                {(() => {
+                  const pitfallItems = currentGuide.content.commonPitfalls || currentGuide.content.pitfalls || [];
+                  return pitfallItems.length > 0 ? (
                   <AccordionItem value="pitfalls">
                     <AccordionTrigger className="text-base" data-testid="accordion-pitfalls">
                       <div className="flex items-center gap-2">
@@ -995,18 +1001,25 @@ export default function CourseDetail() {
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-3">
-                        {currentGuide.content.commonPitfalls.map((pitfall, i) => (
-                          <div key={i} className="space-y-1 pl-2 border-l-2 border-orange-300 dark:border-orange-700">
-                            <p className="text-sm font-medium text-orange-600 dark:text-orange-400">{pitfall.pitfall}</p>
-                            <p className="text-sm text-muted-foreground">{pitfall.solution}</p>
-                          </div>
-                        ))}
+                        {pitfallItems.map((pitfall, i) => {
+                          const pitfallText = typeof pitfall === 'string' ? pitfall : pitfall.pitfall;
+                          const solutionText = typeof pitfall === 'string' ? null : pitfall.solution;
+                          return (
+                            <div key={i} className="space-y-1 pl-3 py-2 border-l-2 border-orange-300 dark:border-orange-700">
+                              <p className="text-sm font-medium text-orange-600 dark:text-orange-400">{pitfallText}</p>
+                              {solutionText && <p className="text-sm text-muted-foreground">{solutionText}</p>}
+                            </div>
+                          );
+                        })}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
-                )}
+                  ) : null;
+                })()}
 
-                {currentGuide.content.practiceExercises && currentGuide.content.practiceExercises.length > 0 && (
+                {(() => {
+                  const exerciseItems = currentGuide.content.practiceExercises || currentGuide.content.exercises || [];
+                  return exerciseItems.length > 0 ? (
                   <AccordionItem value="exercises">
                     <AccordionTrigger className="text-base" data-testid="accordion-exercises">
                       <div className="flex items-center gap-2">
@@ -1016,22 +1029,25 @@ export default function CourseDetail() {
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-3">
-                        {currentGuide.content.practiceExercises.map((exercise, i) => (
-                          <Card key={i}>
-                            <CardContent className="pt-4 pb-3">
-                              <p className="text-sm font-medium">{exercise.question}</p>
-                              {exercise.hint && (
-                                <p className="text-xs text-muted-foreground mt-2 italic">
-                                  {language === 'fr' ? 'Indice' : 'Hint'}: {exercise.hint}
+                        {exerciseItems.map((exercise, i) => {
+                          const exerciseText = typeof exercise === 'string' ? exercise : exercise.question;
+                          const hintText = typeof exercise === 'string' ? null : exercise.hint;
+                          return (
+                            <div key={i} className="space-y-1 pl-3 py-2 border-l-2 border-purple-300 dark:border-purple-700">
+                              <p className="text-sm font-medium">{exerciseText}</p>
+                              {hintText && (
+                                <p className="text-xs text-muted-foreground mt-1 italic">
+                                  {language === 'fr' ? 'Indice' : 'Hint'}: {hintText}
                                 </p>
                               )}
-                            </CardContent>
-                          </Card>
-                        ))}
+                            </div>
+                          );
+                        })}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
-                )}
+                  ) : null;
+                })()}
 
                 {currentGuide.content.studyTips && currentGuide.content.studyTips.length > 0 && (
                   <AccordionItem value="tips">

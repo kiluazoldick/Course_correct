@@ -91,3 +91,7 @@ app.use((req, res, next) => {
   cleanupExpiredUploads();
   setInterval(cleanupExpiredUploads, 3600000);
 })();
+
+// ===== EXPORT POUR VERCEL =====
+// Ceci permet à Vercel de trouver l'application Express
+export default app;

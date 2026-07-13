@@ -6,7 +6,7 @@ import path from "path";
 const isReplit = !!process.env.REPL_ID || !!process.env.REPLIT_DOMAINS;
 
 // Plugins de base
-const plugins = [react()];
+const plugins: any[] = [react()];
 
 // Ajouter les plugins Replit uniquement si on est sur Replit
 if (isReplit) {

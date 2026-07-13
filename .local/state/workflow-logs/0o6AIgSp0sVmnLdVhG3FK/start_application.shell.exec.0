@@ -1,0 +1,19 @@
+[1G[0K⠙[1G[0K
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[1G[0K⠙[1G[0K7:20:50 AM [express] Initializing Stripe schema...
+7:20:51 AM [express] Stripe schema ready
+{ autoExpandLists: [90mundefined[39m, stripeApiVersion: [90mundefined[39m } StripeSync initialized
+7:20:51 AM [express] Stripe webhook configured: "ready"
+7:20:51 AM [express] Stripe data synced
+7:20:51 AM [express] serving on port 5000
+Browserslist: browsers data (caniuse-lite) is 21 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+7:21:03 AM [express] GET /api/auth/user 401 in 2ms :: {"error":"Non authentifié"}
+7:21:27 AM [express] GET /api/auth/user 401 in 2ms :: {"error":"Non authentifié"}
+7:21:54 AM [express] GET /api/auth/user 401 in 1ms :: {"error":"Non authentifié"}
+7:25:18 AM [express] GET /api/auth/user 401 in 1ms :: {"error":"Non authentifié"}

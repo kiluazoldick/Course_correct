@@ -1,0 +1,70 @@
+[1G[0K⠙[1G[0K
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[1G[0K⠙[1G[0K8:39:32 AM [express] Initializing Stripe schema...
+8:39:32 AM [express] Stripe schema ready
+{ autoExpandLists: [90mundefined[39m, stripeApiVersion: [90mundefined[39m } StripeSync initialized
+{
+  error: StripeInvalidRequestError: No such webhook endpoint: 'we_1TATonPF3vLdQHDFQDFRvEfd'
+      at generateV1Error [90m(file:///home/runner/workspace/[39mnode_modules/[4mstripe[24m/esm/Error.js:8:20[90m)[39m
+      at res.toJSON.then.StripeAPIError.message [90m(file:///home/runner/workspace/[39mnode_modules/[4mstripe[24m/esm/RequestSender.js:111:31[90m)[39m
+  [90m    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)[39m {
+    type: [32m'StripeInvalidRequestError'[39m,
+    raw: {
+      code: [32m'resource_missing'[39m,
+      doc_url: [32m'https://stripe.com/docs/error-codes/resource-missing'[39m,
+      message: [32m"No such webhook endpoint: 'we_1TATonPF3vLdQHDFQDFRvEfd'"[39m,
+      param: [32m'webhook_endpoint'[39m,
+      request_log_url: [32m'https://dashboard.stripe.com/acct_1T2gZoPF3vLdQHDF/workbench/logs?object=req_kDzw1VwA99u1yJ'[39m,
+      type: [32m'invalid_request_error'[39m,
+      headers: [36m[Object][39m,
+      statusCode: [33m404[39m,
+      requestId: [32m'req_kDzw1VwA99u1yJ'[39m
+    },
+    rawType: [32m'invalid_request_error'[39m,
+    code: [32m'resource_missing'[39m,
+    doc_url: [32m'https://stripe.com/docs/error-codes/resource-missing'[39m,
+    param: [32m'webhook_endpoint'[39m,
+    detail: [90mundefined[39m,
+    headers: {
+      server: [32m'nginx'[39m,
+      date: [32m'Sat, 14 Mar 2026 08:39:33 GMT'[39m,
+      [32m'content-type'[39m: [32m'application/json'[39m,
+      [32m'content-length'[39m: [32m'385'[39m,
+      connection: [32m'keep-alive'[39m,
+      [32m'access-control-allow-credentials'[39m: [32m'true'[39m,
+      [32m'access-control-allow-methods'[39m: [32m'GET, HEAD, PUT, PATCH, POST, DELETE'[39m,
+      [32m'access-control-allow-origin'[39m: [32m'*'[39m,
+      [32m'access-control-expose-headers'[39m: [32m'Request-Id, Stripe-Manage-Version, Stripe-Should-Retry, X-Stripe-External-Auth-Required, X-Stripe-Privileged-Session-Required'[39m,
+      [32m'access-control-max-age'[39m: [32m'300'[39m,
+      [32m'cache-control'[39m: [32m'no-cache, no-store'[39m,
+      [32m'content-security-policy'[39m: [32m"base-uri 'none'; default-src 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; script-src 'self' 'report-sample'; style-src 'self'; worker-src 'none'; upgrade-insecure-requests; report-uri https://q.stripe.com/csp-violation?q=1YFZMXQiTU2qwpIaN4BNLfjaIR9eJehnlcPdiqdarN8-WHCIJQ2wPwejAVXs00nnZvendn5KQLc2BPQd"[39m,
+      [32m'request-id'[39m: [32m'req_kDzw1VwA99u1yJ'[39m,
+      [32m'stripe-version'[39m: [32m'2025-11-17.clover'[39m,
+      vary: [32m'Origin'[39m,
+      [32m'x-stripe-priority-routing-enabled'[39m: [32m'true'[39m,
+      [32m'x-stripe-routing-context-priority-tier'[39m: [32m'livemode'[39m,
+      [32m'x-wc'[39m: [32m'ABGHIJ'[39m,
+      [32m'strict-transport-security'[39m: [32m'max-age=63072000; includeSubDomains; preload'[39m
+    },
+    requestId: [32m'req_kDzw1VwA99u1yJ'[39m,
+    statusCode: [33m404[39m,
+    userMessage: [90mundefined[39m,
+    charge: [90mundefined[39m,
+    decline_code: [90mundefined[39m,
+    payment_intent: [90mundefined[39m,
+    payment_method: [90mundefined[39m,
+    payment_method_type: [90mundefined[39m,
+    setup_intent: [90mundefined[39m,
+    source: [90mundefined[39m
+  },
+  webhookId: [32m'we_1TATonPF3vLdQHDFQDFRvEfd'[39m
+} Webhook not found in Stripe (404), removing from database
+{
+  webhookId: [32m'we_1TAZDpPF3vLdQHDFMhtEjBRA'[39m,
+  url: [32m'https://corrigetescours.replit.app/api/stripe/webhook'[39m
+} Found orphaned managed webhook in Stripe, deleting
+8:39:34 AM [express] Stripe webhook configured: "ready"
+8:39:34 AM [express] Stripe data synced
+8:39:34 AM [express] serving on port 5000

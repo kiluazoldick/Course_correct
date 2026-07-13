@@ -1,0 +1,10 @@
+[1G[0K⠙[1G[0K
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[1G[0K⠙[1G[0K9:18:39 AM [express] Initializing Stripe schema...
+9:18:39 AM [express] Stripe schema ready
+{ autoExpandLists: [90mundefined[39m, stripeApiVersion: [90mundefined[39m } StripeSync initialized
+9:18:39 AM [express] Stripe webhook configured: "ready"
+9:18:39 AM [express] Stripe data synced
+9:18:39 AM [express] serving on port 5000

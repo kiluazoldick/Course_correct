@@ -1,130 +1,16 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
-import { runMigrations } from 'stripe-replit-sync';
-import { getStripeSync } from './stripeClient';
-import { WebhookHandlers } from './webhookHandlers';
 
 const app = express();
 
+// Désactiver Stripe en développement
 async function initStripe() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    console.warn('DATABASE_URL not set, skipping Stripe initialization');
-    return;
-  }
-
-  try {
-    log('Initializing Stripe schema...');
-    await runMigrations({ databaseUrl, schema: 'stripe' });
-    log('Stripe schema ready');
-
-    const stripeSync = await getStripeSync();
-
-    const webhookBaseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
-    const webhookResult = await stripeSync.findOrCreateManagedWebhook(
-      `${webhookBaseUrl}/api/stripe/webhook`
-    );
-    log(`Stripe webhook configured: ${JSON.stringify(webhookResult?.webhook?.url || 'ready')}`);
-
-    stripeSync.syncBackfill()
-      .then(() => log('Stripe data synced'))
-      .catch((err: any) => console.error('Error syncing Stripe data:', err));
-  } catch (error) {
-    console.error('Failed to initialize Stripe:', error);
-  }
+  log("⚠️ Stripe désactivé - Mode développement local");
+  return;
 }
-
-app.post(
-  '/api/stripe/webhook',
-  express.raw({ type: 'application/json' }),
-  async (req, res) => {
-    const signature = req.headers['stripe-signature'];
-    if (!signature) {
-      return res.status(400).json({ error: 'Missing stripe-signature' });
-    }
-
-    try {
-      const sig = Array.isArray(signature) ? signature[0] : signature;
-
-      if (!Buffer.isBuffer(req.body)) {
-        console.error('STRIPE WEBHOOK ERROR: req.body is not a Buffer');
-        return res.status(500).json({ error: 'Webhook processing error' });
-      }
-
-      // processWebhook verifies signature via stripe.webhooks.constructEventAsync internally
-      // If it succeeds without throwing, the payload is cryptographically verified
-      await WebhookHandlers.processWebhook(req.body as Buffer, sig);
-
-      // Safe to parse after successful signature verification above
-      const event = JSON.parse(req.body.toString());
-
-      if (event.type === 'checkout.session.completed') {
-        const session = event.data.object as any;
-        const userId = session.metadata?.userId;
-
-        if (userId && session.payment_status === 'paid') {
-          try {
-            const startDate = new Date();
-            const endDate = new Date();
-            endDate.setMonth(endDate.getMonth() + 1);
-
-            let subscription = await storage.getSubscriptionByUserId(userId);
-            if (subscription) {
-              await storage.updateSubscription(subscription.id, {
-                status: 'premium',
-                startDate,
-                endDate,
-                paymentMethod: 'stripe',
-                amount: 10,
-                transactionId: session.payment_intent || session.id,
-              });
-            } else {
-              await storage.createSubscription({
-                userId,
-                status: 'premium',
-                startDate,
-                endDate,
-                paymentMethod: 'stripe',
-                amount: 10,
-                transactionId: session.payment_intent || session.id,
-              });
-            }
-
-            const payment = await storage.getPaymentByTransactionId(session.id);
-            if (payment) {
-              await storage.updatePayment(payment.id, {
-                status: 'completed',
-                metadata: {
-                  ...(payment.metadata as object || {}),
-                  stripePaymentIntent: session.payment_intent,
-                  verifiedAt: new Date().toISOString(),
-                },
-              });
-            }
-
-            const user = await storage.getUser(userId);
-            if (user) {
-              const { sendPremiumCongratsEmail } = await import('./email');
-              sendPremiumCongratsEmail(user.email, user.firstName, (user.language as 'fr' | 'en') || 'fr')
-                .catch(err => console.error('Failed to send premium email:', err));
-            }
-
-            log(`Premium activated for user ${userId} via Stripe`);
-          } catch (err) {
-            console.error('Error activating premium from webhook:', err);
-          }
-        }
-      }
-
-      res.status(200).json({ received: true });
-    } catch (error: any) {
-      console.error('Webhook error:', error.message);
-      res.status(400).json({ error: 'Webhook processing error' });
-    }
-  }
-);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -171,20 +57,25 @@ app.use((req, res, next) => {
     res.status(status).json({ message });
   });
 
+  // Setup Vite ou serveur statique selon l'environnement
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+  const port = parseInt(process.env.PORT || "5000", 10);
+  const host = process.env.HOST || "127.0.0.1";
+
+  server.listen(
+    {
+      port,
+      host: host,
+    },
+    () => {
+      log(`🚀 Corrige Tes Cours - serving on http://${host}:${port}`);
+    },
+  );
 
   const cleanupExpiredUploads = async () => {
     try {
@@ -193,7 +84,7 @@ app.use((req, res, next) => {
         log(`Cleaned up ${deletedCount} expired anonymous upload(s)`);
       }
     } catch (error) {
-      console.error('Error cleaning up expired uploads:', error);
+      console.error("Error cleaning up expired uploads:", error);
     }
   };
 

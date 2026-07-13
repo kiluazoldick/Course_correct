@@ -24,7 +24,9 @@ export const sessions = pgTable(
 
 // User storage table (supports local auth + Google OAuth)
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   email: varchar("email").notNull().unique(),
   password: varchar("password"), // Nullable for Google OAuth users
   googleId: varchar("google_id").unique(), // Nullable for local auth users
@@ -46,13 +48,16 @@ export const insertLocalUserSchema = createInsertSchema(users, {
   email: z.string().email("Email invalide"),
   firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
   lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  password: z
+    .string()
+    .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
 }).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
   googleId: true,
   profileImageUrl: true,
+  phone: true, // 🔧 On retire le téléphone de l'inscription
 });
 
 // Schema for Google OAuth registration
@@ -61,6 +66,7 @@ export const insertGoogleUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   updatedAt: true,
   password: true,
+  phone: true, // 🔧 On retire le téléphone de l'inscription Google
 });
 
 export type InsertLocalUser = z.infer<typeof insertLocalUserSchema>;
@@ -70,9 +76,22 @@ export type User = typeof users.$inferSelect;
 
 // Schema for updating user profile
 export const updateUserProfileSchema = z.object({
-  firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères").optional(),
-  lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères").optional(),
-  phone: z.string().regex(/^\+?[0-9]{9,15}$/, "Numéro de téléphone invalide (ex: +237670000000)").optional().or(z.literal("")),
+  firstName: z
+    .string()
+    .min(2, "Le prénom doit contenir au moins 2 caractères")
+    .optional(),
+  lastName: z
+    .string()
+    .min(2, "Le nom doit contenir au moins 2 caractères")
+    .optional(),
+  phone: z
+    .string()
+    .regex(
+      /^\+?[0-9]{9,15}$/,
+      "Numéro de téléphone invalide (ex: +237670000000)",
+    )
+    .optional()
+    .or(z.literal("")),
   profileImageUrl: z.string().url().optional().or(z.literal("")),
   emailMarketing: z.enum(["yes", "no"]).optional(),
 });
@@ -80,8 +99,12 @@ export const updateUserProfileSchema = z.object({
 export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
 
 export const courses = pgTable("courses", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   content: text("content").notNull(),
   subject: text("subject"),
@@ -100,9 +123,15 @@ export type InsertCourse = z.infer<typeof insertCourseSchema>;
 export type Course = typeof courses.$inferSelect;
 
 export const summaries = pgTable("summaries", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  courseId: varchar("course_id").notNull().references(() => courses.id, { onDelete: 'cascade' }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  courseId: varchar("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -116,9 +145,15 @@ export type InsertSummary = z.infer<typeof insertSummarySchema>;
 export type Summary = typeof summaries.$inferSelect;
 
 export const quizzes = pgTable("quizzes", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  courseId: varchar("course_id").notNull().references(() => courses.id, { onDelete: 'cascade' }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  courseId: varchar("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   questions: jsonb("questions").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -133,10 +168,18 @@ export type InsertQuiz = z.infer<typeof insertQuizSchema>;
 export type Quiz = typeof quizzes.$inferSelect;
 
 export const quizResults = pgTable("quiz_results", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  quizId: varchar("quiz_id").notNull().references(() => quizzes.id, { onDelete: 'cascade' }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
-  courseId: varchar("course_id").notNull().references(() => courses.id, { onDelete: 'cascade' }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  quizId: varchar("quiz_id")
+    .notNull()
+    .references(() => quizzes.id, { onDelete: "cascade" }),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  courseId: varchar("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
   answers: jsonb("answers").notNull(),
   score: integer("score").notNull(),
   totalQuestions: integer("total_questions").notNull(),
@@ -153,8 +196,13 @@ export type QuizResult = typeof quizResults.$inferSelect;
 
 // Subscriptions table for premium features
 export const subscriptions = pgTable("subscriptions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }).unique(),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" })
+    .unique(),
   status: varchar("status").notNull().default("free"), // 'free' | 'premium' | 'cancelled'
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
@@ -176,8 +224,12 @@ export type Subscription = typeof subscriptions.$inferSelect;
 
 // Chatbot sessions table for conversation history
 export const chatSessions = pgTable("chat_sessions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   messages: jsonb("messages").notNull().default([]), // Array of {role: 'user'|'assistant', content: string, timestamp: string}
   messageCount: integer("message_count").notNull().default(0),
   lastMessageAt: timestamp("last_message_at"),
@@ -197,9 +249,16 @@ export type ChatSession = typeof chatSessions.$inferSelect;
 
 // Payment transactions table for Lygos payments
 export const payments = pgTable("payments", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
-  subscriptionId: varchar("subscription_id").references(() => subscriptions.id, { onDelete: 'set null' }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  subscriptionId: varchar("subscription_id").references(
+    () => subscriptions.id,
+    { onDelete: "set null" },
+  ),
   amount: integer("amount").notNull(), // Amount in XAF
   currency: varchar("currency").notNull().default("XAF"),
   status: varchar("status").notNull().default("pending"), // 'pending' | 'completed' | 'failed'
@@ -222,7 +281,9 @@ export type Payment = typeof payments.$inferSelect;
 
 // Anonymous uploads table for onboarding flow (test before signup)
 export const anonymousUploads = pgTable("anonymous_uploads", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   sessionId: varchar("session_id").notNull(), // Cookie/localStorage identifier
   title: text("title").notNull(),
   content: text("content").notNull(),
@@ -231,7 +292,9 @@ export const anonymousUploads = pgTable("anonymous_uploads", {
   expiresAt: timestamp("expires_at").notNull(), // Auto-delete after 48h if not claimed
 });
 
-export const insertAnonymousUploadSchema = createInsertSchema(anonymousUploads).omit({
+export const insertAnonymousUploadSchema = createInsertSchema(
+  anonymousUploads,
+).omit({
   id: true,
   createdAt: true,
 });
@@ -241,8 +304,12 @@ export type AnonymousUpload = typeof anonymousUploads.$inferSelect;
 
 // Shared stats for social sharing
 export const sharedStats = pgTable("shared_stats", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   shareToken: varchar("share_token").notNull().unique(), // Unique token for sharing
   totalQuizzes: integer("total_quizzes").notNull().default(0),
   totalCourses: integer("total_courses").notNull().default(0),
@@ -263,9 +330,15 @@ export type SharedStats = typeof sharedStats.$inferSelect;
 
 // Flashcard sets generated by AI from course content
 export const flashcardSets = pgTable("flashcard_sets", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  courseId: varchar("course_id").notNull().references(() => courses.id, { onDelete: 'cascade' }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  courseId: varchar("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   cards: jsonb("cards").notNull(), // Array of {front: string, back: string}
   totalCards: integer("total_cards").notNull().default(0),
   masteredCards: integer("mastered_cards").notNull().default(0),
@@ -282,26 +355,42 @@ export type FlashcardSet = typeof flashcardSets.$inferSelect;
 
 // Individual flashcard progress tracking
 export const flashcardProgress = pgTable("flashcard_progress", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  flashcardSetId: varchar("flashcard_set_id").notNull().references(() => flashcardSets.id, { onDelete: 'cascade' }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  flashcardSetId: varchar("flashcard_set_id")
+    .notNull()
+    .references(() => flashcardSets.id, { onDelete: "cascade" }),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   cardIndex: integer("card_index").notNull(),
   status: varchar("status").notNull().default("to_review"), // 'mastered' | 'to_review'
   lastReviewedAt: timestamp("last_reviewed_at"),
 });
 
-export const insertFlashcardProgressSchema = createInsertSchema(flashcardProgress).omit({
+export const insertFlashcardProgressSchema = createInsertSchema(
+  flashcardProgress,
+).omit({
   id: true,
 });
 
-export type InsertFlashcardProgress = z.infer<typeof insertFlashcardProgressSchema>;
+export type InsertFlashcardProgress = z.infer<
+  typeof insertFlashcardProgressSchema
+>;
 export type FlashcardProgress = typeof flashcardProgress.$inferSelect;
 
 // Study guides generated by AI
 export const studyGuides = pgTable("study_guides", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  courseId: varchar("course_id").notNull().references(() => courses.id, { onDelete: 'cascade' }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  courseId: varchar("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   content: jsonb("content").notNull(), // {objectives: string[], keyConcepts: {title, explanation}[], pitfalls: string[], exercises: string[]}
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -316,9 +405,15 @@ export type StudyGuide = typeof studyGuides.$inferSelect;
 
 // Referrals table for tracking referral rewards
 export const referrals = pgTable("referrals", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  referrerId: varchar("referrer_id").notNull().references(() => users.id, { onDelete: 'cascade' }), // The user who referred
-  referredId: varchar("referred_id").notNull().references(() => users.id, { onDelete: 'cascade' }), // The new user who signed up
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  referrerId: varchar("referrer_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }), // The user who referred
+  referredId: varchar("referred_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }), // The new user who signed up
   referralCode: varchar("referral_code").notNull(), // The code used
   rewardGranted: integer("reward_granted").notNull().default(0), // 1 if reward was granted, 0 otherwise
   rewardDays: integer("reward_days").notNull().default(14), // Number of free trial days granted

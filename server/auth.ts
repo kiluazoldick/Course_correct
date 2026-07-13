@@ -1,13 +1,13 @@
-import { Express } from 'express';
-import passport from 'passport';
-import { Strategy as LocalStrategy } from 'passport-local';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import bcrypt from 'bcryptjs';
-import session from 'express-session';
-import connectPg from 'connect-pg-simple';
-import { storage } from './storage';
-import { User } from '@shared/schema';
-import { nanoid } from 'nanoid';
+import { Express } from "express";
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import bcrypt from "bcryptjs";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import { storage } from "./storage";
+import { User } from "@shared/schema";
+import { nanoid } from "nanoid";
 
 // Generate a unique referral code (6 characters, uppercase alphanumeric)
 export function generateReferralCode(): string {
@@ -24,7 +24,7 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
-  
+
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
@@ -32,7 +32,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === "production",
       maxAge: sessionTtl,
     },
   });
@@ -43,13 +43,16 @@ export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);
 }
 
-export async function comparePassword(password: string, hash: string): Promise<boolean> {
+export async function comparePassword(
+  password: string,
+  hash: string,
+): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
 
 // Setup authentication strategies
 export function setupAuth(app: Express) {
-  app.set('trust proxy', 1);
+  app.set("trust proxy", 1);
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
@@ -58,41 +61,49 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(
       {
-        usernameField: 'email',
-        passwordField: 'password',
+        usernameField: "email",
+        passwordField: "password",
       },
       async (email, password, done) => {
         try {
           const user = await storage.getUserByEmail(email);
-          
+
           if (!user) {
-            return done(null, false, { message: 'Email ou mot de passe incorrect' });
+            return done(null, false, {
+              message: "Email ou mot de passe incorrect",
+            });
           }
 
           if (!user.password) {
-            return done(null, false, { message: 'Veuillez vous connecter avec Google' });
+            return done(null, false, {
+              message: "Veuillez vous connecter avec Google",
+            });
           }
 
           const isValid = await comparePassword(password, user.password);
-          
+
           if (!isValid) {
-            return done(null, false, { message: 'Email ou mot de passe incorrect' });
+            return done(null, false, {
+              message: "Email ou mot de passe incorrect",
+            });
           }
 
           return done(null, user);
         } catch (error) {
           return done(error);
         }
-      }
-    )
+      },
+    ),
   );
 
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    const domain = process.env.CUSTOM_DOMAIN || process.env.REPLIT_DOMAINS?.split(',')[0];
-    const callbackURL = process.env.NODE_ENV === 'production'
-      ? `https://${domain}/api/auth/google/callback`
-      : 'http://localhost:5000/api/auth/google/callback';
+    // 🔧 CORRECTION : Utiliser le bon domaine pour Vercel
+    const domain = process.env.CUSTOM_DOMAIN || "course-correct-ten.vercel.app";
+    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+    const callbackURL = `${protocol}://${domain}/api/auth/google/callback`;
+
+    console.log(`🔑 Google OAuth callback URL: ${callbackURL}`);
 
     passport.use(
       new GoogleStrategy(
@@ -108,18 +119,23 @@ export function setupAuth(app: Express) {
 
             if (!user) {
               // Check if user exists with this email
-              const existingUser = await storage.getUserByEmail(profile.emails?.[0]?.value || '');
-              
+              const existingUser = await storage.getUserByEmail(
+                profile.emails?.[0]?.value || "",
+              );
+
               if (existingUser) {
                 // Link Google account to existing user
-                user = await storage.linkGoogleAccount(existingUser.id, profile.id);
+                user = await storage.linkGoogleAccount(
+                  existingUser.id,
+                  profile.id,
+                );
               } else {
                 // Create new user with referral code
-                const email = profile.emails?.[0]?.value || '';
-                const firstName = profile.name?.givenName || 'Utilisateur';
-                const lastName = profile.name?.familyName || 'Google';
+                const email = profile.emails?.[0]?.value || "";
+                const firstName = profile.name?.givenName || "Utilisateur";
+                const lastName = profile.name?.familyName || "Google";
                 const newUserReferralCode = generateReferralCode();
-                
+
                 user = await storage.createGoogleUser({
                   email,
                   googleId: profile.id,
@@ -131,17 +147,31 @@ export function setupAuth(app: Express) {
 
                 // Add user to Resend contacts and send welcome email (non-blocking)
                 try {
-                  const { addContactToResend, sendWelcomeEmail } = await import('./email');
+                  const { addContactToResend, sendWelcomeEmail } =
+                    await import("./email");
                   // Add to Resend contacts
-                  addContactToResend(email, firstName, lastName, false).catch(err => {
-                    console.error('Failed to add Google contact to Resend:', err);
-                  });
+                  addContactToResend(email, firstName, lastName, false).catch(
+                    (err) => {
+                      console.error(
+                        "Failed to add Google contact to Resend:",
+                        err,
+                      );
+                    },
+                  );
                   // Send welcome email
-                  sendWelcomeEmail(email, firstName, 'fr', 'yes').catch(err => {
-                    console.error('Failed to send welcome email to Google user:', err);
-                  });
+                  sendWelcomeEmail(email, firstName, "fr", "yes").catch(
+                    (err) => {
+                      console.error(
+                        "Failed to send welcome email to Google user:",
+                        err,
+                      );
+                    },
+                  );
                 } catch (emailError) {
-                  console.error('Email service error for Google user:', emailError);
+                  console.error(
+                    "Email service error for Google user:",
+                    emailError,
+                  );
                 }
               }
             }
@@ -150,8 +180,12 @@ export function setupAuth(app: Express) {
           } catch (error) {
             return done(error as Error);
           }
-        }
-      )
+        },
+      ),
+    );
+  } else {
+    console.warn(
+      "⚠️ Google OAuth non configuré. Vérifiez GOOGLE_CLIENT_ID et GOOGLE_CLIENT_SECRET",
     );
   }
 
@@ -170,36 +204,41 @@ export function setupAuth(app: Express) {
   });
 
   // Auth routes
-  
-  // Local login
-  app.post('/api/auth/login', (req, res, next) => {
-    passport.authenticate('local', (err: Error, user: User, info: { message: string }) => {
-      if (err) {
-        return res.status(500).json({ error: 'Erreur serveur' });
-      }
-      
-      if (!user) {
-        return res.status(401).json({ error: info.message || 'Authentification échouée' });
-      }
 
-      req.logIn(user, (err) => {
+  // Local login
+  app.post("/api/auth/login", (req, res, next) => {
+    passport.authenticate(
+      "local",
+      (err: Error, user: User, info: { message: string }) => {
         if (err) {
-          return res.status(500).json({ error: 'Erreur de connexion' });
+          return res.status(500).json({ error: "Erreur serveur" });
         }
-        return res.json({ user });
-      });
-    })(req, res, next);
+
+        if (!user) {
+          return res
+            .status(401)
+            .json({ error: info.message || "Authentification échouée" });
+        }
+
+        req.logIn(user, (err) => {
+          if (err) {
+            return res.status(500).json({ error: "Erreur de connexion" });
+          }
+          return res.json({ user });
+        });
+      },
+    )(req, res, next);
   });
 
   // Local registration
-  app.post('/api/auth/register', async (req, res) => {
+  app.post("/api/auth/register", async (req, res) => {
     try {
       const { email, firstName, lastName, password, referralCode } = req.body;
 
       // Check if user exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(400).json({ error: 'Cet email est déjà utilisé' });
+        return res.status(400).json({ error: "Cet email est déjà utilisé" });
       }
 
       // Hash password
@@ -236,26 +275,30 @@ export function setupAuth(app: Express) {
           });
 
           // Grant 14 days free premium to the referrer
-          const subscription = await storage.getSubscriptionByUserId(referrer.id);
+          const subscription = await storage.getSubscriptionByUserId(
+            referrer.id,
+          );
           if (subscription) {
             // Extend existing subscription or set to premium
-            const currentEndDate = subscription.endDate && new Date(subscription.endDate) > new Date() 
-              ? new Date(subscription.endDate) 
-              : new Date();
+            const currentEndDate =
+              subscription.endDate &&
+              new Date(subscription.endDate) > new Date()
+                ? new Date(subscription.endDate)
+                : new Date();
             currentEndDate.setDate(currentEndDate.getDate() + 14);
-            
+
             await storage.updateSubscription(subscription.id, {
-              status: 'premium',
+              status: "premium",
               endDate: currentEndDate,
             });
           } else {
             // Create new premium subscription
             await storage.createSubscription({
               userId: referrer.id,
-              status: 'premium',
+              status: "premium",
               startDate: new Date(),
               endDate: rewardExpiresAt,
-              paymentMethod: 'referral',
+              paymentMethod: "referral",
               amount: 0,
             });
           }
@@ -264,60 +307,61 @@ export function setupAuth(app: Express) {
 
       // Add user to Resend contacts and send welcome email (non-blocking)
       try {
-        const { addContactToResend, sendWelcomeEmail } = await import('./email');
+        const { addContactToResend, sendWelcomeEmail } =
+          await import("./email");
         // Add to Resend contacts
-        addContactToResend(email, firstName, lastName, false).catch(err => {
-          console.error('Failed to add contact to Resend (non-blocking):', err);
+        addContactToResend(email, firstName, lastName, false).catch((err) => {
+          console.error("Failed to add contact to Resend (non-blocking):", err);
         });
         // Send welcome email
-        sendWelcomeEmail(email, firstName, 'fr', 'yes').catch(err => {
-          console.error('Failed to send welcome email (non-blocking):', err);
+        sendWelcomeEmail(email, firstName, "fr", "yes").catch((err) => {
+          console.error("Failed to send welcome email (non-blocking):", err);
         });
       } catch (emailError) {
-        console.error('Email service error (non-blocking):', emailError);
+        console.error("Email service error (non-blocking):", emailError);
       }
 
       // Auto-login after registration
       req.logIn(user, (err) => {
         if (err) {
-          return res.status(500).json({ error: 'Erreur de connexion' });
+          return res.status(500).json({ error: "Erreur de connexion" });
         }
         return res.json({ user });
       });
     } catch (error) {
-      console.error('Registration error:', error);
-      res.status(500).json({ error: 'Erreur lors de l\'inscription' });
+      console.error("Registration error:", error);
+      res.status(500).json({ error: "Erreur lors de l'inscription" });
     }
   });
 
   // Google OAuth routes
   app.get(
-    '/api/auth/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })
+    "/api/auth/google",
+    passport.authenticate("google", { scope: ["profile", "email"] }),
   );
 
   app.get(
-    '/api/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login' }),
+    "/api/auth/google/callback",
+    passport.authenticate("google", { failureRedirect: "/login" }),
     (req, res) => {
-      res.redirect('/');
-    }
+      res.redirect("/");
+    },
   );
 
   // Get current user
-  app.get('/api/auth/user', (req, res) => {
+  app.get("/api/auth/user", (req, res) => {
     if (req.isAuthenticated()) {
       res.json(req.user);
     } else {
-      res.status(401).json({ error: 'Non authentifié' });
+      res.status(401).json({ error: "Non authentifié" });
     }
   });
 
   // Logout
-  app.post('/api/auth/logout', (req, res) => {
+  app.post("/api/auth/logout", (req, res) => {
     req.logout((err) => {
       if (err) {
-        return res.status(500).json({ error: 'Erreur lors de la déconnexion' });
+        return res.status(500).json({ error: "Erreur lors de la déconnexion" });
       }
       res.json({ success: true });
     });
@@ -329,5 +373,5 @@ export function isAuthenticated(req: any, res: any, next: any) {
   if (req.isAuthenticated()) {
     return next();
   }
-  res.status(401).json({ error: 'Non authentifié' });
+  res.status(401).json({ error: "Non authentifié" });
 }

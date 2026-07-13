@@ -64,8 +64,12 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
+  // 🔧 CORRECTION : Ne pas utiliser host: "127.0.0.1" sur Vercel
   const port = parseInt(process.env.PORT || "5000", 10);
-  const host = process.env.HOST || "127.0.0.1";
+  const host =
+    process.env.NODE_ENV === "production"
+      ? "0.0.0.0"
+      : process.env.HOST || "127.0.0.1";
 
   server.listen(
     {

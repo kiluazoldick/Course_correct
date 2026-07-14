@@ -8,8 +8,8 @@ const app = express();
 
 // Désactiver Stripe en développement
 async function initStripe() {
-  log("⚠️ Stripe désactivé - Mode développement local");
-  return;
+  log("⚠️ Stripe désactivé - Mode production");
+  return Promise.resolve();
 }
 
 app.use(express.json());

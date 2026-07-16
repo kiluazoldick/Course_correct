@@ -45,8 +45,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Fonction pour démarrer le serveur
-async function startServer() {
+// Configuration du serveur
+async function setupServer() {
   await initStripe();
 
   const server = await registerRoutes(app);
@@ -97,7 +97,9 @@ async function startServer() {
 }
 
 // Démarrer le serveur
-startServer();
+if (process.env.NODE_ENV !== "production") {
+  setupServer();
+}
 
 // ===== EXPORT POUR VERCEL =====
 export default app;

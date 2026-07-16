@@ -8,8 +8,8 @@ const app = express();
 
 // Désactiver Stripe en développement
 async function initStripe() {
-  log("⚠️ Stripe désactivé - Mode production");
-  return Promise.resolve();
+  log("⚠️ Stripe désactivé - Mode développement local");
+  return;
 }
 
 app.use(express.json());
@@ -45,7 +45,8 @@ app.use((req, res, next) => {
   next();
 });
 
-(async () => {
+// Fonction pour démarrer le serveur
+async function startServer() {
   await initStripe();
 
   const server = await registerRoutes(app);
@@ -64,7 +65,6 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // 🔧 CORRECTION : Ne pas utiliser host: "127.0.0.1" sur Vercel
   const port = parseInt(process.env.PORT || "5000", 10);
   const host =
     process.env.NODE_ENV === "production"
@@ -94,8 +94,10 @@ app.use((req, res, next) => {
 
   cleanupExpiredUploads();
   setInterval(cleanupExpiredUploads, 3600000);
-})();
+}
+
+// Démarrer le serveur
+startServer();
 
 // ===== EXPORT POUR VERCEL =====
-// Ceci permet à Vercel de trouver l'application Express
 export default app;

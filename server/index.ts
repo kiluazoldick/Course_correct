@@ -101,3 +101,9 @@ startServer();
 
 // ===== EXPORT POUR VERCEL =====
 export default app;
+// Ne pas démarrer le serveur avec server.listen() en production
+// Vercel gère ça via la fonction handler
+
+if (process.env.NODE_ENV !== "production") {
+  startServer();
+}

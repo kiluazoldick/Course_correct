@@ -1,5 +1,6 @@
-// api/index.js - Point d'entrée pour Vercel
+// api/index.js - Point d'entrée pour Vercel avec serverless-http
 import app from "../dist/index.js";
+import serverless from "serverless-http";
 
-// Exporter app comme handler pour Vercel
-export default app;
+// Exporter la fonction handler pour Vercel
+export const handler = serverless(app);

@@ -46,7 +46,7 @@ app.use((req, res, next) => {
 });
 
 // Configuration du serveur
-async function setupServer() {
+async function startServer() {
   await initStripe();
 
   const server = await registerRoutes(app);
@@ -96,10 +96,8 @@ async function setupServer() {
   setInterval(cleanupExpiredUploads, 3600000);
 }
 
-// Démarrer le serveur
-if (process.env.NODE_ENV !== "production") {
-  setupServer();
-}
+// 🔧 CORRECTION : Démarrer le serveur dans TOUS les environnements
+startServer();
 
 // ===== EXPORT POUR VERCEL =====
 export default app;

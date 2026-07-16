@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
-    "build": "vite build && npx esbuild server/index.ts --platform=node --bundle --format=esm --outdir=dist --external:pg --external:ws --external:bcryptjs --external:passport --external:express --external:multer --external:mammoth --external:pdf-parse --external:stripe --external:resend --external:connect-pg-simple --external:express-session --external:passport-local --external:passport-google-oauth20 --external:drizzle-orm --external:@neondatabase/serverless --external:nanoid --external:zod --external:openid-client --external:html2canvas --external:jspdf --external:react --external:react-dom",
+    "build": "vite build && npx esbuild server/index.ts --platform=node --bundle --format=esm --outdir=dist --external:pg --external:ws --external:bcryptjs --external:passport --external:express --external:multer --external:mammoth --external:pdf-parse --external:stripe --external:resend --external:connect-pg-simple --external:express-session --external:passport-local --external:passport-google-oauth20 --external:drizzle-orm --external:@neondatabase/serverless --external:nanoid --external:zod --external:openid-client --external:html2canvas --external:jspdf --external:react --external:react-dom --external:lightningcss --external:@babel/preset-typescript --external:@babel/core --external:@babel/plugin-transform-react-jsx --external:@babel/plugin-transform-typescript",
     "start": "NODE_ENV=production node dist/index.js",
     "vercel-build": "npm run build",
     "check": "tsc --noEmit",
